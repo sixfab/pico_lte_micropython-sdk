@@ -1,84 +1,100 @@
+from core.atcom import ATCom, Status
 import time
-from machine import UART, Pin
-
-
-class Status:
-    SUCCESS = 0
-    ERROR = 1
-    TIMEOUT = 2
-
 
 class Modem:
-    def __init__(
-        self,
-        uart_number = 0,
-        tx_pin = Pin(0),
-        rx_pin = Pin(1),
-        baudrate = 115200,
-        timeout = 10000
-        ):
-        self.modem_com = UART(
-            uart_number,
-            tx = tx_pin,
-            rx = rx_pin,
-            baudrate=baudrate,
-            timeout=timeout
-            )
+    atcom = ATCom()
 
-    def send_at_comm_once(self, command, line_end=True):
+    CTRL_Z = '\x1A'
+
+    ############################
+    ### Main Modem functions ###
+    ############################
+    def check_modem_communication(self):
         """
-		Function for sending AT commmand to modem
-        
-		params:
-			command: str, message that sending to modem
+        Function for checking modem communication
         """
-        if line_end:
-            self.compose = f"{command}\r".encode()
-        else:
-            self.compose = command.encode()
+        return self.atcom.send_at_comm("AT").get("status")
 
-        try:
-            self.modem_com.write(self.compose)
-        except:
-            print("Error occured while AT command writing to modem")
-        
-    def get_response(self, desired_response="OK", timeout=5):
+    def set_modem_echo_off(self):
         """
-		Function for getting modem response
-        
-        params:
-			desired_response: str, desired response of modem
-            timeout: int, timeout in seconds
-		"""
-        response = ""
-
-        timer = time.time()
-        while True:
-            if timer - time.time() < timeout:
-                while self.modem_com.any():
-                    response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
-            else:
-                print("Timeout")
-                return {"status": Status.TIMEOUT, "response": "timeout"}
-
-            if desired_response in response:
-                return {"status": Status.SUCCESS, "response": response}
-            elif "ERROR" in response:
-                return {"status": Status.ERROR, "response": response}
-            else:
-                return response
-
-    def send_at_comm(self, command, response="OK", timeout=5):
+        Function for setting modem echo off
         """
-		Function for writing AT command to modem and getting modem response
-		"""
-        self.send_at_comm_once(command)
-        time.sleep(0.1)
-        return self.get_response(response, timeout)
+        return self.atcom.send_at_comm("ATE0").get("status")
 
+    def set_modem_echo_on(self):
+        """
+        Function for setting modem echo on
+        """
+        return self.atcom.send_at_comm("ATE1").get("status")
+
+    ################################
+    ### Authendication functions ###
+    ################################
+    def delete_modem_ca_cert(self):
+        """
+        Function for deleting modem CA certificate
+        """
+        return self.atcom.send_at_comm('AT+QFDEL="cacert.pem"').get("status")
+
+    def delete_modem_client_cert(self):
+        """
+        Function for deleting modem client certificate
+        """
+        return self.atcom.send_at_comm('AT+QFDEL="client.pem"').get("status")
+
+    def delete_modem_client_key(self):
+        """
+        Function for deleting modem client key
+        """
+        return self.atcom.send_at_comm('AT+QFDEL="client.key"').get("status")
+
+    def upload_modem_ca_cert(self, ca_cert, timeout=5000):
+        """
+        Function for uploading modem CA certificate
+        """
+        len_cacert = len(ca_cert)
+        command = f'AT+QFUPL="cacert.pem",{len_cacert},{timeout}'
+        res = self.atcom.send_at_comm(command,"CONNECT").get("status")
     
+        if res == Status.SUCCESS:
+            self.atcom.send_at_comm_once(ca_cert) # send ca cert
+            return self.atcom.send_at_comm(self.CTRL_Z).get("status") # send end char -> CTRL_Z
+        else:
+            return res
+
+    def upload_modem_client_cert(self, client_cert, timeout=5000):
+        """
+        Function for uploading modem client certificate
+        """
+        len_clientcert = len(client_cert)
+        command = f'AT+QFUPL="client.pem",{len_clientcert},{timeout}'
+        res = self.atcom.send_at_comm(command,"CONNECT").get("status")
+    
+        if res == Status.SUCCESS:
+            self.atcom.send_at_comm_once(client_cert) # send client cert
+            return self.atcom.send_at_comm(self.CTRL_Z).get("status") # send end char -> CTRL_Z
+        else:
+            return res
+
+    def upload_modem_client_key(self, client_key, timeout=5000):
+        """
+        Function for uploading modem client key
+        """
+        len_clientkey = len(client_key)
+        command = f'AT+QFUPL="client.key",{len_clientkey},{timeout}'
+        res = self.atcom.send_at_comm(command,"CONNECT").get("status")
+    
+        if res == Status.SUCCESS:
+            self.atcom.send_at_comm_once(client_key) # send client key
+            return self.atcom.send_at_comm(self.CTRL_Z).get("status") # send end char -> CTRL_Z
+        else:
+            return res
+    
+    ##################### 
+    ### SSL functions ###
+    #####################
 
 
-
-            
-            
+    ######################
+    ### MQTT Functions ###
+    ######################
