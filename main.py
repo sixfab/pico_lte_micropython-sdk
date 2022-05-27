@@ -9,14 +9,17 @@ modem = Modem()
 auth = Auth(config)
 auth.load_certificas()
 
+print(modem.check_modem_communication())
 
-modem.send_at_comm("AT","OK")
+print("Delete CA: ", modem.delete_modem_ca_cert())
+print("Delete Client Cert: ", modem.delete_modem_client_cert())
+print("Delete Client Key: ", modem.delete_modem_client_key())
 
-len_ca = len(config["auth"]["cacert"])
-len_client_cert = len(config["auth"]["client_cert"])
-len_client_key = len(config["auth"]["client_key"])
+print(modem.upload_modem_ca_cert(config["auth"]["cacert"]))
+print(modem.upload_modem_client_cert(config["auth"]["client_cert"]))
+print(modem.upload_modem_client_key(config["auth"]["client_key"]))
 
-print(len_ca, len_client_cert, len_client_key) 
+
 
 # pin = Pin(25, Pin.OUT)
 # pin.value(1)
