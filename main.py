@@ -9,15 +9,16 @@ modem = Modem()
 auth = Auth(config)
 auth.load_certificas()
 
-print(modem.check_modem_communication())
+#print(modem.check_modem_communication())
+print(modem.set_modem_ssl_version())
 
-print("Delete CA: ", modem.delete_modem_ca_cert())
-print("Delete Client Cert: ", modem.delete_modem_client_cert())
-print("Delete Client Key: ", modem.delete_modem_client_key())
-
-print(modem.upload_modem_ca_cert(config["auth"]["cacert"]))
-print(modem.upload_modem_client_cert(config["auth"]["client_cert"]))
-print(modem.upload_modem_client_key(config["auth"]["client_key"]))
+#print("Delete CA: ", modem.delete_modem_ca_cert())
+#print("Delete Client Cert: ", modem.delete_modem_client_cert())
+#print("Delete Client Key: ", modem.delete_modem_client_key())
+#
+#print(modem.upload_modem_ca_cert(config["auth"]["cacert"]))
+#print(modem.upload_modem_client_cert(config["auth"]["client_cert"]))
+#print(modem.upload_modem_client_key(config["auth"]["client_key"]))
 
 
 
