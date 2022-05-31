@@ -47,7 +47,7 @@ class ATCom:
         except:
             print("Error occured while AT command writing to modem")
         
-    def get_response(self, desired_response="OK", timeout=5):
+    def get_response(self, desired_responses=["OK"], timeout=5):
         """
 		Function for getting modem response
         
@@ -67,7 +67,7 @@ class ATCom:
 
         timer = time.time()
         while True:
-            time.sleep(0.05) # wait for new chars
+            time.sleep(0.1) # wait for new chars
             
             if time.time() - timer < timeout:
                 while self.modem_com.any():
@@ -75,13 +75,12 @@ class ATCom:
             else:
                 return {"status": Status.TIMEOUT, "response": "timeout"}
 
-            if desired_response in response or "ERROR" in response:
-                print(response)
+            for desired_response in desired_responses:
                 if desired_response in response:
                     return {"status": Status.SUCCESS, "response": response}
-                else:
+                elif "ERROR" in response:
                     return {"status": Status.ERROR, "response": response}
-
+                
     def send_at_comm(self, command, response="OK", timeout=5):
         """
 		Function for writing AT command to modem and getting modem response
@@ -127,12 +126,12 @@ class ATCom:
             response from modem
         """
         for _ in range(retry_count):
-            res = self.send_at_comm(command, response, timeout)
-            if res["status"] == Status.SUCCESS:
-                return res
+            result = self.send_at_comm(command, response, timeout)
+            if result["status"] == Status.SUCCESS:
+                return result
             else:
                 time.sleep(interval)
-        return res
+        return result
 
 
     

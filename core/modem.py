@@ -15,10 +15,13 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
-        return self.atcom.send_at_comm("AT").get("status")
+        return self.atcom.send_at_comm("AT")
 
     def set_modem_echo_off(self):
         """
@@ -26,10 +29,13 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
-        return self.atcom.send_at_comm("ATE0").get("status")
+        return self.atcom.send_at_comm("ATE0")
 
     def set_modem_echo_on(self):
         """
@@ -37,10 +43,119 @@ class Modem:
         
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
-        return self.atcom.send_at_comm("ATE1").get("status")
+        return self.atcom.send_at_comm("ATE1")
+
+    #################################
+    ### Network Service Functions ###
+    #################################
+    def check_network_registeration(self):
+        """
+        Function for checking network registeration status
+        
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        desired_reponses = ["+CREG: 0,1", "+CREG: 0,5"]
+        return self.atcom.retry_at_comm("AT+CREG?", desired_reponses, retry_count=20, interval=1)
+
+    def get_operator_information(self):
+        """
+        Function for getting operator information
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = "AT+COPS?"
+        return self.atcom.send_at_comm(command,"OK")
+        
+    ####################################
+    ### Modem Extended Configuration ###
+    ####################################
+    def config_modem_scan_mode(self, scan_mode=0):
+        """
+        Function for configuring modem network scan mode
+
+        Parameters
+        ----------
+        scan_mode : int
+            Scan mode (default=0)
+                0 --> Automatic
+                1 --> GSM Only
+                3 --> LTE Only
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QCFG="nwscanmode",{scan_mode}'
+        return self.atcom.send_at_comm(command,"OK")
+    
+    def config_modem_scan_sequence(self, scan_sequence="00"):
+        """
+        Function for configuring modem scan sequence
+
+        Parameters
+        ----------
+        scan_sequence : str
+            Scan sequence (default=00)
+                00 --> Automatic (eMTC → NB-IoT → GSM)
+                01 --> GSM
+                02 --> eMTC
+                03 --> NB-IoT
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QCFG="nwscanseq",{scan_sequence}'
+        return self.atcom.send_at_comm(command,"OK")
+
+    def config_modem_iot_operation_mode(self, iotopmode=2):
+        """
+        Function for configuring modem IoT operation mode
+
+        Parameters
+        ----------
+        iotopmode : int
+            Operation mode (default=2)
+                0 --> eMTC
+                1 --> NB-IoT
+                2 --> eMTC and NB-IoT
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QCFG="iotopmode",{iotopmode}'
+        return self.atcom.send_at_comm(command,"OK")
 
     ################################
     ### TCP/IP functions Related ###
@@ -72,11 +187,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QICSGP={context_id},{context_type},"{apn}","{username}","{password}",{auth}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def activate_pdp_context(self, context_id=1):
         """
@@ -89,11 +207,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QIACT={context_id}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
     
     def deactivate_pdp_context(self, context_id=1):
         """
@@ -106,11 +227,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QIDEACT={context_id}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     ##############################
     ### File Process functions ###
@@ -126,11 +250,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QFDEL="{file_name}"'
-        return self.atcom.send_at_comm(command, "OK").get("status")
+        return self.atcom.send_at_comm(command, "OK")
 
     def upload_file_to_modem(self, filename, file, timeout=5000):
         """
@@ -145,20 +272,21 @@ class Modem:
         
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         len_file = len(file)
         command = f'AT+QFUPL="{filename}",{len_file},{timeout}'
-        res = self.atcom.send_at_comm(command,"CONNECT").get("status")
+        result = self.atcom.send_at_comm(command,"CONNECT")
     
-        if res == Status.SUCCESS:
+        if result["status"] == Status.SUCCESS:
             self.atcom.send_at_comm_once(file) # send ca cert
-            return self.atcom.send_at_comm(self.CTRL_Z).get("status") # send end char -> CTRL_Z
-        return res
+            return self.atcom.send_at_comm(self.CTRL_Z) # send end char -> CTRL_Z
+        return result
 
-    
-    
     ##################### 
     ### SSL functions ###
     #####################
@@ -176,11 +304,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_ssl_client_cert(self, ssl_context_id=2, file_path="client.pem"):
         """
@@ -196,11 +327,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_ssl_client_key(self, ssl_context_id=2, file_path="user_key.pem"):
         """
@@ -216,11 +350,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QSSLCFG="clientkey",{ssl_context_id},"{file_path}"'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
         
     def set_modem_ssl_sec_level(self, ssl_context_id=2, sec_level=2):
         """
@@ -239,11 +376,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QSSLCFG="seclevel",{ssl_context_id},{sec_level}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_ssl_version(self, ssl_context_id=2, ssl_version=4):
         """
@@ -264,11 +404,14 @@ class Modem:
         
         Returns
         -------
-        status : int
-            Status of the command.       
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.       
         """
         command = f'AT+QSSLCFG="sslversion",{ssl_context_id},{ssl_version}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_ssl_cipher_suite(self,ssl_context_id=2, cipher_suite="0xFFFF"):
         """
@@ -320,11 +463,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QSSLCFG="ciphersuite",{ssl_context_id},{cipher_suite}'
-        return self.atcom.send_at_comm(command).get("status")
+        return self.atcom.send_at_comm(command)
 
     def set_modem_ssl_ignore_local_time(self, ssl_context_id=2, ignore_local_time=1):
         """
@@ -342,11 +488,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
     
 
     ######################
@@ -367,11 +516,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="version",{cid},{version}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_mqtt_pdpcid_config(self, cid=0, pdpcid=0):
         """
@@ -386,11 +538,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="pdpcid",{cid},{pdpcid}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
     
     def set_modem_mqtt_ssl_mode_config(self, cid=0, ssl_mode=1, ssl_ctx_index=2):
         """
@@ -409,11 +564,14 @@ class Modem:
         
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="SSL",{cid},{ssl_mode},{ssl_ctx_index}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
     
     def set_modem_mqtt_keep_alive_time_config(self, cid=0, keep_alive_time=120):
         """
@@ -433,11 +591,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="keepalive",{cid},{keep_alive_time}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_mqtt_clean_session_config(self, cid=0, clean_session=0):
         """
@@ -455,11 +616,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="clean_session",{cid},{clean_session}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_mqtt_timeout_config(self, cid=0, timeout=5, retry_count=3, timeout_notice=0):
         """
@@ -480,11 +644,14 @@ class Modem:
                 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="timeout",{cid},{timeout},{retry_count},{timeout_notice}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_mqtt_will_config(self, cid=0, will_flag=0, will_qos=0, will_retain=0, will_topic="", will_message=""):
         """
@@ -518,11 +685,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},{will_retain},"{will_topic}","{will_message}"'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_mqtt_message_recieve_mode_config(self, cid=0, message_recieve_mode=0):
         """
@@ -539,11 +709,14 @@ class Modem:
 
         Returns
         -------
-        status : int
-            Status of the command.
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
         """
         command = f'AT+QMTCFG="message_recieve_mode",{cid},{message_recieve_mode}'
-        return self.atcom.send_at_comm(command,"OK").get("status")
+        return self.atcom.send_at_comm(command,"OK")
 
     def open_mqtt_connection(self, cid=0, host="", port=8883):
         """
@@ -577,14 +750,14 @@ class Modem:
                         5 --> Network connection error
         """
         command = f'AT+QMTOPEN={cid},"{host}",{port}'
-        res = self.atcom.send_at_comm(command,"OK")
+        result = self.atcom.send_at_comm(command,"OK")
 
         desired_response = f"+QMTOPEN: {cid},0"
 
-        if res["status"] == 0:
-            res = self.atcom.get_response(desired_response, timeout=60)
-            return res
-        return res
+        if result["status"] == Status.SUCCESS:
+            result = self.atcom.get_response(desired_response, timeout=60)
+            return result
+        return result
 
     def close_mqtt_connection(self, cid=0):
         """
@@ -607,13 +780,13 @@ class Modem:
 
         """
         command = f'AT+QMTCLOSE={cid}'
-        res =  self.atcom.send_at_comm(command,"OK")
+        result =  self.atcom.send_at_comm(command,"OK")
 
-        if res["status"] == 0:
+        if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCLOSE: {cid},0"
-            res = self.atcom.get_response(desired_response, timeout=60)
-            return res
-        return res
+            result = self.atcom.get_response(desired_response, timeout=60)
+            return result
+        return result
     
     def connect_mqtt_broker(self, cid=0, client_id_string="picocell", username=None, password=None):
         """
@@ -658,13 +831,13 @@ class Modem:
         else:
             command = f'AT+QMTCONN={cid},"{client_id_string}","{username}","{password}"'
         
-        res = self.atcom.send_at_comm(command,"OK")
+        result = self.atcom.send_at_comm(command,"OK")
 
-        if res["status"] == 0:
+        if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCONN: {cid},0,0"
-            res = self.atcom.get_response(desired_response, timeout=60)
-            return res
-        return res
+            result = self.atcom.get_response(desired_response, timeout=60)
+            return result
+        return result
 
     def disconnect_mqtt_broker(self, cid=0):
         """
@@ -733,13 +906,13 @@ class Modem:
 
         """
         command = f'AT+QMTSUB={cid},{message_id},"{topic}",{qos}'
-        res = self.atcom.send_at_comm(command,"OK")
+        result = self.atcom.send_at_comm(command,"OK")
 
-        if res["status"] == 0:
+        if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTSUB: {cid},{message_id},0"
-            res = self.atcom.get_response(desired_response, timeout=60)
-            return res
-        return res
+            result = self.atcom.get_response(desired_response, timeout=60)
+            return result
+        return result
 
     def unsubscribe_mqtt_topic(self, cid=0, message_id=1, topic=""):
         """
@@ -823,10 +996,10 @@ class Modem:
                         If <result> is 0 or 2, it will not be presente
         """
         command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
-        res = self.atcom.send_at_comm(command,">")
+        result = self.atcom.send_at_comm(command,">")
 
-        if res["status"] == Status.SUCCESS:
+        if result["status"] == Status.SUCCESS:
             self.atcom.send_at_comm_once(payload,"OK") # Send message
             return self.atcom.send_at_comm(self.CTRL_Z,"OK") # Send end char --> CTRL+Z
         else:
-            return res
+            return result
