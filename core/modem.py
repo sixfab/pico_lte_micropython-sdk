@@ -1,9 +1,13 @@
 from core.atcom import ATCom, Status
-import time
+
+def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
+    response = response.replace("\r","\n").replace('"','') # Simplify response
+    index = response.find(prefix) + len(prefix) # Find index of meaningful data
+    return response[index:].split("\n")[0].split(separator)[data_index] # Get meaningful data
+    
 
 class Modem:
     atcom = ATCom()
-
     CTRL_Z = '\x1A'
 
     ############################
@@ -50,6 +54,115 @@ class Modem:
                 Status of the command.
         """
         return self.atcom.send_at_comm("ATE1")
+
+    def check_sim_ready(self):
+        """
+        Function for checking SIM ready status
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        desired_reponses = ["+CPIN: READY"]
+        return self.atcom.send_at_comm("AT+CPIN?", desired_reponses)
+
+    def enter_sim_pin_code(self, pin_code):
+        """
+        Function for entering SIM PIN code
+
+        Parameters
+        ----------
+        pin_code : str
+            SIM PIN code
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+CPIN="{pin_code}"'
+        return self.atcom.send_at_comm(command,"OK")
+
+    def get_sim_iccid(self):
+        """
+        Function for getting SIM ICCID
+
+        Returns
+        -------
+        (response, status, value) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+            value : str
+                ICCID of modem
+        """
+        command = "AT+QCCID"
+        result = self.atcom.send_at_comm(command,"OK")
+        response = result.get("response")
+        value = get_desired_data_from_response(response, "+QCCID: ")
+        result["value"] = value
+        return result
+
+    def get_modem_apn(self):
+        """
+        Function for getting modem APN
+
+        Returns
+        -------
+        (response, status, value) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+            value : str
+                APN of modem
+        """
+        command = "AT+CGDCONT?"
+        result = self.atcom.send_at_comm(command,"OK")
+        response = result.get("response")
+        value = get_desired_data_from_response(
+                                        response, 
+                                        prefix="+CGDCONT: ", 
+                                        separator=",", 
+                                        data_index=2
+                                        )
+        result["value"] = value
+        return result
+    
+    def set_modem_apn(self, cid=1, pdp_type="IPV4V6", apn="super"):
+        """
+        Function for setting modem APN
+
+        Parameters
+        ----------
+        cid : int
+            Context ID (default=1)
+        pdp_type : str
+            PDP type (default="IPV4V6")
+                IPV4V6 --> IPv4v6
+                IP --> IPv4
+                IPV6 --> IPv6
+        apn : str
+            APN (default="super")
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+CGDCONT={cid},"{pdp_type}","{apn}"'
+        return self.atcom.send_at_comm(command,"OK")
 
     #################################
     ### Network Service Functions ###
