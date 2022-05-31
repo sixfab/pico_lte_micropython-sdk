@@ -27,4 +27,3 @@ print("COM: ", modem.check_modem_communication())
 print("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
 print("Network Registration: ", modem.check_network_registeration())
 print("Operator Information: ", modem.get_operator_information())
-
