@@ -20,9 +20,9 @@ class Auth:
         """
         Function for loading certificates from file
         """
-        cacert = read_file("../cert/AmazonRootCA1.pem")
-        client_cert = read_file("../cert/pico3.pem")
-        client_key = read_file("../cert/pico3.key")
+        cacert = read_file("../cert/cacert.pem")
+        client_cert = read_file("../cert/client.pem")
+        client_key = read_file("../cert/user_key.pem")
         
         self.config["auth"]["cacert"] = cacert
         self.config["auth"]["client_cert"] = client_cert

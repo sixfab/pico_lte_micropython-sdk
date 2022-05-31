@@ -29,8 +29,13 @@ class ATCom:
         """
 		Function for sending AT commmand to modem
         
-		params:
-			command: str, message that sending to modem
+		Parameters
+        ----------
+        command: str
+            AT command to send
+        line_end: bool
+            if True, send line end
+
         """
         if line_end:
             self.compose = f"{command}\r".encode()
@@ -46,9 +51,17 @@ class ATCom:
         """
 		Function for getting modem response
         
-        params:
-			desired_response: str, desired response of modem
-            timeout: int, timeout in seconds
+        Parameters
+        ----------
+        desired_response: str
+            desired response from modem
+        timeout: int
+            timeout for getting response
+
+        Returns
+        -------
+        response: dict
+            response from modem
 		"""
         response = ""
 
@@ -63,6 +76,7 @@ class ATCom:
                 return {"status": Status.TIMEOUT, "response": "timeout"}
 
             if desired_response in response or "ERROR" in response:
+                print(response)
                 if desired_response in response:
                     return {"status": Status.SUCCESS, "response": response}
                 else:
@@ -71,10 +85,55 @@ class ATCom:
     def send_at_comm(self, command, response="OK", timeout=5):
         """
 		Function for writing AT command to modem and getting modem response
+
+        Parameters
+        ----------
+        command: str
+            AT command to send
+        response: str
+            desired response from modem
+        timeout: int
+            timeout for getting response
+        
+        Returns
+        -------
+        response: dict
+            response from modem
 		"""
         self.send_at_comm_once(command)
         time.sleep(0.1)
         return self.get_response(response, timeout)
+
+    def retry_at_comm(self, command, response="OK", timeout=5, retry_count=3, interval=1):
+        """
+        Function for retrying AT command to modem and getting modem response
+
+        Parameters
+        ----------
+        command: str
+            AT command to send
+        response: str
+            desired response from modem
+        timeout: int
+            timeout for getting response
+        retry_count: int
+            number of retries
+        interval: int
+            interval between retries
+
+        Returns
+        -------
+        response: dict
+            response from modem
+        """
+        for _ in range(retry_count):
+            res = self.send_at_comm(command, response, timeout)
+            if res["status"] == Status.SUCCESS:
+                return res
+            else:
+                time.sleep(interval)
+        return res
+
 
     
 
