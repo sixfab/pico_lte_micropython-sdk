@@ -47,7 +47,7 @@ class ATCom:
         except:
             print("Error occured while AT command writing to modem")
         
-    def get_response(self, desired_responses=["OK"], timeout=5):
+    def get_response(self, desired_responses="OK", timeout=5):
         """
 		Function for getting modem response
         
@@ -75,11 +75,18 @@ class ATCom:
             else:
                 return {"status": Status.TIMEOUT, "response": "timeout"}
 
-            for desired_response in desired_responses:
-                if desired_response in response:
+            if isinstance(desired_responses, str):
+                if desired_responses in response:
                     return {"status": Status.SUCCESS, "response": response}
                 elif "ERROR" in response:
                     return {"status": Status.ERROR, "response": response}
+
+            elif isinstance(desired_responses, list):
+                for desired_response in desired_responses:
+                    if desired_response in response:
+                        return {"status": Status.SUCCESS, "response": response}
+                    elif "ERROR" in response:
+                        return {"status": Status.ERROR, "response": response}
                 
     def send_at_comm(self, command, response="OK", timeout=5):
         """
