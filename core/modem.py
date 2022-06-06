@@ -1116,3 +1116,72 @@ class Modem:
             return self.atcom.send_at_comm(self.CTRL_Z,"OK") # Send end char --> CTRL+Z
         else:
             return result
+
+    def check_any_mqtt_messages(self, cid=0):
+        """
+        Function for receiving MQTT messages.
+
+        Parameters
+        ----------
+        cid : int
+            MQTT Client ID (range 0:5) (default=0)
+        
+        Returns
+        -------
+        (status, modem_response, buffer_indexes) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+            buffer_indexes : list
+                List of indexes of the received messages.
+        """
+        buffer_indexes = []
+        result = self.atcom.send_at_comm(f'AT+QMTRECV?',"+QMTRECV:")
+
+        if result["status"] == Status.SUCCESS:
+            prefix = f"+QMTRECV: {cid}"
+            buffer = get_desired_data_from_response(result["response"], prefix, separator=",", data_index=range(0,4)) or []
+
+            for index in buffer:
+                if buffer[index] != "" or buffer[index] is not None:
+                    buffer_indexes.append(int(buffer[index]))
+        
+        result["buffer_indexes"] = buffer_indexes
+        return result
+
+    def read_mqtt_messages(self, cid=0):
+        """
+        Function for receiving MQTT messages.
+
+        Parameters
+        ----------
+        cid : int
+            MQTT Client ID (range 0:5) (default=0)
+        
+        Returns
+        -------
+        (status, modem_response, messages) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+            messages : list ["client_idx,message_id,topic,payload_len,payload", ...]
+                List of messages.
+        """
+        messages = []
+
+        result = self.check_any_mqtt_messages(cid)
+        if result["status"] == Status.SUCCESS:
+            for index in result["buffer_indexes"]:
+                result = self.read_mqtt_messages(cid, index)
+                if result["status"] == Status.SUCCESS:
+                    messages.append(result["response"])
+            
+            result["messages"] = messages
+            return result
+        else:
+            result.pop("buffer_indexes")
+            result["messages"] = messages
+            return result
+
