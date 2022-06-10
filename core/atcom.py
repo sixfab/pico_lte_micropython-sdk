@@ -1,12 +1,6 @@
 import time
+from core.status import Status
 from machine import UART, Pin
-
-
-class Status:
-    SUCCESS = 0
-    ERROR = 1
-    TIMEOUT = 2
-    UNKNOWN = 99
 
 class ATCom:
     def __init__(
