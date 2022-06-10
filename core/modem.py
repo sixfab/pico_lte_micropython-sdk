@@ -1,4 +1,7 @@
-from core.atcom import ATCom, Status
+from core.atcom import ATCom
+from core.status import Status
+from core.manager import StateManager, Step
+import time
 
 def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
     response = response.replace("\r","\n").replace('"','') # Simplify response
@@ -1185,3 +1188,81 @@ class Modem:
             result["messages"] = messages
             return result
 
+#############################
+### AWS Related Functions ###
+#############################
+
+    def publish_message_to_aws(self, host, port, topic, payload):
+
+        step_atcom = Step(
+            function=self.check_modem_communication,
+            name="check_atcom",
+            success="set_apn",
+            fail="failure",
+            retry=2,
+            interval=1,
+        )
+
+        step_set_apn = Step(
+            function=self.set_modem_apn,
+            name="set_apn",
+            success="pdp_deactivate",
+            fail="failure",
+        )
+
+        step_pdp_deactivate = Step(
+            function=self.deactivate_pdp_context,
+            name="pdp_deactivate",
+            success="pdp_activate",
+            fail="failure",
+        )
+
+        step_pdp_activate= Step(
+            function=self.activate_pdp_context,
+            name="pdp_activate",
+            success="open_mqtt_connection",
+            fail="failure",
+        )
+
+        step_open_mqtt_connection = Step(
+            function=self.open_mqtt_connection,
+            name="open_mqtt_connection",
+            success="connect_mqtt_broker",
+            fail="failure",
+            function_params={"host":host, "port":port}
+        )
+
+        step_connect_mqtt_broker = Step(
+            function=self.connect_mqtt_broker,
+            name="connect_mqtt_broker",
+            success="publish_message",
+            fail="failure",
+        )
+
+        step_publish_message = Step(
+            function=self.publish_mqtt_message,
+            name="publish_message",
+            success="success",
+            fail="failure",
+            function_params={"payload":payload, "topic":topic}
+        )
+
+        sm = StateManager(first_step=step_atcom)
+
+        sm.add_step(step_atcom)
+        sm.add_step(step_set_apn)
+        sm.add_step(step_pdp_deactivate)
+        sm.add_step(step_pdp_activate)
+        sm.add_step(step_open_mqtt_connection)
+        sm.add_step(step_connect_mqtt_broker)
+        sm.add_step(step_publish_message)
+
+        while True:
+            result = sm.loop()
+            print(result)
+
+            if result["status"] == Status.SUCCESS:
+                break
+            elif result["status"] == Status.ERROR:
+                break
+            time.sleep(result["interval"])
