@@ -1,12 +1,18 @@
+import re
 from core.atcom import ATCom
 from core.status import Status
 from core.manager import StateManager, Step
 import time
 
 def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
+    print(response)
     response = response.replace("\r","\n").replace('"','') # Simplify response
     index = response.find(prefix) + len(prefix) # Find index of meaningful data
-    return response[index:].split("\n")[0].split(separator)[data_index] # Get meaningful data
+    data_array = response[index:].split("\n")[0].split(separator)
+    
+    if isinstance(data_index, list):    # If desired multiple data, data_index should be list
+        return [data_array[i] for i in data_index]
+    return data_array[data_index]
     
 
 class Modem:
@@ -170,7 +176,7 @@ class Modem:
     #################################
     ### Network Service Functions ###
     #################################
-    def check_network_registeration(self):
+    def check_network_registration(self):
         """
         Function for checking network registeration status
         
@@ -1143,12 +1149,12 @@ class Modem:
         result = self.atcom.send_at_comm(f'AT+QMTRECV?',"+QMTRECV:")
 
         if result["status"] == Status.SUCCESS:
-            prefix = f"+QMTRECV: {cid}"
-            buffer = get_desired_data_from_response(result["response"], prefix, separator=",", data_index=range(0,4)) or []
+            prefix = f"+QMTRECV: {cid},"
+            buffer = get_desired_data_from_response(result["response"], prefix, separator=",", data_index=[0,1,2,3,4]) or []
 
             for index in buffer:
-                if buffer[index] != "" or buffer[index] is not None:
-                    buffer_indexes.append(int(buffer[index]))
+                if index != "" or index is not None:
+                    buffer_indexes.append(int(index))
         
         result["buffer_indexes"] = buffer_indexes
         return result
@@ -1175,12 +1181,16 @@ class Modem:
         messages = []
 
         result = self.check_any_mqtt_messages(cid)
+        buffer_indexes = result["buffer_indexes"] or []
+
         if result["status"] == Status.SUCCESS:
-            for index in result["buffer_indexes"]:
-                result = self.read_mqtt_messages(cid, index)
-                if result["status"] == Status.SUCCESS:
-                    messages.append(result["response"])
+            for index in buffer_indexes:
+                if buffer_indexes[index] == 1:
+                    result = self.atcom.send_at_comm(f'AT+QMTRECV={cid},{index}',"OK")
+                    if result["status"] == Status.SUCCESS:
+                        messages.append(result["response"])
             
+            result.pop("buffer_indexes")
             result["messages"] = messages
             return result
         else:
@@ -1188,24 +1198,208 @@ class Modem:
             result["messages"] = messages
             return result
 
+#######################################################
+### Combined Functions for Providing Desired States ###
+#######################################################
+    def register_network(self):
+        
+        step_network_precheck = Step(
+            function=self.check_network_registration,
+            name="check_network_registration",
+            success="success",
+            fail="check_atcom",
+        )
+
+        step_atcom = Step(
+            function=self.check_modem_communication,
+            name="check_atcom",
+            success="check_sim_ready",
+            fail="failure"
+        )
+
+        step_sim_ready = Step(
+            function=self.check_sim_ready,
+            name="check_sim_ready",
+            success="get_apn",
+            fail="failure",
+        )
+
+        step_get_apn = Step(
+            function=self.get_modem_apn,
+            name="get_apn",
+            success="check_network_registration",
+            fail="set_apn",
+            desired_response="super"
+        )
+
+        step_set_apn = Step(
+            function=self.set_modem_apn,
+            name="set_apn",
+            success="pdp_deactivate",
+            fail="failure",
+        )
+
+        step_check_network = Step(
+            function=self.check_network_registration,
+            name="check_network_registration",
+            success="success",
+            fail="failure",
+            interval=5,
+            retry=60, # 60 times = 5 minute
+        )
+
+        sm = StateManager(first_step = step_network_precheck)
+        sm.add_step(step_network_precheck)
+        sm.add_step(step_atcom)
+        sm.add_step(step_sim_ready)
+        sm.add_step(step_get_apn)
+        sm.add_step(step_set_apn)
+        sm.add_step(step_check_network)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
+    def configure_modem_ssl_for_x509_certification(self):
+        """
+        Function for configuring the modem for X.509 certification.
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
+        
+        step_set_ca = Step(
+            function=self.set_modem_ssl_ca_cert,
+            name="set_ca",
+            success="set_client_cert",
+            fail="failure",
+        )
+
+        step_set_client_cert = Step(
+            function=self.set_modem_ssl_client_cert,
+            name="set_client_cert",
+            success="set_client_key",
+            fail="failure",
+        )
+
+        step_set_client_key = Step(
+            function=self.set_modem_ssl_client_key,
+            name="set_client_key",
+            success="set_sec_level",
+            fail="failure",
+        )
+
+        step_set_sec_level = Step(
+            function=self.set_modem_ssl_sec_level,
+            name="set_sec_level",
+            success="set_ssl_ver",
+            fail="failure",
+        )
+
+        step_set_ssl_ver = Step(
+            function=self.set_modem_ssl_version,
+            name="set_ssl_ver",
+            success="set_ssl_ciphers",
+            fail="failure",
+        )
+
+        step_set_ssl_ciphers = Step(
+            function=self.set_modem_ssl_cipher_suite,
+            name="set_ssl_ciphers",
+            success="set_ignore_local_time",
+            fail="failure",
+        )
+
+        step_set_ignore_local_time = Step(
+            function=self.set_modem_ssl_ignore_local_time,
+            name="set_ignore_local_time",
+            success="success",
+            fail="failure",
+        )
+
+        sm = StateManager(first_step = step_set_ca)
+        sm.add_step(step_set_ca)
+        sm.add_step(step_set_client_cert)
+        sm.add_step(step_set_client_key)
+        sm.add_step(step_set_sec_level)
+        sm.add_step(step_set_ssl_ver)
+        sm.add_step(step_set_ssl_ciphers)
+        sm.add_step(step_set_ignore_local_time)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
+    def configure_modem_mqtt_client(self):
+        """
+        Function for configuring the modem for MQTT client.
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
+        
+        step_set_mqtt_version = Step(
+            function=self.set_modem_mqtt_version_config,
+            name="set_mqtt_version",
+            success="set_mqtt_ssl_mode",
+            fail="failure",
+        )
+
+        step_set_mqtt_ssl_mode = Step(
+            function=self.set_modem_mqtt_ssl_mode_config,
+            name="set_mqtt_ssl_mode",
+            success="success",
+            fail="failure",
+        )
+
+        sm = StateManager(first_step = step_set_mqtt_version)
+        sm.add_step(step_set_mqtt_version)
+        sm.add_step(step_set_mqtt_ssl_mode)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
 #############################
 ### AWS Related Functions ###
 #############################
 
     def publish_message_to_aws(self, host, port, topic, payload):
 
-        step_atcom = Step(
-            function=self.check_modem_communication,
-            name="check_atcom",
-            success="set_apn",
-            fail="failure",
-            retry=2,
-            interval=1,
-        )
-
-        step_set_apn = Step(
-            function=self.set_modem_apn,
-            name="set_apn",
+        # Combined step for 
+        # - check atcom
+        # - check sim ready
+        # - get apn
+        # - set apn
+        # - check network registration
+        step_network_reg = Step(
+            function=self.register_network,
+            name="register_network",
             success="pdp_deactivate",
             fail="failure",
         )
@@ -1220,6 +1414,20 @@ class Modem:
         step_pdp_activate= Step(
             function=self.activate_pdp_context,
             name="pdp_activate",
+            success="ssl_configuration",
+            fail="failure",
+        )
+
+        step_ssl_configuration = Step(
+            function=self.configure_modem_ssl_for_x509_certification,
+            name="ssl_configuration",
+            success="modem_mqtt_configuration",
+            fail="failure",
+        )
+
+        step_modem_mqtt_configuration = Step(
+            function=self.configure_modem_mqtt_client,
+            name="modem_mqtt_configuration",
             success="open_mqtt_connection",
             fail="failure",
         )
@@ -1235,34 +1443,51 @@ class Modem:
         step_connect_mqtt_broker = Step(
             function=self.connect_mqtt_broker,
             name="connect_mqtt_broker",
+            success="subscribe_topic",
+            fail="failure",
+        )
+
+        step_subscribe_topic = Step(
+            function=self.subscribe_mqtt_topic,
+            name="subscribe_topic",
             success="publish_message",
             fail="failure",
+            function_params={"topic":topic}
         )
 
         step_publish_message = Step(
             function=self.publish_mqtt_message,
             name="publish_message",
-            success="success",
+            success="check_messages",
             fail="failure",
             function_params={"payload":payload, "topic":topic}
         )
 
-        sm = StateManager(first_step=step_atcom)
+        step_check_messages = Step(
+            function=self.read_mqtt_messages,
+            name="check_messages",
+            success="success",
+            fail="failure",
+        )
 
-        sm.add_step(step_atcom)
-        sm.add_step(step_set_apn)
+        sm = StateManager(first_step=step_network_reg)
+
+        sm.add_step(step_network_reg)
         sm.add_step(step_pdp_deactivate)
         sm.add_step(step_pdp_activate)
+        sm.add_step(step_ssl_configuration)
+        sm.add_step(step_modem_mqtt_configuration)
         sm.add_step(step_open_mqtt_connection)
         sm.add_step(step_connect_mqtt_broker)
+        sm.add_step(step_subscribe_topic)
         sm.add_step(step_publish_message)
+        sm.add_step(step_check_messages)
 
         while True:
-            result = sm.loop()
+            result = sm.run()
             print(result)
-
             if result["status"] == Status.SUCCESS:
-                break
+                return result
             elif result["status"] == Status.ERROR:
-                break
+                return result
             time.sleep(result["interval"])
