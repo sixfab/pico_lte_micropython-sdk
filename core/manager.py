@@ -5,7 +5,8 @@ class Step:
     final_step = False
     def __init__(
         self, name, function, success, fail,
-            function_params=None, interval=0, retry=0, final_step=False
+            function_params=None, desired_response=None, 
+            interval=0, retry=0, final_step=False
         ):
         self.function = function
         self.name = name
@@ -15,8 +16,9 @@ class Step:
         self.retry = retry
         self.function_params = function_params
         self.final_step = final_step
-    
+        self.desired_response = desired_response
 
+    
 class StateManager:
     NO_WAIT_INTERVAL = 0
     
@@ -81,10 +83,10 @@ class StateManager:
         return {"status" : Status.SUCCESS}
     
     def success(self):
-        return {"status": Status.SUCCESS}
+        return {"status": Status.SUCCESS, "interval": self.NO_WAIT_INTERVAL}
     
     def failure(self):
-        return {"status": Status.ERROR}
+        return {"status": Status.ERROR, "interval": self.NO_WAIT_INTERVAL}
 
     def execute_organizer_step(self):
         self.organizer()
@@ -96,15 +98,22 @@ class StateManager:
             result = self.current.function(**params)
         else:
             result = self.current.function()
-        
-        print(result)
 
-        if result["status"] == Status.SUCCESS:
-            self.current.is_ok = True
-        else:
-            self.current.is_ok = False
+        print(result)
         
-    def loop(self, begin=None, end=None):
+        if self.current.desired_response:
+            if result["status"] == Status.SUCCESS and \
+                    self.current.desired_response in result["value"]:
+                self.current.is_ok = True
+            else:
+                self.current.is_ok = False
+        else:
+            if result["status"] == Status.SUCCESS:
+                self.current.is_ok = True
+            else:
+                self.current.is_ok = False
+        
+    def run(self, begin=None, end=None):
         result={}
         if begin:
             self.current = self.get_step(begin)
