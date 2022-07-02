@@ -2,6 +2,25 @@ import time
 from core.status import Status
 from machine import UART, Pin
 
+class MessageBuffer:
+    buffer = ""
+
+    def add_message(self, message):
+        self.buffer += message
+
+    def any_data(self):
+        return len(self.buffer)
+    
+    def get_message(self):
+        return self.buffer
+
+    def clear(self):
+        self.buffer = ""
+    
+    def clear_before_id(self, id):
+        self.buffer = self.buffer[id:]
+
+
 class ATCom:
     def __init__(
         self,
@@ -11,6 +30,7 @@ class ATCom:
         baudrate = 115200,
         timeout = 10000
         ):
+        self.buffer = MessageBuffer()
         self.modem_com = UART(
             uart_number,
             tx = tx_pin,
@@ -81,7 +101,7 @@ class ATCom:
                         return {"status": Status.SUCCESS, "response": response}
                     elif "ERROR" in response:
                         return {"status": Status.ERROR, "response": response}
-                
+        
     def send_at_comm(self, command, response="OK", timeout=5):
         """
 		Function for writing AT command to modem and getting modem response
@@ -133,6 +153,16 @@ class ATCom:
             else:
                 time.sleep(interval)
         return result
+
+    def listen_and_save_messages(self):
+        """
+        Function for listening modem messages and add them to buffer
+        """
+        len = self.modem_com.any()
+        if len:
+            message = self.modem_com.read(len).decode('utf-8')
+            message = message.replace("\r", "\n") # replace carriage return with line end
+            self.buffer.add_message(message)
 
 
     
