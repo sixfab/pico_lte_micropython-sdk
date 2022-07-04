@@ -18,3 +18,6 @@ port = 8883
 topic = "$aws/things/picocell_test/shadow/update"
 payload_json = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
 payload = json.dumps(payload_json)
+
+print(modem.publish_message_to_aws(host=host, port=port, topic=topic, payload=payload))
+

@@ -20,7 +20,7 @@ class Listener:
         """
         self.defined_responses.append(ModemResponse(response, callback))
 
-    def run(self):
+    def run_once(self):
         """
         Function for processing received message
         """
@@ -48,7 +48,7 @@ class Listener:
 
                     if state.callback:
                         print("Callback running...")
-                        state.callback()
+                        state.callback(desired_message)
             # if buffer has to many meaningless messages, clear it
             if self.atcom.buffer.any_data() > self.MAX_UNDEFINED_LEN:
                 self.atcom.buffer.clear()
