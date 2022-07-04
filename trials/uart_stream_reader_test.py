@@ -1,3 +1,7 @@
+"""
+Test code for UART stream reader
+"""
+
 import uasyncio as asyncio
 from machine import UART, Pin
 
@@ -9,6 +13,7 @@ uart = UART(
             )
 
 async def receiver():
+    """Receive data from UART"""
     sreader = asyncio.StreamReader(uart)
     while True:
         res = await sreader.readline()
@@ -18,4 +23,3 @@ loop = asyncio.get_event_loop()
 #loop.create_task(sender())
 loop.create_task(receiver())
 loop.run_forever()
-

@@ -1,8 +1,15 @@
+"""
+Module for communicating with cellular modem over UART interface.
+"""
+
 import time
-from core.status import Status
 from machine import UART, Pin
+from core.status import Status
+
 
 class MessageBuffer:
+    """Buffer class for storing messages"""
+
     buffer = ""
 
     def add_message(self, message):
@@ -10,18 +17,20 @@ class MessageBuffer:
 
     def any_data(self):
         return len(self.buffer)
-    
+
     def get_message(self):
         return self.buffer
 
     def clear(self):
         self.buffer = ""
-    
+
     def clear_before_id(self, id):
         self.buffer = self.buffer[id:]
 
 
 class ATCom:
+    """Class for handling AT communication with modem"""
+
     def __init__(
         self,
         uart_number = 0,
@@ -42,7 +51,7 @@ class ATCom:
     def send_at_comm_once(self, command, line_end=True):
         """
 		Function for sending AT commmand to modem
-        
+
 		Parameters
         ----------
         command: str
@@ -60,11 +69,11 @@ class ATCom:
             self.modem_com.write(self.compose)
         except:
             print("Error occured while AT command writing to modem")
-        
+
     def get_response(self, desired_responses="OK", timeout=5):
         """
 		Function for getting modem response
-        
+
         Parameters
         ----------
         desired_response: str
@@ -82,7 +91,7 @@ class ATCom:
         timer = time.time()
         while True:
             time.sleep(0.1) # wait for new chars
-            
+
             if time.time() - timer < timeout:
                 while self.modem_com.any():
                     response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
@@ -101,7 +110,7 @@ class ATCom:
                         return {"status": Status.SUCCESS, "response": response}
                     elif "ERROR" in response:
                         return {"status": Status.ERROR, "response": response}
-        
+
     def send_at_comm(self, command, response="OK", timeout=5):
         """
 		Function for writing AT command to modem and getting modem response
@@ -114,7 +123,7 @@ class ATCom:
             desired response from modem
         timeout: int
             timeout for getting response
-        
+
         Returns
         -------
         response: dict
@@ -163,11 +172,4 @@ class ATCom:
             message = self.modem_com.read(len).decode('utf-8')
             message = message.replace("\r", "\n") # replace carriage return with line end
             self.buffer.add_message(message)
-
-
-    
-
-
-
-            
-            
+         

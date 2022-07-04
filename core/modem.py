@@ -1,21 +1,29 @@
-import re
+"""
+Module for ease to use of cellular modem. This module includes required functions
+for working with cellular modem without need of AT command knowledge.
+"""
+
+import time
+
 from core.atcom import ATCom
 from core.status import Status
 from core.manager import StateManager, Step
-import time
+
 
 def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
     print(response)
     response = response.replace("\r","\n").replace('"','') # Simplify response
     index = response.find(prefix) + len(prefix) # Find index of meaningful data
     data_array = response[index:].split("\n")[0].split(separator)
-    
+
     if isinstance(data_index, list):    # If desired multiple data, data_index should be list
         return [data_array[i] for i in data_index]
     return data_array[data_index]
-    
+
 
 class Modem:
+    """Modem class that contains all functions for working with cellular modem"""
+
     atcom = ATCom()
     CTRL_Z = '\x1A'
 
@@ -53,7 +61,7 @@ class Modem:
     def set_modem_echo_on(self):
         """
         Function for setting modem echo on
-        
+
         Returns
         -------
         (response, status) : tuple
@@ -138,14 +146,14 @@ class Modem:
         result = self.atcom.send_at_comm(command,"OK")
         response = result.get("response")
         value = get_desired_data_from_response(
-                                        response, 
-                                        prefix="+CGDCONT: ", 
-                                        separator=",", 
+                                        response,
+                                        prefix="+CGDCONT: ",
+                                        separator=",",
                                         data_index=2
                                         )
         result["value"] = value
         return result
-    
+
     def set_modem_apn(self, cid=1, pdp_type="IPV4V6", apn="super"):
         """
         Function for setting modem APN
@@ -179,7 +187,7 @@ class Modem:
     def check_network_registration(self):
         """
         Function for checking network registeration status
-        
+
         Returns
         -------
         (response, status) : tuple
@@ -205,7 +213,7 @@ class Modem:
         """
         command = "AT+COPS?"
         return self.atcom.send_at_comm(command,"OK")
-        
+
     ####################################
     ### Modem Extended Configuration ###
     ####################################
@@ -231,7 +239,7 @@ class Modem:
         """
         command = f'AT+QCFG="nwscanmode",{scan_mode}'
         return self.atcom.send_at_comm(command,"OK")
-    
+
     def config_modem_scan_sequence(self, scan_sequence="00"):
         """
         Function for configuring modem scan sequence
@@ -282,7 +290,9 @@ class Modem:
     ################################
     ### TCP/IP functions Related ###
     ################################
-    def configure_tcp_ip_context(self, context_id=1, context_type=1, apn="super", username="", password="", auth=0):
+    def configure_tcp_ip_context(
+        self, context_id=1, context_type=1, apn="super", username="", password="", auth=0
+        ):
         """
         Function for configuring TCP/IP context
 
@@ -337,7 +347,7 @@ class Modem:
         """
         command = f'AT+QIACT={context_id}'
         return self.atcom.send_at_comm(command,"OK")
-    
+
     def deactivate_pdp_context(self, context_id=1):
         """
         Function for deactivating PDP context
@@ -391,7 +401,7 @@ class Modem:
             Path to the file
         timeout : int (default=5000)
             Timeout for the command
-        
+
         Returns
         -------
         (response, status) : tuple
@@ -403,13 +413,13 @@ class Modem:
         len_file = len(file)
         command = f'AT+QFUPL="{filename}",{len_file},{timeout}'
         result = self.atcom.send_at_comm(command,"CONNECT")
-    
+
         if result["status"] == Status.SUCCESS:
             self.atcom.send_at_comm_once(file) # send ca cert
             return self.atcom.send_at_comm(self.CTRL_Z) # send end char -> CTRL_Z
         return result
 
-    ##################### 
+    #####################
     ### SSL functions ###
     #####################
     def set_modem_ssl_ca_cert(self, ssl_context_id=2, file_path="cacert.pem"):
@@ -420,7 +430,7 @@ class Modem:
         ----------
         ssl_context_id : int
             SSL context identifier
-        
+
         file_path : str (default="cacert.pem")
             Path to the CA certificate file
 
@@ -443,7 +453,7 @@ class Modem:
         ----------
         ssl_context_id : int
             SSL context identifier
-        
+
         file_path : str (default="client.pem")
             Path to the client certificate file
 
@@ -466,7 +476,7 @@ class Modem:
         ----------
         ssl_context_id : int
             SSL context identifier
-        
+
         file_path : str (default="user_key.pem")
             Path to the client key file
 
@@ -480,7 +490,7 @@ class Modem:
         """
         command = f'AT+QSSLCFG="clientkey",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command,"OK")
-        
+
     def set_modem_ssl_sec_level(self, ssl_context_id=2, sec_level=2):
         """
         Function for setting modem security level
@@ -489,7 +499,7 @@ class Modem:
         ----------
         ssl_context_id : int
             SSL context identifier
-        
+
         sec_level : int
             SSL Security level
                 0 --> No authentication
@@ -510,27 +520,27 @@ class Modem:
     def set_modem_ssl_version(self, ssl_context_id=2, ssl_version=4):
         """
         Function for setting modem SSL version
-        
+
         Parameters
         ----------
         ssl_context_id : int
             SSL context identifier(default=2)
 
-        ssl_version : int 
+        ssl_version : int
             SSL version (default=4)
                 0 --> SSL3.0
                 1 --> TLS1.0
                 2 --> TLS1.1
                 3 --> TLS1.2
                 4 --> All
-        
+
         Returns
         -------
         (response, status) : tuple
             response : str
                 Response from the command
             status : int
-                Status of the command.       
+                Status of the command.
         """
         command = f'AT+QSSLCFG="sslversion",{ssl_context_id},{ssl_version}'
         return self.atcom.send_at_comm(command,"OK")
@@ -543,9 +553,9 @@ class Modem:
         ----------
         ssl_context_id : int
             SSL context identifier (default=2)
-        
+
         cipher_suite : str
-            SSL Cipher suite. 
+            SSL Cipher suite.
                 0X0035 --> TLS_RSA_WITH_AES_256_CBC_SHA
                 0X002F --> TLS_RSA_WITH_AES_128_CBC_SHA
                 0X0005 --> TLS_RSA_WITH_RC4_128_SHA
@@ -602,7 +612,7 @@ class Modem:
         ----------
         ssl_context_id : int
             SSL context identifier (default=2)
-        
+
         ignore_local_time : int
             Ignore local time (default=1)
                 0 --> Do not ignore local time
@@ -618,7 +628,7 @@ class Modem:
         """
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
         return self.atcom.send_at_comm(command,"OK")
-    
+
 
     ######################
     ### MQTT Functions ###
@@ -668,7 +678,7 @@ class Modem:
         """
         command = f'AT+QMTCFG="pdpcid",{cid},{pdpcid}'
         return self.atcom.send_at_comm(command,"OK")
-    
+
     def set_modem_mqtt_ssl_mode_config(self, cid=0, ssl_mode=1, ssl_ctx_index=2):
         """
         Function for setting modem MQTT SSL mode configuration
@@ -683,7 +693,7 @@ class Modem:
                 1 --> Use SSL TCP secure connection for MQTT
         ssl_ctx_index : int
             SSL context index (default=2)
-        
+
         Returns
         -------
         (response, status) : tuple
@@ -694,7 +704,7 @@ class Modem:
         """
         command = f'AT+QMTCFG="SSL",{cid},{ssl_mode},{ssl_ctx_index}'
         return self.atcom.send_at_comm(command,"OK")
-    
+
     def set_modem_mqtt_keep_alive_time_config(self, cid=0, keep_alive_time=120):
         """
         Function for setting modem MQTT keep alive time configuration
@@ -703,7 +713,7 @@ class Modem:
         ----------
         cid : int
             Client ID (range 0:5) (default=0)
-        keep_alive_time : int 
+        keep_alive_time : int
             Keep alive time (unit: seconds)(range 0:3600)(default=120)
                 It defines the maximum interval between messages received from a client. If the
                 server does not receive a message from the client within 1.5 times of the
@@ -763,7 +773,7 @@ class Modem:
             Timeout notice (default=0)
                 0 --> Do not report
                 1 --> Report
-                
+
         Returns
         -------
         (response, status) : tuple
@@ -775,7 +785,9 @@ class Modem:
         command = f'AT+QMTCFG="timeout",{cid},{timeout},{retry_count},{timeout_notice}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_mqtt_will_config(self, cid=0, will_flag=0, will_qos=0, will_retain=0, will_topic="", will_message=""):
+    def set_modem_mqtt_will_config(
+        self, cid=0, will_flag=0, will_qos=0, will_retain=0, will_topic="", will_message=""
+        ):
         """
         Function for setting modem MQTT will configuration
 
@@ -802,8 +814,8 @@ class Modem:
             Will topic. Maximum length: 255 bytes. (default="")
         will_message : str
             Will message. Maximum length: 255 bytes. (default="")
-                The Will message defines the content of the message published on the Will topic 
-                if the client is unexpectedly disconnected. It can be a zero-length message. 
+                The Will message defines the content of the message published on the Will topic
+                if the client is unexpectedly disconnected. It can be a zero-length message.
 
         Returns
         -------
@@ -813,7 +825,8 @@ class Modem:
             status : int
                 Status of the command.
         """
-        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},{will_retain},"{will_topic}","{will_message}"'
+        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},\
+                        {will_retain},"{will_topic}","{will_message}"'
         return self.atcom.send_at_comm(command,"OK")
 
     def set_modem_mqtt_message_recieve_mode_config(self, cid=0, message_recieve_mode=0):
@@ -909,12 +922,12 @@ class Modem:
             result = self.atcom.get_response(desired_response, timeout=60)
             return result
         return result
-    
+
     def connect_mqtt_broker(self, cid=0, client_id_string="picocell", username=None, password=None):
         """
-        Function for connecting to MQTT broker. This function is used when a client requests a connection to the MQTT server.
-        When a TCP/IP socket connection is established between a client and a server, a protocol level session must be created 
-        using a CONNECT flow.
+        Function for connecting to MQTT broker. This function is used when a client requests a
+        connection to the MQTT server. When a TCP/IP socket connection is established between
+        a client and a server, a protocol level session must be created using a CONNECT flow.
 
         Parameters
         ----------
@@ -932,7 +945,7 @@ class Modem:
         (status, modem_response) : tuple
             status : int
                 Status of the command.
-            modem_response : "client_idx, result, ret_code" str 
+            modem_response : "client_idx, result, ret_code" str
                 Response of the modem.
                     client_idx : int
                         Client ID (range 0:5)
@@ -952,7 +965,7 @@ class Modem:
             command = f'AT+QMTCONN={cid},"{client_id_string}"'
         else:
             command = f'AT+QMTCONN={cid},"{client_id_string}","{username}","{password}"'
-        
+
         result = self.atcom.send_at_comm(command,"OK")
 
         if result["status"] == Status.SUCCESS:
@@ -963,7 +976,7 @@ class Modem:
 
     def disconnect_mqtt_broker(self, cid=0):
         """
-        Function for disconnecting from MQTT broker. This function is used when a client 
+        Function for disconnecting from MQTT broker. This function is used when a client
         requests a disconnection from the MQTT server.
 
         Parameters
@@ -989,7 +1002,8 @@ class Modem:
 
     def subscribe_mqtt_topic(self, cid=0, message_id=1, topic="", qos=0):
         """
-        Function for subscribing to MQTT topic. This function is used when a client requests a subscription to a topic.
+        Function for subscribing to MQTT topic. This function is used when a client requests
+        a subscription to a topic.
 
         Parameters
         ----------
@@ -1022,8 +1036,8 @@ class Modem:
                         1 --> Packet retransmission
                         2 --> Failed to send a packet
                     value : int
-                        If <result> is 0, it is a vector of granted QoS levels
-                        If <result> is 1, it is the number of times the packet has been retransmitted
+                        If <result> is 0, a vector of granted QoS levels
+                        If <result> is 1, the number of times the packet has been retransmitted
                         If <result> is 2, it will not be presented
 
         """
@@ -1038,7 +1052,8 @@ class Modem:
 
     def unsubscribe_mqtt_topic(self, cid=0, message_id=1, topic=""):
         """
-        Function for unsubscribing from MQTT topic. This function is used when a client requests an unsubscription from a topic.
+        Function for unsubscribing from MQTT topic. This function is used
+        when a client requests an unsubscription from a topic.
 
         Parameters
         ----------
@@ -1071,8 +1086,8 @@ class Modem:
 
     def publish_mqtt_message(self, cid=0, message_id=1, qos=1, retain=0, topic="", payload=""):
         """
-        Function for publishing MQTT message. This function is used when a client requests a message to be published.
-        This method uses data mode of the modem to send the message.
+        Function for publishing MQTT message. This function is used when a client requests
+        a message to be published. This method uses data mode of the modem to send the message.
 
         Parameters
         ----------
@@ -1087,11 +1102,11 @@ class Modem:
                 2 --> Exactly once
         retain : int
             Retain. (default=0)
-            Determines whether the server will retain the message after it has been delivered 
+            Determines whether the server will retain the message after it has been delivered
             to the current subscribers.
-                0 --> The server will not retain the message after it has been 
+                0 --> The server will not retain the message after it has been
                     delivered to the current subscriber
-                1 --> The server will retain the message after it has been delivered 
+                1 --> The server will retain the message after it has been delivered
                     to the current subscribers
         topic : str
             Topic. Maximum length: 255 bytes. (default="")
@@ -1109,12 +1124,12 @@ class Modem:
                         Message ID.
                     result : int
                         Command execution result.
-                        0 --> Packet sent successfully and ACK received from the server (message that
-                            is published when <qos>=0 does not require ACK)
+                        0 --> Packet sent successfully and ACK received from the server
+                            (message that is published when <qos>=0 does not require ACK)
                         1 --> Packet retransmission
                         2 --> Failed to send a packet
                     value : int
-                        If <result> is 1, it means the number of times a packet has been retransmitted.
+                        If <result> is 1, number of times a packet has been retransmitted.
                         If <result> is 0 or 2, it will not be presente
         """
         command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
@@ -1134,7 +1149,7 @@ class Modem:
         ----------
         cid : int
             MQTT Client ID (range 0:5) (default=0)
-        
+
         Returns
         -------
         (status, modem_response, buffer_indexes) : tuple
@@ -1146,16 +1161,21 @@ class Modem:
                 List of indexes of the received messages.
         """
         buffer_indexes = []
-        result = self.atcom.send_at_comm(f'AT+QMTRECV?',"+QMTRECV:")
+        result = self.atcom.send_at_comm("AT+QMTRECV?","+QMTRECV:")
 
         if result["status"] == Status.SUCCESS:
             prefix = f"+QMTRECV: {cid},"
-            buffer = get_desired_data_from_response(result["response"], prefix, separator=",", data_index=[0,1,2,3,4]) or []
+            buffer = get_desired_data_from_response(
+                        result["response"],
+                        prefix,
+                        separator=",",
+                        data_index=[0,1,2,3,4]
+                        ) or []
 
             for index in buffer:
                 if index != "" or index is not None:
                     buffer_indexes.append(int(index))
-        
+
         result["buffer_indexes"] = buffer_indexes
         return result
 
@@ -1167,7 +1187,7 @@ class Modem:
         ----------
         cid : int
             MQTT Client ID (range 0:5) (default=0)
-        
+
         Returns
         -------
         (status, modem_response, messages) : tuple
@@ -1189,7 +1209,7 @@ class Modem:
                     result = self.atcom.send_at_comm(f'AT+QMTRECV={cid},{index}',"OK")
                     if result["status"] == Status.SUCCESS:
                         messages.append(result["response"])
-            
+
             result.pop("buffer_indexes")
             result["messages"] = messages
             return result
@@ -1202,7 +1222,7 @@ class Modem:
 ### Combined Functions for Providing Desired States ###
 #######################################################
     def register_network(self):
-        
+
         step_network_precheck = Step(
             function=self.check_network_registration,
             name="check_network_registration",
@@ -1277,7 +1297,7 @@ class Modem:
             modem_response : str
                 Response of the modem.
         """
-        
+
         step_set_ca = Step(
             function=self.set_modem_ssl_ca_cert,
             name="set_ca",
@@ -1357,7 +1377,7 @@ class Modem:
             modem_response : str
                 Response of the modem.
         """
-        
+
         step_set_mqtt_version = Step(
             function=self.set_modem_mqtt_version_config,
             name="set_mqtt_version",
@@ -1391,7 +1411,7 @@ class Modem:
 
     def publish_message_to_aws(self, host, port, topic, payload):
 
-        # Combined step for 
+        # Combined step for
         # - check atcom
         # - check sim ready
         # - get apn

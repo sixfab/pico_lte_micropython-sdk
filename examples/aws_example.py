@@ -1,6 +1,9 @@
+"""
+Example code for publishing data to AWS IoT by using SDK funtions.
+"""
+
 import json
 
-from machine import UART, Pin
 from core.modem import Modem
 from core.auth import Auth
 from core.atcom import ATCom
@@ -16,17 +19,17 @@ auth = Auth(config)
 atcom = ATCom()
 auth.load_certificas()
 
-host = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
-port = 8883
-topic = "$aws/things/picocell_test/shadow/update"
-payload_json = {"state": {"reported": {"Status": "Hello from Picocell!"}}}
-payload = json.dumps(payload_json)
+HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
+PORT = 8883
+TOPIC = "$aws/things/picocell_test/shadow/update"
+PAYLOAD_JSON = {"state": {"reported": {"Status": "Hello from Picocell!"}}}
+payload = json.dumps(PAYLOAD_JSON)
 
 # Check communication with modem
 print("COM: ", modem.check_modem_communication())
 print("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
 print("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
- 
+
 # Certicifate
 print("Delete CA: ", modem.delete_file_from_modem("cacert.pem"))
 print("Delete Client Cert: ", modem.delete_file_from_modem("client.pem"))
@@ -55,8 +58,8 @@ print("Set modem ignore local time: ", modem.set_modem_ssl_ignore_local_time())
 # MQTT
 print("Modem MQTT version: ", modem.set_modem_mqtt_version_config())
 print("Modem MQTT SSL Mode: ", modem.set_modem_mqtt_ssl_mode_config())
- 
-print("Open MQTT Connection: ", modem.open_mqtt_connection(host=host, port=port))
+
+print("Open MQTT Connection: ", modem.open_mqtt_connection(host=HOST, port=PORT))
 print("Connect MQTT Broker: ", modem.connect_mqtt_broker())
-print("Publish MQTT Message: ", modem.publish_mqtt_message(topic=topic, payload=payload))
+print("Publish MQTT Message: ", modem.publish_mqtt_message(topic=TOPIC, payload=payload))
 print("Close MQTT Connection: ", modem.close_mqtt_connection())

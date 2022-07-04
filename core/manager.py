@@ -1,11 +1,17 @@
+"""
+Module for managing processes on modem step by step.
+"""
+
 from core.status import Status
 
 class Step:
+    """Data class for storing step data"""
+
     is_ok = False
     final_step = False
     def __init__(
         self, name, function, success, fail,
-            function_params=None, desired_response=None, 
+            function_params=None, desired_response=None,
             interval=0, retry=0, final_step=False
         ):
         self.function = function
@@ -18,16 +24,18 @@ class Step:
         self.final_step = final_step
         self.desired_response = desired_response
 
-    
+
 class StateManager:
+    """Class for managing states"""
+
     NO_WAIT_INTERVAL = 0
-    
+
     retry_counter = 0
     steps = {}
 
     def __init__(self, first_step):
         self.first_step = first_step
-        
+
         self.organizer_step = Step(
             function=self.organizer,
             name="organizer", success="organizer", fail="organizer",
@@ -58,7 +66,7 @@ class StateManager:
 
     def get_step(self, name):
         return self.steps[name]
-    
+
     def clear_counter(self):
         self.retry_counter = 0
 
@@ -81,10 +89,10 @@ class StateManager:
                     self.current = self.get_step(self.current.name)
                     self.counter_tick()
         return {"status" : Status.SUCCESS}
-    
+
     def success(self):
         return {"status": Status.SUCCESS, "interval": self.NO_WAIT_INTERVAL}
-    
+
     def failure(self):
         return {"status": Status.ERROR, "interval": self.NO_WAIT_INTERVAL}
 
@@ -100,7 +108,7 @@ class StateManager:
             result = self.current.function()
 
         print(result)
-        
+
         if self.current.desired_response:
             if result["status"] == Status.SUCCESS and \
                     self.current.desired_response in result["value"]:
@@ -112,7 +120,7 @@ class StateManager:
                 self.current.is_ok = True
             else:
                 self.current.is_ok = False
-        
+
     def run(self, begin=None, end=None):
         result={}
         if begin:
@@ -120,11 +128,11 @@ class StateManager:
 
         self.execute_organizer_step()
         self.execute_current_step()
-        
+
         if end:
             if self.current.name == self.get_step(end).name:
                 self.current.final_step = True
-        
+
         if not self.current.final_step:
             result["status"] = Status.ONGOING
             result["interval"] = self.current.interval
@@ -134,6 +142,6 @@ class StateManager:
                 result["status"] = Status.SUCCESS
             elif self.current.name == "failure":
                 result["status"] = Status.ERROR
-            
+
             result["interval"] = self.NO_WAIT_INTERVAL
             return result
