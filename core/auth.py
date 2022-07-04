@@ -1,3 +1,6 @@
+"""
+Module for managing authentication.
+"""
 
 def read_file(file_path):
     """
@@ -5,7 +8,7 @@ def read_file(file_path):
     """
     with open(file_path, "r") as file:
         data = file.read()
-    return data or {}  
+    return data or {}
 
 
 class Auth:
@@ -23,10 +26,7 @@ class Auth:
         cacert = read_file("../cert/cacert.pem")
         client_cert = read_file("../cert/client.pem")
         client_key = read_file("../cert/user_key.pem")
-        
+
         self.config["auth"]["cacert"] = cacert
         self.config["auth"]["client_cert"] = client_cert
         self.config["auth"]["client_key"] = client_key
-
-
-
