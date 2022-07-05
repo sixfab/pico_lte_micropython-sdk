@@ -4,6 +4,7 @@ Main code file.
 
 import json
 from core.auth import Auth
+from core.modem import Modem
 
 config = {}
 auth = Auth(config)
@@ -16,5 +17,9 @@ TOPIC = "$aws/things/picocell_test/shadow/update"
 PAYLOAD_JSON = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
 payload = json.dumps(PAYLOAD_JSON)
 
+
+modem = Modem()
+
 if __name__ == "__main__":
     print("Starting...")
+    modem.register_network()

@@ -12,7 +12,7 @@ class Step:
     def __init__(
         self, name, function, success, fail,
             function_params=None, desired_response=None,
-            interval=0, retry=0, final_step=False
+            interval=0, retry=0, final_step=False, cachable=False
         ):
         self.function = function
         self.name = name
@@ -23,18 +23,45 @@ class Step:
         self.function_params = function_params
         self.final_step = final_step
         self.desired_response = desired_response
+        self.cachable = cachable
+
+
+class StateCache:
+    """Data class for storing state data"""
+
+    states = {}
+
+    def add_cache(self, function_name):
+        """Gets cache for #function_name or adds new cache with #function_name key"""
+        if not self.states.get(function_name):
+            self.states[function_name] = None
+
+    def get_state(self, function_name):
+        """Returns state of function_name"""
+        return self.states.get(function_name)
+
+    def set_state(self, function_name, state):
+        """Sets state of function_name"""
+        self.states[function_name] = state
 
 
 class StateManager:
     """Class for managing states"""
 
     NO_WAIT_INTERVAL = 0
-
+    cache_available = False
     retry_counter = 0
     steps = {}
 
-    def __init__(self, first_step):
+    def __init__(self, first_step, cache=None, function_name=None):
+        """Initializes state manager"""
         self.first_step = first_step
+        self.cache = cache
+        self.function_name = function_name
+
+        if function_name and cache.states.get(function_name):
+            self.cache_available = True
+            self.cache.add_cache(function_name)
 
         self.organizer_step = Step(
             function=self.organizer,
@@ -62,44 +89,74 @@ class StateManager:
         self.add_step(self.failure_step)
 
     def add_step(self, step):
+        """Adds step to steps dictionary"""
         self.steps[step.name] = step
 
     def get_step(self, name):
+        """Returns step with name"""
         return self.steps[name]
 
     def clear_counter(self):
+        """Clears retry counter"""
         self.retry_counter = 0
 
     def counter_tick(self):
+        """Increments retry counter"""
         self.retry_counter += 1
 
     def organizer(self):
+        """Organizer step function"""
         if self.current.name == "organizer":
             self.current = self.first_step
+            print("CACHE AVAILABLE:", self.cache_available)
+            print("FUNC:", self.function_name)
+            # assign cache step as current if specific cache is exists
+            if self.cache_available:
+                if self.function_name in self.cache.states:
+                    self.current = self.get_step(self.cache.states[self.function_name])
+                    print("CURRENT: ", self.current)
         else:
-            if self.current.is_ok:
+            if self.current.is_ok: # step succieded
+                if self.current.cachable: # Assign new cache if step cachable
+                    self.cache.set_state(self.function_name, self.current.name)
+
                 self.current.is_ok = False
                 self.current = self.get_step(self.current.success)
             else:
                 if self.retry_counter >= self.current.retry:
-                    self.current = self.get_step(self.current.fail)
+                    # step failed and retry counter is exceeded
+
+                    if self.cache_available:
+                        if self.current.name == self.cache.states[self.function_name]:
+                            # step failed and current step is cache step
+                            # go to first step and clear function spesific cache
+                            self.current = self.first_step
+                            self.cache.set_state(self.function_name, None)
+                    else:
+                        self.current = self.get_step(self.current.fail)
+
                     self.clear_counter()
                     self.current.interval = self.NO_WAIT_INTERVAL
                 else:
+                    # step failed and retry counter is not exceeded, retrying...
                     self.current = self.get_step(self.current.name)
                     self.counter_tick()
         return {"status" : Status.SUCCESS}
 
     def success(self):
+        """Success step function"""
         return {"status": Status.SUCCESS, "interval": self.NO_WAIT_INTERVAL}
 
     def failure(self):
+        """Fail step function"""
         return {"status": Status.ERROR, "interval": self.NO_WAIT_INTERVAL}
 
     def execute_organizer_step(self):
+        """Executes organizer step"""
         self.organizer()
 
     def execute_current_step(self):
+        """Executes current step"""
         params = self.current.function_params
 
         if params:
@@ -122,6 +179,7 @@ class StateManager:
                 self.current.is_ok = False
 
     def run(self, begin=None, end=None):
+        """Runs state manager"""
         result={}
         if begin:
             self.current = self.get_step(begin)

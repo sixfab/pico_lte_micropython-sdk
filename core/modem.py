@@ -7,7 +7,7 @@ import time
 
 from core.atcom import ATCom
 from core.status import Status
-from core.manager import StateManager, Step
+from core.manager import StateManager, Step, StateCache
 
 
 def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
@@ -25,6 +25,8 @@ class Modem:
     """Modem class that contains all functions for working with cellular modem"""
 
     atcom = ATCom()
+    cache = StateCache()
+
     CTRL_Z = '\x1A'
 
     ############################
@@ -1255,7 +1257,7 @@ class Modem:
         step_set_apn = Step(
             function=self.set_modem_apn,
             name="set_apn",
-            success="pdp_deactivate",
+            success="get_apn",
             fail="failure",
         )
 
@@ -1268,7 +1270,11 @@ class Modem:
             retry=60, # 60 times = 5 minute
         )
 
-        sm = StateManager(first_step = step_network_precheck)
+        # Add cache if it is not already existed
+        function_name = "register_network"
+
+        sm = StateManager(first_step = step_network_precheck,
+                            cache=self.cache, function_name=function_name)
         sm.add_step(step_network_precheck)
         sm.add_step(step_atcom)
         sm.add_step(step_sim_ready)
@@ -1436,6 +1442,7 @@ class Modem:
             name="pdp_activate",
             success="ssl_configuration",
             fail="failure",
+            cachable=True,
         )
 
         step_ssl_configuration = Step(
@@ -1443,6 +1450,7 @@ class Modem:
             name="ssl_configuration",
             success="modem_mqtt_configuration",
             fail="failure",
+            cachable=True,
         )
 
         step_modem_mqtt_configuration = Step(
@@ -1450,6 +1458,7 @@ class Modem:
             name="modem_mqtt_configuration",
             success="open_mqtt_connection",
             fail="failure",
+            cachable=True,
         )
 
         step_open_mqtt_connection = Step(
@@ -1457,7 +1466,8 @@ class Modem:
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
-            function_params={"host":host, "port":port}
+            function_params={"host":host, "port":port},
+            cachable=True,
         )
 
         step_connect_mqtt_broker = Step(
@@ -1465,6 +1475,7 @@ class Modem:
             name="connect_mqtt_broker",
             success="subscribe_topic",
             fail="failure",
+            cachable=True,
         )
 
         step_subscribe_topic = Step(
@@ -1472,25 +1483,24 @@ class Modem:
             name="subscribe_topic",
             success="publish_message",
             fail="failure",
-            function_params={"topic":topic}
+            function_params={"topic":topic},
+            cachable=True,
         )
 
         step_publish_message = Step(
             function=self.publish_mqtt_message,
             name="publish_message",
-            success="check_messages",
-            fail="failure",
-            function_params={"payload":payload, "topic":topic}
-        )
-
-        step_check_messages = Step(
-            function=self.read_mqtt_messages,
-            name="check_messages",
             success="success",
             fail="failure",
+            function_params={"payload":payload, "topic":topic},
+            cachable=True,
         )
 
-        sm = StateManager(first_step=step_network_reg)
+        # Add cache if it is not already existed
+        function_name = "publish_message_to_aws"
+
+        sm = StateManager(first_step = step_network_reg,
+                            cache=self.cache, function_name=function_name)
 
         sm.add_step(step_network_reg)
         sm.add_step(step_pdp_deactivate)
@@ -1501,7 +1511,6 @@ class Modem:
         sm.add_step(step_connect_mqtt_broker)
         sm.add_step(step_subscribe_topic)
         sm.add_step(step_publish_message)
-        sm.add_step(step_check_messages)
 
         while True:
             result = sm.run()
