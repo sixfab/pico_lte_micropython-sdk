@@ -373,6 +373,27 @@ class Modem:
     ##############################
     ### File Process functions ###
     ##############################
+
+    def get_file_list(self, path="*"):
+        """
+        Function for getting file list
+
+        Parameters
+        ----------
+        path : str
+            Path to the directory (default="*")
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QFLST="{path}"'
+        return self.atcom.send_at_comm(command,"OK")
+
     def delete_file_from_modem(self, file_name):
         """
         Function for deleting file from modem UFS storage
@@ -424,7 +445,7 @@ class Modem:
     #####################
     ### SSL functions ###
     #####################
-    def set_modem_ssl_ca_cert(self, ssl_context_id=2, file_path="cacert.pem"):
+    def set_modem_ssl_ca_cert(self, ssl_context_id=2, file_path="/security/cacert.pem"):
         """
         Function for setting modem CA certificate
 
@@ -447,7 +468,7 @@ class Modem:
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_client_cert(self, ssl_context_id=2, file_path="client.pem"):
+    def set_modem_ssl_client_cert(self, ssl_context_id=2, file_path="/security/client.pem"):
         """
         Function for setting modem client certificate
 
@@ -470,7 +491,7 @@ class Modem:
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_client_key(self, ssl_context_id=2, file_path="user_key.pem"):
+    def set_modem_ssl_client_key(self, ssl_context_id=2, file_path="/security/user_key.pem"):
         """
         Function for setting modem client key
 

@@ -13,7 +13,7 @@ config = {}
 atcom = ATCom()
 auth = Auth(config)
 
-auth.load_certificas()
+auth.load_certificates()
 
 HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
 PORT = 8883

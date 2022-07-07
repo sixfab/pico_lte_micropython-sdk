@@ -9,7 +9,7 @@ from core.modem import Modem
 config = {}
 auth = Auth(config)
 
-auth.load_certificas()
+auth.load_certificates()
 
 HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
 PORT = 8883
@@ -22,4 +22,4 @@ modem = Modem()
 
 if __name__ == "__main__":
     print("Starting...")
-    modem.register_network()
+
