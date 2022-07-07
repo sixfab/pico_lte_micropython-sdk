@@ -17,7 +17,7 @@ config = {}
 modem = Modem()
 auth = Auth(config)
 atcom = ATCom()
-auth.load_certificas()
+auth.load_certificates()
 
 HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
 PORT = 8883
@@ -31,13 +31,13 @@ print("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
 print("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
 
 # Certicifate
-print("Delete CA: ", modem.delete_file_from_modem("cacert.pem"))
-print("Delete Client Cert: ", modem.delete_file_from_modem("client.pem"))
-print("Delete Client Key: ", modem.delete_file_from_modem("user_key.pem"))
-
-print("Upload CA: ", modem.upload_file_to_modem("cacert.pem", config["auth"]["cacert"]))
-print("Upload Client Cert: ", modem.upload_file_to_modem("client.pem", config["auth"]["client_cert"]))
-print("Upload Client Key: ", modem.upload_file_to_modem("user_key.pem", config["auth"]["client_key"]))
+# print("Delete CA: ", modem.delete_file_from_modem("cacert.pem"))
+# print("Delete Client Cert: ", modem.delete_file_from_modem("client.pem"))
+# print("Delete Client Key: ", modem.delete_file_from_modem("user_key.pem"))
+# 
+# print("Upload CA: ", modem.upload_file_to_modem("/security/cacert.pem", config["auth"]["cacert"]))
+# print("Upload Client Cert: ", modem.upload_file_to_modem("/security/client.pem", config["auth"]["client_cert"]))
+# print("Upload Client Key: ", modem.upload_file_to_modem("/security/user_key.pem", config["auth"]["client_key"]))
 
 # TCP/IP
 print("TCPIP Context Configuration: ", modem.configure_tcp_ip_context())
