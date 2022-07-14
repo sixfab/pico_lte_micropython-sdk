@@ -94,8 +94,11 @@ class ATCom:
 
             if time.time() - timer < timeout:
                 while self.modem_com.any():
-                    response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
-            else:
+                    try:
+                        response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
+                    except:
+                        pass
+            else:   
                 return {"status": Status.TIMEOUT, "response": "timeout"}
 
             if isinstance(desired_responses, str):

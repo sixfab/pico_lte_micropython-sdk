@@ -4,30 +4,87 @@ for working with cellular modem without need of AT command knowledge.
 """
 
 import time
+import os
 
+from core.helpers import (
+                        read_file,
+                        read_json_file,
+                        get_desired_data_from_response
+                        )
 from core.atcom import ATCom
 from core.status import Status
 from core.manager import StateManager, Step, StateCache
 
 
-def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
-    print(response)
-    response = response.replace("\r","\n").replace('"','') # Simplify response
-    index = response.find(prefix) + len(prefix) # Find index of meaningful data
-    data_array = response[index:].split("\n")[0].split(separator)
-
-    if isinstance(data_index, list):    # If desired multiple data, data_index should be list
-        return [data_array[i] for i in data_index]
-    return data_array[data_index]
-
-
 class Modem:
     """Modem class that contains all functions for working with cellular modem"""
 
-    atcom = ATCom()
-    cache = StateCache()
 
-    CTRL_Z = '\x1A'
+    def __init__(self, config):
+        """Initialize modem class"""
+        self.atcom = ATCom()
+        self.cache = StateCache()
+        self.CTRL_Z = '\x1A'
+
+        # check certificates in modem or upload them
+        self.load_certificates()
+        config["params"] = read_json_file("config.json")
+        self.default = config["params"]
+
+    #####################
+    ### Certification ###
+    #####################
+    def load_certificates(self):
+        """
+        Function for loading certificates from file
+        """
+        cacert = read_file("../cert/cacert.pem")
+        client_cert = read_file("../cert/client.pem")
+        client_key = read_file("../cert/user_key.pem")
+
+        first_run = cacert and client_cert and client_key
+
+        # If first run, upload the certificates to the modem
+        if first_run:
+            try:
+                # delete old certificates if existed
+                self.delete_file_from_modem("/security/cacert.pem")
+                self.delete_file_from_modem("/security/client.pem")
+                self.delete_file_from_modem("/security/user_key.pem")
+                # Upload new certificates
+                self.upload_file_to_modem("/security/cacert.pem", cacert)
+                self.upload_file_to_modem("/security/client.pem", client_cert)
+                self.upload_file_to_modem("/security/user_key.pem", client_key)
+            except Exception as error:
+                print("Error occured while uploading certificates", error)
+                return Status.ERROR
+
+            print("Certificates uploaded secure storage. Deleting from file system...")
+            try:
+                os.remove("../cert/cacert.pem")
+                os.remove("../cert/client.pem")
+                os.remove("../cert/user_key.pem")
+            except Exception as error: 
+                print("Error occured while deleting certificates", error)
+                return Status.ERROR
+
+            print("Certificates deleted from file system.")
+
+        # check certificates in modem
+        result = self.get_file_list("ufs:/security/*")
+
+        if result["status"] == Status.SUCCESS:
+            if "cacert.pem" in result["response"] and \
+                    "client.pem" in result["response"] and \
+                        "user_key.pem" in result["response"]:
+                print("Certificates found in modem.")
+                return Status.SUCCESS
+            else:
+                print("Certificates couldn't find in modem!")
+                return Status.ERROR
+        else:
+            print("Error occured while getting certificates from modem!")
+            return Status.ERROR
 
     ############################
     ### Main Modem functions ###
@@ -1245,6 +1302,17 @@ class Modem:
 ### Combined Functions for Providing Desired States ###
 #######################################################
     def register_network(self):
+        """
+        Function for registering network.
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
 
         step_network_precheck = Step(
             function=self.check_network_registration,
@@ -1436,14 +1504,19 @@ class Modem:
 ### AWS Related Functions ###
 #############################
 
-    def publish_message_to_aws(self, host, port, topic, payload):
+    def publish_message_to_aws(self, payload, host=None, port=None, topic=None):
+        """
+        Function for publishing a message to AWS IoT by using MQTT.
 
-        # Combined step for
-        # - check atcom
-        # - check sim ready
-        # - get apn
-        # - set apn
-        # - check network registration
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
+
         step_network_reg = Step(
             function=self.register_network,
             name="register_network",
@@ -1535,7 +1608,7 @@ class Modem:
 
         while True:
             result = sm.run()
-            print(result)
+            
             if result["status"] == Status.SUCCESS:
                 return result
             elif result["status"] == Status.ERROR:
