@@ -61,12 +61,12 @@ class ATCom:
 
         """
         if line_end:
-            self.compose = f"{command}\r".encode()
+            compose = f"{command}\r".encode()
         else:
-            self.compose = command.encode()
-
+            compose = command.encode()
+        print(compose)
         try:
-            self.modem_com.write(self.compose)
+            self.modem_com.write(compose)
         except:
             print("Error occured while AT command writing to modem")
 
@@ -114,7 +114,7 @@ class ATCom:
                     elif "ERROR" in response:
                         return {"status": Status.ERROR, "response": response}
 
-    def send_at_comm(self, command, response="OK", timeout=5):
+    def send_at_comm(self, command, response="OK", timeout=5, line_end=True):
         """
 		Function for writing AT command to modem and getting modem response
 
@@ -132,7 +132,7 @@ class ATCom:
         response: dict
             response from modem
 		"""
-        self.send_at_comm_once(command)
+        self.send_at_comm_once(command, line_end=line_end)
         time.sleep(0.1)
         return self.get_response(response, timeout)
 

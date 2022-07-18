@@ -5,15 +5,12 @@ Example code for listener class
 import json
 import time
 from core.atcom import ATCom
-from core.auth import Auth
 from core.listener import Listener
+from core.modem import Modem
 
 config = {}
-
 atcom = ATCom()
-auth = Auth(config)
-
-auth.load_certificates()
+modem = Modem(config)
 
 HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
 PORT = 8883
