@@ -6,6 +6,7 @@ for working with cellular modem without need of AT command knowledge.
 import time
 import os
 
+from machine import Pin
 from core.helpers import (
                         read_file,
                         read_json_file,
@@ -14,6 +15,7 @@ from core.helpers import (
 from core.atcom import ATCom
 from core.status import Status
 from core.manager import StateManager, Step, StateCache
+from core.peripherals import Periph
 
 
 class Modem:
@@ -22,14 +24,101 @@ class Modem:
 
     def __init__(self, config):
         """Initialize modem class"""
+        print("Modem initialization...")
         self.atcom = ATCom()
         self.cache = StateCache()
+        peripheral = Periph()
         self.CTRL_Z = '\x1A'
+
+        # power up modem
+        if self.power_status() != 0:
+            self.power_on_off()
+        self.wait_until_status_on()
+        self.wait_until_modem_ready_to_communicate()
 
         # check certificates in modem or upload them
         self.load_certificates()
         config["params"] = read_json_file("config.json")
         self.default = config["params"]
+
+    #############################
+    ### Modem Power Functions ###
+    #############################
+    def power_on_off(self):
+        """
+        Function for powering on modem
+        """
+        powerkey_pin = Pin(2, Pin.OUT)
+        powerkey_pin.value(1)
+        time.sleep(2)
+        powerkey_pin.value(0)
+
+    def power_status(self):
+        """
+        Function for getting power status of modem
+        """
+        status_pin = Pin(3, Pin.IN)
+        print("Power status:", status_pin.value())
+        return status_pin.value()
+
+    def wait_until_status_on(self, timeout=30):
+        """
+        Function for waiting until modem status is on
+
+        Parameters
+        ----------
+        timeout : int, optional
+            Timeout for waiting. The default is 30.
+        """
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            status = self.power_status()
+            if status == 0:
+                return {"status": Status.SUCCESS, "response": ""}
+            time.sleep(1)
+        return {"status": Status.TIMEOUT, "response": ""}
+
+    def check_modem_communication(self):
+        """
+        Function for checking modem communication
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        return self.atcom.send_at_comm("AT")
+
+    def wait_until_modem_ready_to_communicate(self, timeout=30):
+        """
+        Function for waiting until modem is ready to communicate
+
+        Parameters
+        ----------
+        timeout : int, optional
+            Timeout for waiting. The default is 30.
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            result = self.atcom.send_at_comm("AT","OK")
+            print("COM:", result)
+            if result["status"] == Status.SUCCESS:
+                return result
+            time.sleep(1)
+        result["status"] = Status.TIMEOUT
+        result["response"] = ""
+        return result
 
     #####################
     ### Certification ###
@@ -89,20 +178,6 @@ class Modem:
     ############################
     ### Main Modem functions ###
     ############################
-    def check_modem_communication(self):
-        """
-        Function for checking modem communication
-
-        Returns
-        -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
-        """
-        return self.atcom.send_at_comm("AT")
-
     def set_modem_echo_off(self):
         """
         Function for setting modem echo off
