@@ -11,12 +11,10 @@ config = {}
 modem = Modem(config)
 atcom=ATCom()
 
-HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
-PORT = 8883
-TOPIC = "$aws/things/picocell_test/shadow/update"
+HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
+TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
 PAYLOAD_JSON = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
+server_url = 'https://' + HOST + ':8443/topics/' + TOPIC + '?qos=1'
 payload = json.dumps(PAYLOAD_JSON)
 
-print(modem.set_modem_http_context_id(1))
-time.sleep(1)
-print(atcom.send_at_comm('AT+QHTTPCFG="contextid"',"OK"))
+print(modem.publish_message_to_aws_https(payload, server_url))
