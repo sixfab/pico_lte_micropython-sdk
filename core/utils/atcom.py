@@ -4,7 +4,7 @@ Module for communicating with cellular modem over UART interface.
 
 import time
 from machine import UART, Pin
-from core.status import Status
+from core.utils.status import Status
 
 
 class MessageBuffer:

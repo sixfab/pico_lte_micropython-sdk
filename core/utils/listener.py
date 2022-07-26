@@ -1,4 +1,4 @@
-from core.status import Status
+from core.utils.status import Status
 
 class ModemResponse:
     def __init__(self, response, callback=None):

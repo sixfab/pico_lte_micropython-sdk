@@ -5,7 +5,7 @@ Example code for publishing data to AWS IoT by using SDK funtions.
 import json
 
 from core.modem import Modem
-from core.atcom import ATCom
+from core.utils.atcom import ATCom
 
 config = {}
 

@@ -2,7 +2,7 @@
 Module for managing processes on modem step by step.
 """
 
-from core.status import Status
+from core.utils.status import Status
 
 class Step:
     """Data class for storing step data"""
