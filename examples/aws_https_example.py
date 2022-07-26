@@ -17,8 +17,8 @@ config = {}
 modem = Modem(config)
 atcom = ATCom()
 
-HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
-TOPIC = "$aws/things/picocell_test/shadow/update"
+HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
+TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
 PAYLOAD_JSON = {"state": {"reported": {"Status": "HTTPS TEST MESSAGE!"}}}
 payload = json.dumps(PAYLOAD_JSON)
 publish_url = 'https://' + HOST + ':8443/topics/' + TOPIC + '?qos=1'

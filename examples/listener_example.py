@@ -12,12 +12,6 @@ config = {}
 atcom = ATCom()
 modem = Modem(config)
 
-HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
-PORT = 8883
-TOPIC = "$aws/things/picocell_test/shadow/update"
-PAYLOAD_JSON = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
-payload = json.dumps(PAYLOAD_JSON)
-
 
 def callback(message):
     """Example callback function"""
