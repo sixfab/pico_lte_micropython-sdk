@@ -269,10 +269,10 @@ class MQTT:
                         5 --> Network connection error
         """
         if host is None:
-            host = get_parameter("host")
+            host = get_parameter("mqtt_host")
 
         if port is None:
-            port = get_parameter("port", 8883) # default port is 8883
+            port = get_parameter("mqtt_port", 8883) # default port is 8883
 
         if host and port:
             command = f'AT+QMTOPEN={cid},"{host}",{port}'
@@ -483,17 +483,17 @@ class MQTT:
         command = f'AT+QMTUNS={cid},{message_id},"{topic}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def publish_message(self, topic, payload, qos=1, retain=0, message_id=1, cid=0):
+    def publish_message(self, payload, topic=None, qos=1, retain=0, message_id=1, cid=0):
         """
         Function for publishing MQTT message. This function is used when a client requests
         a message to be published. This method uses data mode of the modem to send the message.
 
         Parameters
         ----------
+        payload : str
+            Payload.
         topic : str
             Topic. Maximum length: 255 bytes.
-        payload : str
-            Payload. Maximum length: 255 bytes.
         qos : int
             QoS. (default=0)
                 0 --> At most once
@@ -533,13 +533,18 @@ class MQTT:
                         If <result> is 1, number of times a packet has been retransmitted.
                         If <result> is 0 or 2, it will not be presented
         """
-        command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
-        result = self.atcom.send_at_comm(command,">")
+        if topic is None:
+            topic = get_parameter("mqtt_pub_topic")
 
-        if result["status"] == Status.SUCCESS:
-            self.atcom.send_at_comm_once(payload, line_end=False) # Send message
-            result = self.atcom.send_at_comm(self.CTRL_Z,"OK") # Send end char --> CTRL+Z
-        return result
+        if payload and topic:
+            command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
+            result = self.atcom.send_at_comm(command,">")
+
+            if result["status"] == Status.SUCCESS:
+                self.atcom.send_at_comm_once(payload, line_end=False) # Send message
+                result = self.atcom.send_at_comm(self.CTRL_Z,"OK") # Send end char --> CTRL+Z
+            return result
+        return {"response": "Missing parameter", "status": Status.ERROR}
 
     def check_messages(self, cid=0):
         """

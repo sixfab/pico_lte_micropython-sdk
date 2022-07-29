@@ -5,18 +5,11 @@ import time
 import json
 from core.modem import Modem
 
-config = {}
-modem = Modem(config)
-
-HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
-TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
-PORT = 8883
-PAYLOAD_JSON = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
-payload = json.dumps(PAYLOAD_JSON)
+modem = Modem()
 
 while True:
-    print(modem.publish_message_to_aws(host=HOST, port=PORT, topic=TOPIC, payload=payload))
-    print()
-    print("CACHE:", modem.cache.states)
-    print("\n\n")
+    PAYLOAD_JSON = {"state": {"reported": {"App": "AWS MQTT Example", "Timestamp": str(time.time())}}}
+    payload = json.dumps(PAYLOAD_JSON)
+    result = modem.aws.publish_message(payload)
+    print(result)
     time.sleep(10)

@@ -30,7 +30,6 @@ class Modem:
         """
         Initialize modem class
         """
-
         self.peripherals = Periph()
         self.atcom = ATCom()
 

@@ -12,9 +12,9 @@ class AWS:
     """
     Class for including functions of AWS IoT operations of picocell module.
     """
-    cache = config["cache"] or None
+    cache = config["cache"]
 
-    def __init__(self, base, network, ssl, mqtt, http, cache=None):
+    def __init__(self, base, network, ssl, mqtt, http):
         """
         Constructor of the class.
 
@@ -28,7 +28,6 @@ class AWS:
         self.ssl = ssl
         self.mqtt = mqtt
         self.http = http
-        self.cache = cache
 
     def publish_message(self, payload, host=None, port=None, topic=None):
         """
@@ -101,17 +100,8 @@ class AWS:
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
             name="connect_mqtt_broker",
-            success="subscribe_topic",
-            fail="failure",
-            cachable=True,
-        )
-
-        step_subscribe_topic = Step(
-            function=self.mqtt.subscribe_topic,
-            name="subscribe_topic",
             success="publish_message",
             fail="failure",
-            function_params={"topic":topic},
             cachable=True,
         )
 
@@ -125,10 +115,9 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "publish_message_to_aws"
+        function_name = "aws.publish_message"
 
-        sm = StateManager(first_step = step_network_reg,
-                            cache=self.cache, function_name=function_name)
+        sm = StateManager(first_step = step_network_reg, function_name=function_name)
 
         sm.add_step(step_network_reg)
         sm.add_step(step_pdp_deactivate)
@@ -137,7 +126,6 @@ class AWS:
         sm.add_step(step_set_mqtt_ssl_mode)
         sm.add_step(step_open_mqtt_connection)
         sm.add_step(step_connect_mqtt_broker)
-        sm.add_step(step_subscribe_topic)
         sm.add_step(step_publish_message)
 
         while True:
@@ -218,7 +206,7 @@ class AWS:
         )
 
         step_post_request = Step(
-            function=self.http.post_request,
+            function=self.http.post,
             name="post_request",
             success="read_response",
             fail="failure",
@@ -234,10 +222,9 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "publish_message_to_aws_https"
+        function_name = "aws.post_message"
 
-        sm = StateManager(first_step = step_network_reg,
-                            cache=self.cache, function_name=function_name)
+        sm = StateManager(first_step = step_network_reg, function_name=function_name)
 
         sm.add_step(step_network_reg)
         sm.add_step(step_pdp_deactivate)

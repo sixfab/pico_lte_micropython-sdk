@@ -12,7 +12,7 @@ class Network:
     """
     Class for inculding functions of network operations of picocell module.
     """
-    cache = config["cache"] or None
+    cache = config["cache"]
 
     def __init__(self, atcom, base):
         """
@@ -243,8 +243,7 @@ class Network:
         # Add cache if it is not already existed
         function_name = "register_network"
 
-        sm = StateManager(first_step = step_network_precheck,
-                            cache=self.cache, function_name=function_name)
+        sm = StateManager(first_step = step_network_precheck, function_name=function_name)
         sm.add_step(step_network_precheck)
         sm.add_step(step_atcom)
         sm.add_step(step_sim_ready)

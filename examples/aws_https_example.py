@@ -8,20 +8,15 @@ import time
 from core.modem import Modem
 from core.utils.atcom import ATCom
 
-config = {}
-
 ###########################
 ### AWS HTTP(s) example ###
 ###########################
 
-modem = Modem(config)
+modem = Modem()
 atcom = ATCom()
 
-HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
-TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
-PAYLOAD_JSON = {"state": {"reported": {"Status": "HTTPS TEST MESSAGE!"}}}
+PAYLOAD_JSON = {"state": {"reported": {"Status": "Hello from Picocell --> HTTP"}}}
 payload = json.dumps(PAYLOAD_JSON)
-publish_url = 'https://' + HOST + ':8443/topics/' + TOPIC + '?qos=1'
 
 # Check communication with modem
 print("COM: ", modem.base.check_communication())
@@ -48,6 +43,6 @@ print("Set modem ignore local time: ", modem.ssl.set_ignore_local_time())
 # HTTP
 print("Set HTTP SSL Context", modem.http.set_context_id(2))
 print("HTTP URL: ", modem.http.set_server_url())
-print("HTTP POST: ", modem.http.post_request(payload))
+print("HTTP POST: ", modem.http.post(payload))
 time.sleep(2)
 print("HTTP READ: ", modem.http.read_response())

@@ -48,7 +48,7 @@ def get_parameter(key, default=None):
     Function for getting parameters for SDK methods from global config dictionary.
     """
     if isinstance(config["params"], dict):
-        return config["params"][key]
+        return config["params"].get(key)
     if default:
         return default
     return None
