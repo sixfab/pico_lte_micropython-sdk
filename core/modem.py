@@ -30,8 +30,6 @@ class Modem:
         """
         Initialize modem class
         """
-        print("Modem initialization...")
-        print(config)
 
         self.peripherals = Periph()
         self.atcom = ATCom()
@@ -56,4 +54,3 @@ class Modem:
         # check certificates in modem or upload them
         self.auth.load_certificates()
         config["params"] = read_json_file("config.json")
-        print(config)

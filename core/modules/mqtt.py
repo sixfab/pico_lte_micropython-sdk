@@ -170,13 +170,19 @@ class MQTT:
         return self.atcom.send_at_comm(command,"OK")
 
     def set_will_config(
-        self, cid=0, will_flag=0, will_qos=0, will_retain=0, will_topic="", will_message=""
+        self, will_topic, will_message, cid=0, will_flag=0, will_qos=0, will_retain=0
         ):
         """
         Function for setting modem MQTT will configuration
 
         Parameters
         ----------
+        will_topic : str
+            Will topic. Maximum length: 255 bytes.
+        will_message : str
+            Will message. Maximum length: 255 bytes.
+                The Will message defines the content of the message published on the Will topic
+                if the client is unexpectedly disconnected. It can be a zero-length message.
         cid : int
             Client ID (range 0:5) (default=0)
         will_flag : int
@@ -194,12 +200,6 @@ class MQTT:
                     retain the message after it has been delivered to the current subscribers.
                 1 --> When a client sends a PUBLISH message to a server, the server should
                     retain the message after it has been delivered to the current subscribers.
-        will_topic : str
-            Will topic. Maximum length: 255 bytes. (default="")
-        will_message : str
-            Will message. Maximum length: 255 bytes. (default="")
-                The Will message defines the content of the message published on the Will topic
-                if the client is unexpectedly disconnected. It can be a zero-length message.
 
         Returns
         -------
@@ -237,18 +237,18 @@ class MQTT:
         command = f'AT+QMTCFG="message_recieve_mode",{cid},{message_recieve_mode}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def open_connection(self, cid=0, host=None, port=8883):
+    def open_connection(self, host=None, port=None, cid=0):
         """
         Function for opening MQTT connection for client
 
         Parameters
         ----------
+        host : str
+            Server address. It could be an IP address or a domain name.(default=None)
+        port : int
+            Port number of the server (range 0:65535)(default=None)
         cid : int
             MQTT Client ID (range 0:5) (default=0)
-        host : str
-            Server address. It could be an IP address or a domain name.
-        port : int
-            Port number of the server (range 0:65535)(default=8883)
 
         Returns
         -------
@@ -272,7 +272,7 @@ class MQTT:
             host = get_parameter("host")
 
         if port is None:
-            port = get_parameter("port")
+            port = get_parameter("port", 8883) # default port is 8883
 
         if host and port:
             command = f'AT+QMTOPEN={cid},"{host}",{port}'
@@ -313,7 +313,7 @@ class MQTT:
             result = self.atcom.get_response(desired_response, timeout=60)
         return result
 
-    def connect_broker(self, cid=0, client_id_string="picocell", username=None, password=None):
+    def connect_broker(self, client_id_string="Picocell", username=None, password=None, cid=0):
         """
         Function for connecting to MQTT broker. This function is used when a client requests a
         connection to the MQTT server. When a TCP/IP socket connection is established between
@@ -321,14 +321,14 @@ class MQTT:
 
         Parameters
         ----------
+        client_id_string : str
+            Client ID string. Maximum length: 23 bytes. (default="Picocell")
+        username : str
+            Username. Maximum length: 23 bytes. (default=None)
+        password : str
+            Password. Maximum length: 23 bytes. (default=None)
         cid : int
             MQTT Client ID (range 0:5) (default=0)
-        client_id_string : str
-            Client ID string. Maximum length: 23 bytes. (default="picocell")
-        username : str
-            Username. Maximum length: 23 bytes. (default="")
-        password : str
-            Password. Maximum length: 23 bytes. (default="")
 
         Returns
         -------
@@ -352,9 +352,13 @@ class MQTT:
                             3 --> Connection Refused: Server Unavailable
         """
         if username is None and password is None:
-            command = f'AT+QMTCONN={cid},"{client_id_string}"'
-        else:
+            username = get_parameter("mqtt_username")
+            password = get_parameter("mqtt_password")
+
+        if username and password:
             command = f'AT+QMTCONN={cid},"{client_id_string}","{username}","{password}"'
+        else:
+            command = f'AT+QMTCONN={cid},"{client_id_string}"'
 
         result = self.atcom.send_at_comm(command,"OK")
 
@@ -389,20 +393,21 @@ class MQTT:
         command = f'AT+QMTDISC={cid}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def subscribe_topic(self, topic=None, qos=0, cid=0, message_id=1):
+    def subscribe_topics(self, topics=None, cid=0, message_id=1):
         """
         Function for subscribing to MQTT topic. This function is used when a client requests
         a subscription to a topic.
 
         Parameters
         ----------
-        topic : str
-            Topic. Maximum length: 255 bytes. (default=None)
-        qos : int
-            QoS. (default=0)
-                0 --> At most once
-                1 --> At least once
-                2 --> Exactly once
+        topics : list of tupple [(topic1, qos1),(topic2, qos2),...]
+            topic : str
+                Maximum length: 255 bytes. (default=None)
+            qos : int
+                QoS. (default=0)
+                    0 --> At most once
+                    1 --> At least once
+                    2 --> Exactly once
         cid : int
             MQTT Client ID (range 0:5) (default=0)
         message_id : int
@@ -430,18 +435,21 @@ class MQTT:
                         If <result> is 2, it will not be presented
 
         """
-        if topic is None:
-            topic = get_parameter("topic")
+        if topics is None:
+            topics = get_parameter("mqtt_sub_topics")
 
-        command = f'AT+QMTSUB={cid},{message_id},"{topic}",{qos}'
-        result = self.atcom.send_at_comm(command,"OK")
+        if topics:
+            prefix = f'AT+QMTSUB={cid},{message_id},'
+            command = prefix + ",".join(f'"{topic}",{qos}' for topic, qos in topics)
+            result = self.atcom.send_at_comm(command,"OK")
 
-        if result["status"] == Status.SUCCESS:
-            desired_response = f"+QMTSUB: {cid},{message_id},0"
-            result = self.atcom.get_response(desired_response, timeout=60)
-        return result
+            if result["status"] == Status.SUCCESS:
+                desired_response = f"+QMTSUB: {cid},{message_id},0"
+                result = self.atcom.get_response(desired_response, timeout=60)
+            return result
+        return {"response": "Missing parameter : topic", "status": Status.ERROR}
 
-    def unsubscribe_topic(self, cid=0, message_id=1, topic=""):
+    def unsubscribe_topic(self, topic, cid=0, message_id=1):
         """
         Function for unsubscribing from MQTT topic. This function is used
         when a client requests an unsubscription from a topic.
@@ -475,17 +483,17 @@ class MQTT:
         command = f'AT+QMTUNS={cid},{message_id},"{topic}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def publish_message(self, cid=0, message_id=1, qos=1, retain=0, topic="", payload=""):
+    def publish_message(self, topic, payload, qos=1, retain=0, message_id=1, cid=0):
         """
         Function for publishing MQTT message. This function is used when a client requests
         a message to be published. This method uses data mode of the modem to send the message.
 
         Parameters
         ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
-        message_id : int
-            Message ID. (range 1:65535)(default=1)
+        topic : str
+            Topic. Maximum length: 255 bytes.
+        payload : str
+            Payload. Maximum length: 255 bytes.
         qos : int
             QoS. (default=0)
                 0 --> At most once
@@ -499,8 +507,10 @@ class MQTT:
                     delivered to the current subscriber
                 1 --> The server will retain the message after it has been delivered
                     to the current subscribers
-        topic : str
-            Topic. Maximum length: 255 bytes. (default="")
+        message_id : int
+            Message ID. (range 1:65535)(default=1)
+        cid : int
+            MQTT Client ID (range 0:5) (default=0)
 
         Returns
         -------

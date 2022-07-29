@@ -43,10 +43,12 @@ def read_file(file_path):
         return data
 
 
-def get_parameter(key):
+def get_parameter(key, default=None):
     """
     Function for getting parameters for SDK methods from global config dictionary.
     """
     if isinstance(config["params"], dict):
         return config["params"][key]
+    if default:
+        return default
     return None

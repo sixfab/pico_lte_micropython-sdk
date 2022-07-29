@@ -195,7 +195,7 @@ class HTTP:
         command = f'AT+QHTTPCFG="auth","{username}:{password}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_custom_header(self, header=""):
+    def set_custom_header(self, header=None):
         """
         Function for setting modem HTTP custom header
 
@@ -212,8 +212,13 @@ class HTTP:
             status : int
                 Status of the command.
         """
-        command = f'AT+QHTTPCFG="customheader","{header}"'
-        return self.atcom.send_at_comm(command,"OK")
+        if header is None:
+            header = get_parameter("http_header")
+
+        if header:
+            command = f'AT+QHTTPCFG="customheader","{header}"'
+            return self.atcom.send_at_comm(command,"OK")
+        return {"response": "Missing arguments : header", "status": Status.ERROR}
 
     def set_server_url(self, url=None ,timeout=5):
         """
@@ -247,7 +252,7 @@ class HTTP:
             return result
         return {"response": "Missing arguments : url", "status": Status.ERROR}
 
-    def get_request(self, header_mode=0, timeout=60):
+    def get(self, header_mode=0, timeout=60):
         """
         Function for sending HTTP GET request
 
@@ -273,13 +278,12 @@ class HTTP:
                 Status of the command.
         """
         if header_mode == 1:
-            print("Not implemented yet!")
-            return
+            return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'AT+QHTTPGET={timeout}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def post_request(self, data, header_mode=0, input_timeout=5, timeout=60):
+    def post(self, data, header_mode=0, input_timeout=5, timeout=60):
         """
         Function for sending HTTP POST request
 
@@ -312,8 +316,7 @@ class HTTP:
                 Status of the command.
         """
         if header_mode == 1:
-            print("Not implemented yet!")
-            return
+            return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'AT+QHTTPPOST={len(data)},{input_timeout},{timeout}'
         result =  self.atcom.send_at_comm(command,"CONNECT", timeout=timeout)
@@ -322,7 +325,7 @@ class HTTP:
             result = self.atcom.send_at_comm(data, "OK", line_end=False) # send data
         return result
 
-    def post_file(self, file_path, header_mode=0, timeout=60):
+    def post_from_file(self, file_path, header_mode=0, timeout=60):
         """
         Function for sending HTTP POST file
 
@@ -352,13 +355,12 @@ class HTTP:
                 Status of the command.
         """
         if header_mode == 1:
-            print("Not implemented yet!")
-            return
+            return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'QHTTPPOSTFILE={file_path},{timeout}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def put_request(self, data, header_mode=0, input_timeout=5, timeout=60):
+    def put(self, data, header_mode=0, input_timeout=5, timeout=60):
         """
         Function for sending HTTP PUT request
 
@@ -390,7 +392,7 @@ class HTTP:
                 Status of the command.
         """
         if header_mode == 1:
-            print("Not implemented yet!")
+            return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'AT+QHTTPPUT={len(data)},{input_timeout},{timeout}'
         result = self.atcom.send_at_comm(command,"CONNECT")
@@ -399,7 +401,7 @@ class HTTP:
             result = self.atcom.send_at_comm(data, "OK", line_end=False) # send data
         return result
 
-    def put_file(self, file_path, file_type=0, header_mode=0, timeout=60):
+    def put_from_file(self, file_path, file_type=0, header_mode=0, timeout=60):
         """
         Function for sending HTTP PUT file
 
@@ -437,7 +439,7 @@ class HTTP:
                 Status of the command.
         """
         if header_mode == 1:
-            print("Not implemented yet!")
+            return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'AT+QHTTPPUTFILE={file_path},{timeout},{file_type}'
         return self.atcom.send_at_comm(command,"OK")
@@ -469,10 +471,10 @@ class HTTP:
         command = f'AT+QHTTPREAD={timeout}'
         return self.atcom.send_at_comm(command,"OK", timeout=timeout)
 
-    def read_file(self, file_path, timeout=60):
+    def read_response_to_file(self, file_path, timeout=60):
         """
         Function for storing the HTTP(S) response from an HTTP(S) server to a specified file,
-        after HTTP(S) GET/POST/PUT requests are sent, thus allowing users to retrieve the response 
+        after HTTP(S) GET/POST/PUT requests are sent, thus allowing users to retrieve the response
         information from the file.
 
         Parameters
