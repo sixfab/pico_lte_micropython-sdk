@@ -4,6 +4,7 @@ Module for including functions of AWS IoT operations of picocell module.
 
 import time
 
+from core.temp import config
 from core.utils.manager import StateManager, Step
 from core.utils.status import Status
 
@@ -11,6 +12,7 @@ class AWS:
     """
     Class for including functions of AWS IoT operations of picocell module.
     """
+    cache = config["cache"] or None
 
     def __init__(self, base, network, ssl, mqtt, http, cache=None):
         """
@@ -74,21 +76,21 @@ class AWS:
         )
 
         step_set_mqtt_version = Step(
-            function=self.mqtt.set_modem_mqtt_version_config,
+            function=self.mqtt.set_version_config,
             name="set_mqtt_version",
             success="set_mqtt_ssl_mode",
             fail="failure",
         )
 
         step_set_mqtt_ssl_mode = Step(
-            function=self.mqtt.set_modem_mqtt_ssl_mode_config,
+            function=self.mqtt.set_ssl_mode_config,
             name="set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
-            function=self.mqtt.open_mqtt_connection,
+            function=self.mqtt.open_connection,
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
@@ -97,7 +99,7 @@ class AWS:
         )
 
         step_connect_mqtt_broker = Step(
-            function=self.mqtt.connect_mqtt_broker,
+            function=self.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="subscribe_topic",
             fail="failure",
@@ -105,7 +107,7 @@ class AWS:
         )
 
         step_subscribe_topic = Step(
-            function=self.mqtt.subscribe_mqtt_topic,
+            function=self.mqtt.subscribe_topic,
             name="subscribe_topic",
             success="publish_message",
             fail="failure",
@@ -114,7 +116,7 @@ class AWS:
         )
 
         step_publish_message = Step(
-            function=self.mqtt.publish_mqtt_message,
+            function=self.mqtt.publish_message,
             name="publish_message",
             success="success",
             fail="failure",
@@ -190,7 +192,7 @@ class AWS:
         )
 
         step_ssl_configuration = Step(
-            function=self.ssl.configure_modem_ssl_for_x509_certification,
+            function=self.ssl.configure_for_x509_certification,
             name="ssl_configuration",
             success="http_ssl_configuration",
             fail="failure",
@@ -198,7 +200,7 @@ class AWS:
         )
 
         step_http_ssl_configuration = Step(
-            function=self.http.set_modem_http_ssl_context_id,
+            function=self.http.set_ssl_context_id,
             name="http_ssl_configuration",
             success="set_server_url",
             fail="failure",
@@ -207,7 +209,7 @@ class AWS:
         )
 
         step_set_server_url = Step(
-            function=self.http.set_modem_http_server_url,
+            function=self.http.set_server_url,
             name="set_server_url",
             success="post_request",
             fail="failure",
@@ -216,7 +218,7 @@ class AWS:
         )
 
         step_post_request = Step(
-            function=self.http.http_post_request,
+            function=self.http.post_request,
             name="post_request",
             success="read_response",
             fail="failure",
@@ -225,7 +227,7 @@ class AWS:
         )
 
         step_read_response = Step(
-            function=self.http.http_read_response,
+            function=self.http.read_response,
             name="read_response",
             success="success",
             fail="failure",

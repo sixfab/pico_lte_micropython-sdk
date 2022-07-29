@@ -17,7 +17,7 @@ class SSL:
         """
         self.atcom = atcom
 
-    def set_modem_ssl_ca_cert(self, ssl_context_id=2, file_path="/security/cacert.pem"):
+    def set_ca_cert(self, ssl_context_id=2, file_path="/security/cacert.pem"):
         """
         Function for setting modem CA certificate
 
@@ -40,7 +40,7 @@ class SSL:
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_client_cert(self, ssl_context_id=2, file_path="/security/client.pem"):
+    def set_client_cert(self, ssl_context_id=2, file_path="/security/client.pem"):
         """
         Function for setting modem client certificate
 
@@ -63,7 +63,7 @@ class SSL:
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_client_key(self, ssl_context_id=2, file_path="/security/user_key.pem"):
+    def set_client_key(self, ssl_context_id=2, file_path="/security/user_key.pem"):
         """
         Function for setting modem client key
 
@@ -86,7 +86,7 @@ class SSL:
         command = f'AT+QSSLCFG="clientkey",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_sec_level(self, ssl_context_id=2, sec_level=2):
+    def set_sec_level(self, ssl_context_id=2, sec_level=2):
         """
         Function for setting modem security level
 
@@ -112,7 +112,7 @@ class SSL:
         command = f'AT+QSSLCFG="seclevel",{ssl_context_id},{sec_level}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_version(self, ssl_context_id=2, ssl_version=4):
+    def set_version(self, ssl_context_id=2, ssl_version=4):
         """
         Function for setting modem SSL version
 
@@ -140,7 +140,7 @@ class SSL:
         command = f'AT+QSSLCFG="sslversion",{ssl_context_id},{ssl_version}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_modem_ssl_cipher_suite(self,ssl_context_id=2, cipher_suite="0xFFFF"):
+    def set_cipher_suite(self,ssl_context_id=2, cipher_suite="0xFFFF"):
         """
         Function for setting modem SSL cipher suite
 
@@ -199,7 +199,7 @@ class SSL:
         command = f'AT+QSSLCFG="ciphersuite",{ssl_context_id},{cipher_suite}'
         return self.atcom.send_at_comm(command)
 
-    def set_modem_ssl_ignore_local_time(self, ssl_context_id=2, ignore_local_time=1):
+    def set_ignore_local_time(self, ssl_context_id=2, ignore_local_time=1):
         """
         Function for setting modem SSL ignore local time
 
@@ -224,7 +224,7 @@ class SSL:
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def configure_modem_ssl_for_x509_certification(self):
+    def configure_for_x509_certification(self):
         """
         Function for configuring the modem for X.509 certification.
 
@@ -238,49 +238,49 @@ class SSL:
         """
 
         step_set_ca = Step(
-            function=self.set_modem_ssl_ca_cert,
+            function=self.set_ca_cert,
             name="set_ca",
             success="set_client_cert",
             fail="failure",
         )
 
         step_set_client_cert = Step(
-            function=self.set_modem_ssl_client_cert,
+            function=self.set_client_cert,
             name="set_client_cert",
             success="set_client_key",
             fail="failure",
         )
 
         step_set_client_key = Step(
-            function=self.set_modem_ssl_client_key,
+            function=self.set_client_key,
             name="set_client_key",
             success="set_sec_level",
             fail="failure",
         )
 
         step_set_sec_level = Step(
-            function=self.set_modem_ssl_sec_level,
+            function=self.set_sec_level,
             name="set_sec_level",
             success="set_ssl_ver",
             fail="failure",
         )
 
         step_set_ssl_ver = Step(
-            function=self.set_modem_ssl_version,
+            function=self.set_version,
             name="set_ssl_ver",
             success="set_ssl_ciphers",
             fail="failure",
         )
 
         step_set_ssl_ciphers = Step(
-            function=self.set_modem_ssl_cipher_suite,
+            function=self.set_cipher_suite,
             name="set_ssl_ciphers",
             success="set_ignore_local_time",
             fail="failure",
         )
 
         step_set_ignore_local_time = Step(
-            function=self.set_modem_ssl_ignore_local_time,
+            function=self.set_ignore_local_time,
             name="set_ignore_local_time",
             success="success",
             fail="failure",

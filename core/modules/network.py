@@ -3,6 +3,7 @@ Module for including network functions of picocell module.
 """
 import time
 
+from core.temp import config
 from core.utils.helpers import get_desired_data_from_response
 from core.utils.manager import StateManager, Step
 from core.utils.status import Status
@@ -11,16 +12,16 @@ class Network:
     """
     Class for inculding functions of network operations of picocell module.
     """
+    cache = config["cache"] or None
 
-    def __init__(self, atcom, base, cache=None):
+    def __init__(self, atcom, base):
         """
         Initialization of Network class.
         """
         self.atcom = atcom
         self.base = base
-        self.cache = cache
 
-    def get_modem_apn(self):
+    def get_apn(self):
         """
         Function for getting modem APN
 
@@ -46,7 +47,7 @@ class Network:
         result["value"] = value
         return result
 
-    def set_modem_apn(self, cid=1, pdp_type="IPV4V6", apn="super"):
+    def set_apn(self, cid=1, pdp_type="IPV4V6", apn="super"):
         """
         Function for setting modem APN
 
@@ -202,7 +203,7 @@ class Network:
         )
 
         step_atcom = Step(
-            function=self.base.check_modem_communication,
+            function=self.base.check_communication,
             name="check_atcom",
             success="check_sim_ready",
             fail="failure"
@@ -216,7 +217,7 @@ class Network:
         )
 
         step_get_apn = Step(
-            function=self.get_modem_apn,
+            function=self.get_apn,
             name="get_apn",
             success="check_network_registration",
             fail="set_apn",
@@ -224,7 +225,7 @@ class Network:
         )
 
         step_set_apn = Step(
-            function=self.set_modem_apn,
+            function=self.set_apn,
             name="set_apn",
             success="get_apn",
             fail="failure",

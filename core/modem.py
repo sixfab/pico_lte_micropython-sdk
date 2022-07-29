@@ -3,11 +3,10 @@ Module for ease to use of cellular modem. This module includes required function
 for working with cellular modem without need of AT command knowledge.
 """
 
-import time
+from core.temp import config
 
 from core.utils.helpers import read_json_file
 from core.utils.atcom import ATCom
-from core.utils.manager import StateCache
 
 from core.modules.base import Base
 from core.modules.auth import Auth
@@ -27,25 +26,26 @@ class Modem:
     Modem class that contains all functions for working with cellular modem
     """
 
-    def __init__(self, config):
+    def __init__(self):
         """
         Initialize modem class
         """
         print("Modem initialization...")
+        print(config)
+
         self.peripherals = Periph()
         self.atcom = ATCom()
-        self.cache = StateCache()
 
         self.base = Base(self.atcom)
         self.auth = Auth(self.atcom)
         self.config = Config(self.atcom)
         self.file = File(self.atcom)
-        self.network = Network(self.atcom, self.base, self.cache)
+        self.network = Network(self.atcom, self.base)
         self.ssl = SSL(self.atcom)
         self.http = HTTP(self.atcom)
         self.mqtt = MQTT(self.atcom)
 
-        self.aws = AWS(self.base, self.network, self.ssl, self.mqtt, self.http, self.cache)
+        self.aws = AWS(self.base, self.network, self.ssl, self.mqtt, self.http)
 
         # power up modem
         if self.base.power_status() != 0:
@@ -56,4 +56,4 @@ class Modem:
         # check certificates in modem or upload them
         self.auth.load_certificates()
         config["params"] = read_json_file("config.json")
-        self.default = config["params"]
+        print(config)

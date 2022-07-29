@@ -55,7 +55,7 @@ class Base:
             time.sleep(1)
         return {"status": Status.TIMEOUT, "response": ""}
 
-    def check_modem_communication(self):
+    def check_communication(self):
         """
         Function for checking modem communication
 
@@ -97,7 +97,7 @@ class Base:
         result["response"] = ""
         return result
 
-    def set_modem_echo_off(self):
+    def set_echo_off(self):
         """
         Function for setting modem echo off
 
@@ -111,7 +111,7 @@ class Base:
         """
         return self.atcom.send_at_comm("ATE0")
 
-    def set_modem_echo_on(self):
+    def set_echo_on(self):
         """
         Function for setting modem echo on
 
@@ -180,3 +180,76 @@ class Base:
         value = get_desired_data_from_response(response, "+QCCID: ")
         result["value"] = value
         return result
+
+    ####################
+    ### Modem Config ###
+    ####################
+    def config_network_scan_mode(self, scan_mode=0):
+        """
+        Function for configuring modem network scan mode
+
+        Parameters
+        ----------
+        scan_mode : int
+            Scan mode (default=0)
+                0 --> Automatic
+                1 --> GSM Only
+                3 --> LTE Only
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QCFG="nwscanmode",{scan_mode}'
+        return self.atcom.send_at_comm(command,"OK")
+
+    def config_network_scan_sequence(self, scan_sequence="00"):
+        """
+        Function for configuring modem scan sequence
+
+        Parameters
+        ----------
+        scan_sequence : str
+            Scan sequence (default=00)
+                00 --> Automatic (eMTC → NB-IoT → GSM)
+                01 --> GSM
+                02 --> eMTC
+                03 --> NB-IoT
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QCFG="nwscanseq",{scan_sequence}'
+        return self.atcom.send_at_comm(command,"OK")
+
+    def config_network_iot_operation_mode(self, iotopmode=2):
+        """
+        Function for configuring modem IoT operation mode
+
+        Parameters
+        ----------
+        iotopmode : int
+            Operation mode (default=2)
+                0 --> eMTC
+                1 --> NB-IoT
+                2 --> eMTC and NB-IoT
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QCFG="iotopmode",{iotopmode}'
+        return self.atcom.send_at_comm(command,"OK")

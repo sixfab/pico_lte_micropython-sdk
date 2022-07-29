@@ -3,6 +3,7 @@ Module for storing helper functions
 """
 
 import json
+from core.temp import config
 
 def read_json_file(file_path):
     """
@@ -40,3 +41,12 @@ def read_file(file_path):
         return None
     else:
         return data
+
+
+def get_parameter(key):
+    """
+    Function for getting parameters for SDK methods from global config dictionary.
+    """
+    if isinstance(config["params"], dict):
+        return config["params"][key]
+    return None
