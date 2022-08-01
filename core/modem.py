@@ -8,6 +8,7 @@ from core.temp import config
 from core.utils.helpers import read_json_file
 from core.utils.atcom import ATCom
 
+from core.modules.ulp import ULP
 from core.modules.base import Base
 from core.modules.auth import Auth
 from core.modules.config import Config
@@ -30,6 +31,7 @@ class Modem:
         """
         Initialize modem class
         """
+        self.ulp = ULP()
         self.peripherals = Periph()
         self.atcom = ATCom()
 

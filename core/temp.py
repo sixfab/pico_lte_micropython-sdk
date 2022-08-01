@@ -3,6 +3,8 @@ Basic module for using purpose of provining temporary memory
 for sharing data by different modules.
 """
 
+from core.utils.debug import Debug, DebugChannel
+
 class StateCache:
     """Data class for storing state data"""
 
@@ -23,4 +25,5 @@ class StateCache:
 
 config = {}
 cache = StateCache()
+debug = Debug(channel=DebugChannel.UART)
 config["cache"] = cache

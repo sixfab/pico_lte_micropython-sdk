@@ -61,7 +61,6 @@ class HTTP:
         Initialization of the class.
         """
         self.atcom = atcom
-        print("HTTP: ", config)
 
     def set_context_id(self, http_context_id=1):
         """
