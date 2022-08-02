@@ -3,7 +3,7 @@ Module for storing helper functions
 """
 
 import json
-from core.temp import config
+from core.temp import config, debug
 
 def read_json_file(file_path):
     """
@@ -32,7 +32,7 @@ def write_json_file(file_path, data):
 
 def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
     """Function for getting actual data from response"""
-    print(response)
+    debug.debug(response)
     response = response.replace("\r","\n").replace('"','') # Simplify response
     index = response.find(prefix) + len(prefix) # Find index of meaningful data
     data_array = response[index:].split("\n")[0].split(separator)

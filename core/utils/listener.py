@@ -1,4 +1,9 @@
-from core.utils.status import Status
+"""
+Module for listening modem responses and handling them.
+"""
+
+from core.temp import debug
+
 
 class ModemResponse:
     def __init__(self, response, callback=None):
@@ -29,7 +34,7 @@ class Listener:
         if self.atcom.buffer.any_data():
             message = self.atcom.buffer.get_message()
 
-            print("buffer before process:", [self.atcom.buffer.get_message()])
+            debug.debug("buffer before process:", [self.atcom.buffer.get_message()])
 
             for state in self.defined_responses:
                 if state.response in message:
@@ -43,11 +48,11 @@ class Listener:
                     # clear processed message from buffer
                     self.atcom.buffer.clear_before_id(end_off_message)
 
-                    print("Processed Message:", desired_message)
-                    print("Buffer after process:", [self.atcom.buffer.get_message()])
+                    debug.debug("Processed Message:", desired_message)
+                    debug.debug("Buffer after process:", [self.atcom.buffer.get_message()])
 
                     if state.callback:
-                        print("Callback running...")
+                        debug.debug("Callback running...")
                         state.callback(desired_message)
             # if buffer has to many meaningless messages, clear it
             if self.atcom.buffer.any_data() > self.MAX_UNDEFINED_LEN:

@@ -48,7 +48,7 @@ class ULP:
         try:
             write_json_file(ULP_FILE_PATH, config["ulp"])
         except Exception as error:
-            print(error)
+            debug.error("save_ulp_config", error)
             return {"response" : str(error), "status" : Status.ERROR}
 
     def enable(self):
@@ -101,7 +101,8 @@ class ULP:
         """
         Function for checking timer done
         """
-        debug.print("ULP: Check")
+        debug.debug("ULP: Check")
+
         if not config["ulp"].get("status", False):
             return
 

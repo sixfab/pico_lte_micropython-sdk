@@ -1,11 +1,12 @@
 """
-Module for including base functionalities of picocell module. 
-For example; power control of modem, basic communication check etc. 
+Module for including base functionalities of picocell module.
+For example; power control of modem, basic communication check etc.
 """
 
 import time
 
 from machine import Pin
+from core.temp import debug
 from core.utils.status import Status
 from core.utils.helpers import get_desired_data_from_response
 
@@ -35,7 +36,7 @@ class Base:
         Function for getting power status of modem
         """
         status_pin = Pin(3, Pin.IN)
-        print("Power status:", status_pin.value())
+        debug.debug("Power status:", status_pin.value())
         return status_pin.value()
 
     def wait_until_status_on(self, timeout=30):
@@ -89,7 +90,7 @@ class Base:
         start_time = time.time()
         while time.time() - start_time < timeout:
             result = self.atcom.send_at_comm("AT","OK")
-            print("COM:", result)
+            debug.debug("COM:", result)
             if result["status"] == Status.SUCCESS:
                 return result
             time.sleep(1)

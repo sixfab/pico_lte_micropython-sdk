@@ -2,7 +2,7 @@
 Module for managing processes on modem step by step.
 """
 
-from core.temp import config
+from core.temp import config, debug
 from core.utils.status import Status
 
 class Step:
@@ -89,13 +89,13 @@ class StateManager:
         """Organizer step function"""
         if self.current.name == "organizer":
             self.current = self.first_step
-            print("CACHE AVAILABLE:", self.cache_available)
-            print("FUNC:", self.function_name)
+            debug.debug("CACHE AVAILABLE:", self.cache_available)
+            debug.debug("FUNC:", self.function_name)
             # assign cache step as current if specific cache is exists
             if self.cache_available:
                 if self.function_name in self.cache.states:
                     self.current = self.get_step(self.cache.states[self.function_name])
-                    print("CURRENT: ", self.current)
+                    debug.debug("CURRENT: ", self.current)
         else:
             if self.current.is_ok: # step succieded
                 if self.current.cachable: # Assign new cache if step cachable
@@ -145,7 +145,7 @@ class StateManager:
         else:
             result = self.current.function()
 
-        print(result)
+        debug.debug(result)
 
         if self.current.desired_response:
             if result["status"] == Status.SUCCESS and \

@@ -6,6 +6,7 @@ import time
 from core.utils.atcom import ATCom
 from core.utils.listener import Listener
 from core.modem import Modem
+from core.temp import debug
 
 atcom = ATCom()
 modem = Modem()
@@ -13,7 +14,7 @@ modem = Modem()
 
 def callback(message):
     """Example callback function"""
-    print("Callback:", message)
+    debug.info("Callback:", message)
 
 
 listener = Listener(atcom)
