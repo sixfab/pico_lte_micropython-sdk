@@ -6,48 +6,44 @@ import json
 import time
 
 from core.modem import Modem
-from core.atcom import ATCom
-
-config = {}
+from core.temp import debug
+from core.utils.atcom import ATCom
 
 ###########################
 ### AWS HTTP(s) example ###
 ###########################
 
-modem = Modem(config)
+modem = Modem()
 atcom = ATCom()
 
-HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
-TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
-PAYLOAD_JSON = {"state": {"reported": {"Status": "HTTPS TEST MESSAGE!"}}}
+PAYLOAD_JSON = {"state": {"reported": {"Status": "Hello from Picocell --> HTTP"}}}
 payload = json.dumps(PAYLOAD_JSON)
-publish_url = 'https://' + HOST + ':8443/topics/' + TOPIC + '?qos=1'
 
 # Check communication with modem
-print("COM: ", modem.check_modem_communication())
-print("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
-print("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
-print(atcom.send_at_comm('AT+QICSGP=1,1,"super","","",1',"OK"))
+debug.info("COM: ", modem.base.check_communication())
+debug.info("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
+debug.info("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
+debug.info(atcom.send_at_comm('AT+QICSGP=1,1,"super","","",1',"OK"))
 
 # TCP/IP
-print("TCPIP Context Configuration: ", modem.set_modem_http_context_id())
-print("PDP Deactivation: ", modem.deactivate_pdp_context())
-print("PDP Activatation: ", modem.activate_pdp_context())
-print("PDP Test: ", atcom.send_at_comm("AT+CGACT?","OK"))
+debug.info("TCPIP Context Configuration: ", modem.http.set_context_id())
+debug.info("PDP Deactivation: ", modem.network.deactivate_pdp_context())
+debug.info("PDP Activatation: ", modem.network.activate_pdp_context())
+debug.info("PDP Test: ", atcom.send_at_comm("AT+CGACT?","OK"))
 
 # Configurations
 # SSL
-print("Modem SSL CA: ", modem.set_modem_ssl_ca_cert())
-print("Modem SSL Client Cert: ", modem.set_modem_ssl_client_cert())
-print("Modem SSL Client Key: ", modem.set_modem_ssl_client_key())
-print("Set Modem Security Level: ", modem.set_modem_ssl_sec_level())
-print("Set modem SSL Version: ", modem.set_modem_ssl_version())
-print("Set modem SSL Cipher: ", modem.set_modem_ssl_cipher_suite())
-print("Set modem ignore local time: ", modem.set_modem_ssl_ignore_local_time())
+debug.info("Modem SSL CA: ", modem.ssl.set_ca_cert())
+debug.info("Modem SSL Client Cert: ", modem.ssl.set_client_cert())
+debug.info("Modem SSL Client Key: ", modem.ssl.set_client_key())
+debug.info("Set Modem Security Level: ", modem.ssl.set_sec_level())
+debug.info("Set modem SSL Version: ", modem.ssl.set_version())
+debug.info("Set modem SSL Cipher: ", modem.ssl.set_cipher_suite())
+debug.info("Set modem ignore local time: ", modem.ssl.set_ignore_local_time())
 
 # HTTP
-print("Set HTTP SSL Context", modem.set_modem_http_ssl_context_id(2))
-print("HTTP URL: ", modem.set_modem_http_server_url(url=publish_url))
-print("HTTP POST: ", modem.http_post_request(data=payload))
+debug.info("Set HTTP SSL Context", modem.http.set_context_id(2))
+debug.info("HTTP URL: ", modem.http.set_server_url())
+debug.info("HTTP POST: ", modem.http.post(payload))
 time.sleep(2)
-print("HTTP READ: ", modem.http_read_response())
+debug.info("HTTP READ: ", modem.http.read_response())
