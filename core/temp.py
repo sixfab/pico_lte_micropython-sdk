@@ -25,5 +25,5 @@ class StateCache:
 
 config = {}
 cache = StateCache()
-debug = Debug(channel=DebugChannel.UART)
+debug = Debug()
 config["cache"] = cache

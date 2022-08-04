@@ -18,6 +18,7 @@ from core.modules.mqtt import MQTT
 from core.modules.network import Network
 from core.modules.peripherals import Periph
 from core.modules.ssl import SSL
+from core.modules.gps import GPS
 
 from core.apps.aws import AWS
 
@@ -43,6 +44,7 @@ class Modem:
         self.ssl = SSL(self.atcom)
         self.http = HTTP(self.atcom)
         self.mqtt = MQTT(self.atcom)
+        self.gps = GPS(self.atcom)
 
         self.aws = AWS(self.base, self.network, self.ssl, self.mqtt, self.http)
 
