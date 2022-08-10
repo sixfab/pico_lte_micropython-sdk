@@ -3,7 +3,7 @@ Module for including functions of MQTT related operations of picocell module.
 """
 
 from core.utils.status import Status
-from core.utils.helpers import get_parameter, get_desired_data_from_response
+from core.utils.helpers import get_parameter, extract_messages
 
 class MQTT:
     """
@@ -546,43 +546,6 @@ class MQTT:
             return result
         return {"response": "Missing parameter", "status": Status.ERROR}
 
-    def check_messages(self, cid=0):
-        """
-        Function for receiving MQTT messages.
-
-        Parameters
-        ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
-
-        Returns
-        -------
-        (status, modem_response, buffer_indexes) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
-            buffer_indexes : list
-                List of indexes of the received messages.
-        """
-        buffer_indexes = []
-        result = self.atcom.send_at_comm("AT+QMTRECV?","+QMTRECV:")
-
-        if result["status"] == Status.SUCCESS:
-            prefix = f"+QMTRECV: {cid},"
-            buffer = get_desired_data_from_response(
-                        result["response"],
-                        prefix,
-                        separator=",",
-                        data_index=[0,1,2,3,4]
-                        ) or []
-
-            for index in buffer:
-                if index != "" or index is not None:
-                    buffer_indexes.append(int(index))
-
-        result["buffer_indexes"] = buffer_indexes
-        return result
 
     def read_messages(self, cid=0):
         """
@@ -600,25 +563,15 @@ class MQTT:
                 Status of the command.
             modem_response : str
                 Response of the modem.
-            messages : list ["client_idx,message_id,topic,payload_len,payload", ...]
+            messages : list ["client_idx,topic,payload"]
                 List of messages.
         """
         messages = []
-
-        result = self.check_messages(cid)
-        buffer_indexes = result["buffer_indexes"] or []
+        result = self.atcom.send_at_comm("AT+QMTRECV?","+QMTRECV:")
 
         if result["status"] == Status.SUCCESS:
-            for index in buffer_indexes:
-                if buffer_indexes[index] == 1:
-                    result = self.atcom.send_at_comm(f'AT+QMTRECV={cid},{index}',"OK")
-                    if result["status"] == Status.SUCCESS:
-                        messages.append(result["response"])
+            prefix = f"+QMTRECV: {cid},"
+            messages = extract_messages(result["response"], prefix)
 
-            result.pop("buffer_indexes")
-            result["messages"] = messages
-            return result
-        else:
-            result.pop("buffer_indexes")
-            result["messages"] = messages
-            return result
+        result["messages"] = messages
+        return result
