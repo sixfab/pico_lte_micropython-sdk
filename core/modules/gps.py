@@ -44,7 +44,7 @@ class GPS:
                 Status of the command.
         """
         command = f'AT+QGPS={mode},{accuracy},{fix_count},{fix_rate}'
-        return self.atcom.send_command(command, "OK")
+        return self.atcom.send_at_comm(command, "OK")
 
     def turn_off(self):
         """
@@ -59,7 +59,7 @@ class GPS:
                 Status of the command.
         """
         command = "AT+QGPSEND"
-        return self.atcom.send_command(command, "OK")
+        return self.atcom.send_at_comm(command, "OK")
 
     def get_location(self):
         """
@@ -75,4 +75,4 @@ class GPS:
 
         """
         command = "AT+QGPSLOC"
-        return self.atcom.send_command(command, "OK")
+        return self.atcom.send_at_comm(command, "OK")
