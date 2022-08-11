@@ -251,16 +251,22 @@ class HTTP:
             return result
         return {"response": "Missing arguments : url", "status": Status.ERROR}
 
-    def get(self, header_mode=0, timeout=60):
+    def get(self, data="", header_mode=0, input_timeout=5, timeout=60):
         """
         Function for sending HTTP GET request
 
         Parameters
         ----------
+        data : str
+            The full header for the GET request if header_mode is set.
         header_mode : int
             Customization of HTTP(S) request header)(default=0)
                 0 --> Disable
                 1 --> Enable
+        input_timeout : int
+            Input timeout (default=5)
+        timeout : int
+            Timeout (default=60)
 
         Returns
         -------
@@ -276,11 +282,23 @@ class HTTP:
             status : int
                 Status of the command.
         """
-        if header_mode == 1:
-            return {"response": "Not implemented yet!", "status": Status.ERROR}
+        # Set the request header config.
+        result = self.set_request_header_status(status=header_mode)
+        if result["status"] == Status.SUCCESS:
+            if header_mode == 1:
+                # Send a GET request to the modem.
+                command = f'AT+QHTTPGET={timeout},{len(data)},{input_timeout}'
+                result =  self.atcom.send_at_comm(command, "CONNECT", timeout=60)
+                if result["status"] == Status.SUCCESS:
+                    # Send the request header.
+                    return self.atcom.send_at_comm(data, "OK", line_end=False)
+            else:
+                # Send a GET request without header.
+                command = f'AT+QHTTPGET={timeout}'
+                return self.atcom.send_at_comm(command,"OK")
 
-        command = f'AT+QHTTPGET={timeout}'
-        return self.atcom.send_at_comm(command,"OK")
+        # Return the result of request header if there is no SUCCESS.
+        return result
 
     def post(self, data, header_mode=0, input_timeout=5, timeout=60):
         """
@@ -314,14 +332,15 @@ class HTTP:
             status : int
                 Status of the command.
         """
-        if header_mode == 1:
-            return {"response": "Not implemented yet!", "status": Status.ERROR}
-
-        command = f'AT+QHTTPPOST={len(data)},{input_timeout},{timeout}'
-        result =  self.atcom.send_at_comm(command,"CONNECT", timeout=timeout)
-
+        # Set the request header config.
+        result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
-            result = self.atcom.send_at_comm(data, "OK", line_end=False) # send data
+            # Send a POST request to the modem.
+            command = f'AT+QHTTPPOST={len(data)},{input_timeout},{timeout}'
+            result =  self.atcom.send_at_comm(command,"CONNECT", timeout=timeout)
+            if result["status"] == Status.SUCCESS:
+                # Send the request (header and) body.
+                result = self.atcom.send_at_comm(data, "OK", line_end=False)
         return result
 
     def post_from_file(self, file_path, header_mode=0, timeout=60):
@@ -390,14 +409,15 @@ class HTTP:
             status : int
                 Status of the command.
         """
-        if header_mode == 1:
-            return {"response": "Not implemented yet!", "status": Status.ERROR}
-
-        command = f'AT+QHTTPPUT={len(data)},{input_timeout},{timeout}'
-        result = self.atcom.send_at_comm(command,"CONNECT")
-
+        # Set the request header config.
+        result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
-            result = self.atcom.send_at_comm(data, "OK", line_end=False) # send data
+            # Send a PUT request to the modem.
+            command = f'AT+QHTTPPUT={len(data)},{input_timeout},{timeout}'
+            result = self.atcom.send_at_comm(command,"CONNECT")
+            if result["status"] == Status.SUCCESS:
+                # Send the request (header and) body.
+                result = self.atcom.send_at_comm(data, "OK", line_end=False)
         return result
 
     def put_from_file(self, file_path, file_type=0, header_mode=0, timeout=60):
