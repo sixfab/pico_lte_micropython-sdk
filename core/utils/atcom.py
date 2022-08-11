@@ -4,7 +4,8 @@ Module for communicating with cellular modem over UART interface.
 
 import time
 from machine import UART, Pin
-from core.status import Status
+from core.temp import debug
+from core.utils.status import Status
 
 
 class MessageBuffer:
@@ -64,11 +65,11 @@ class ATCom:
             compose = f"{command}\r".encode()
         else:
             compose = command.encode()
-        print(compose)
+        debug.debug(compose)
         try:
             self.modem_com.write(compose)
         except:
-            print("Error occured while AT command writing to modem")
+            debug.error("Error occured while AT command writing to modem")
 
     def get_response(self, desired_responses="OK", timeout=5):
         """
@@ -98,7 +99,7 @@ class ATCom:
                         response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
                     except:
                         pass
-            else:   
+            else:
                 return {"status": Status.TIMEOUT, "response": "timeout"}
 
             if isinstance(desired_responses, str):

@@ -2,20 +2,19 @@
 Example code for listener class
 """
 
-import json
 import time
-from core.atcom import ATCom
-from core.listener import Listener
+from core.utils.atcom import ATCom
+from core.utils.listener import Listener
 from core.modem import Modem
+from core.temp import debug
 
-config = {}
 atcom = ATCom()
-modem = Modem(config)
+modem = Modem()
 
 
 def callback(message):
     """Example callback function"""
-    print("Callback:", message)
+    debug.info("Callback:", message)
 
 
 listener = Listener(atcom)

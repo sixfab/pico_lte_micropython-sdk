@@ -2,7 +2,8 @@
 Module for managing processes on modem step by step.
 """
 
-from core.status import Status
+from core.temp import config, debug
+from core.utils.status import Status
 
 class Step:
     """Data class for storing step data"""
@@ -25,26 +26,6 @@ class Step:
         self.desired_response = desired_response
         self.cachable = cachable
 
-
-class StateCache:
-    """Data class for storing state data"""
-
-    states = {}
-
-    def add_cache(self, function_name):
-        """Gets cache for #function_name or adds new cache with #function_name key"""
-        if not self.states.get(function_name):
-            self.states[function_name] = None
-
-    def get_state(self, function_name):
-        """Returns state of function_name"""
-        return self.states.get(function_name)
-
-    def set_state(self, function_name, state):
-        """Sets state of function_name"""
-        self.states[function_name] = state
-
-
 class StateManager:
     """Class for managing states"""
 
@@ -52,14 +33,14 @@ class StateManager:
     cache_available = False
     retry_counter = 0
     steps = {}
+    cache = config["cache"]
 
-    def __init__(self, first_step, cache=None, function_name=None):
+    def __init__(self, first_step, function_name=None):
         """Initializes state manager"""
         self.first_step = first_step
-        self.cache = cache
         self.function_name = function_name
 
-        if function_name and cache.states.get(function_name):
+        if function_name and self.cache.states.get(function_name):
             self.cache_available = True
             self.cache.add_cache(function_name)
 
@@ -108,13 +89,13 @@ class StateManager:
         """Organizer step function"""
         if self.current.name == "organizer":
             self.current = self.first_step
-            print("CACHE AVAILABLE:", self.cache_available)
-            print("FUNC:", self.function_name)
+            debug.debug("CACHE AVAILABLE:", self.cache_available)
+            debug.debug("FUNC:", self.function_name)
             # assign cache step as current if specific cache is exists
             if self.cache_available:
                 if self.function_name in self.cache.states:
                     self.current = self.get_step(self.cache.states[self.function_name])
-                    print("CURRENT: ", self.current)
+                    debug.debug("CURRENT: ", self.current)
         else:
             if self.current.is_ok: # step succieded
                 if self.current.cachable: # Assign new cache if step cachable
@@ -164,7 +145,7 @@ class StateManager:
         else:
             result = self.current.function()
 
-        print(result)
+        debug.debug(result)
 
         if self.current.desired_response:
             if result["status"] == Status.SUCCESS and \
