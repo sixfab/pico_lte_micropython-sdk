@@ -6,19 +6,20 @@ import json
 import time
 
 from core.modem import Modem
-from core.status import Status
+from core.utils.status import Status
 
 def handle_cellular_network_connection():
     """This function handles the connection to cellular network connection.
     """
     # Ask for return from the modem.
-    modem.check_modem_communication()
+    modem.base.check_communication()
     # Send APN details.
-    modem.set_modem_apn(cid=1, apn="super")
+    modem.network.set_apn(cid=1, apn="super")
+
     # Try to get a operator response for 10 times.
-    for _index in range(0, 10):
+    for _ in range(0, 10):
         # Check if there is a connection to any operator.
-        response = modem.get_operator_information()
+        response = modem.network.get_operator_information()
         if response["status"] == Status.SUCCESS:
             return
         # Wait for 1 second.
@@ -28,9 +29,9 @@ def prepare_http_connection():
     """This function prepares HTTP connection for modem.
     """
     # Set the first HTTP context.
-    modem.set_modem_http_context_id()
+    modem.http.set_context_id()
     # Activate PDP.
-    modem.activate_pdp_context()
+    modem.network.activate_pdp_context()
 
 def prepare_http_with_query(host_url, query_string=""):
     """Sets the modem's HTTP server address.
@@ -42,7 +43,7 @@ def prepare_http_with_query(host_url, query_string=""):
     # Add query to the server URL.
     url_to_post = host_url + "/?" + query_string
     # Set the HTTP url.
-    modem.set_modem_http_server_url(url=url_to_post)
+    modem.http.set_server_url(url=url_to_post)
 
 def send_post_request(server_url, data_dict, query_string=""):
     """POST request to the HTTP server with a payload and optional query.
@@ -57,7 +58,7 @@ def send_post_request(server_url, data_dict, query_string=""):
     # Convert to data to JSON.
     data_to_post = json.dumps(data_dict)
     # Send a post request to the URL.
-    print("POST Request: ", modem.http_post_request(data=data_to_post))
+    print("POST Request: ", modem.http.post(data=data_to_post))
     # Wait for six seconds before the next operation.
     time.sleep(6)
 
@@ -71,7 +72,7 @@ def send_get_request(server_url, query_string=""):
     # Configure the HTTP address.
     prepare_http_with_query(server_url, query_string)
     # Send a GET request.
-    print("GET Request: ", modem.http_get_request())
+    print("GET Request: ", modem.http.get())
     # Wait for six seconds before the next operation.
     time.sleep(6)
 
@@ -88,20 +89,20 @@ def send_put_request(server_url, data_dict, query_string=""):
     # Convert to data to JSON.
     data_to_post = json.dumps(data_dict)
     # Send a PUT request.
-    print("PUT Request: ", modem.http_put_request(data_to_post))
+    print("PUT Request: ", modem.http.put(data_to_post))
     # Wait for six seconds before the next operation.
     time.sleep(6)
 
 
 if __name__ == "__main__":
     # Initilizate the modem.
-    modem = Modem({})
+    modem = Modem()
     # Connect to a cellular network.
     handle_cellular_network_connection()
     # Prepare for the HTTP context.
     prepare_http_connection()
     # Select a HOST for testing purposes.
-    HOST = "https://webhook.site/6112efa6-4f8c-4bdb-8fa3-5787cc02f80a"
+    HOST = "https://webhook.site/e2519ab2-9f74-48c3-9346-0e2e93fa6ff3"
     # Send a POST request to the server.
     send_post_request(HOST, {"ProjectTopic": "PicocellHTTPExample"}, "device=Pico&try=0")
     # Send a GET request to the server.
