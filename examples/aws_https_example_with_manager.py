@@ -5,16 +5,15 @@ Example code for publising data to AWS IoT by using manager class
 import time
 import json
 from core.modem import Modem
-from core.atcom import ATCom
+from core.temp import debug
 
-config = {}
-modem = Modem(config)
-atcom=ATCom()
+modem = Modem()
+debug.set_debug_level(0)
 
-HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
-TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
-PAYLOAD_JSON = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
-server_url = 'https://' + HOST + ':8443/topics/' + TOPIC + '?qos=1'
-payload = json.dumps(PAYLOAD_JSON)
+while True:
+    PAYLOAD_JSON = {"state": {"reported": {"App": "AWS HTTP Example", "Timestamp": str(time.time())}}}
+    payload = json.dumps(PAYLOAD_JSON)
+    result = modem.aws.post_message(payload)
 
-print(modem.publish_message_to_aws_https(payload, server_url))
+    debug.info(result)
+    time.sleep(10)
