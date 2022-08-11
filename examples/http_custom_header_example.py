@@ -40,7 +40,7 @@ modem.network.set_apn()
 result = modem.network.check_network_registration()
 if result["status"] != Status.SUCCESS:
     debug.error("Could not connected to the cellular network.")
-    
+
 
 # Set the first HTTP context.
 modem.http.set_context_id()
