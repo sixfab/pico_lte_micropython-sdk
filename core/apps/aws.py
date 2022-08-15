@@ -14,7 +14,7 @@ class AWS:
     """
     cache = config["cache"]
 
-    def __init__(self, base, network, ssl, mqtt, http):
+    def __init__(self, base, auth, network, ssl, mqtt, http):
         """
         Constructor of the class.
 
@@ -24,6 +24,7 @@ class AWS:
             Cache of the class.
         """
         self.base = base
+        self.auth = auth
         self.network = network
         self.ssl = ssl
         self.mqtt = mqtt
@@ -53,6 +54,13 @@ class AWS:
                 Response of the modem.
         """
 
+        step_load_certificates = Step(
+            function=self.auth.load_certificates,
+            name="load_certificates",
+            success="register_network",
+            fail="failure",
+            cachable=True,
+        )
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
@@ -70,9 +78,17 @@ class AWS:
         step_pdp_activate= Step(
             function=self.network.activate_pdp_context,
             name="pdp_activate",
-            success="set_mqtt_version",
+            success="ssl_configuration",
             fail="failure",
         )
+
+        step_ssl_configuration = Step(
+            function=self.ssl.configure_for_x509_certification,
+            name="ssl_configuration",
+            success="set_mqtt_version",
+            fail="failure",
+            cachable=True
+            )
 
         step_set_mqtt_version = Step(
             function=self.mqtt.set_version_config,
@@ -117,11 +133,13 @@ class AWS:
         # Add cache if it is not already existed
         function_name = "aws.publish_message"
 
-        sm = StateManager(first_step = step_network_reg, function_name=function_name)
+        sm = StateManager(first_step=step_load_certificates, function_name=function_name)
 
+        sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
         sm.add_step(step_pdp_deactivate)
         sm.add_step(step_pdp_activate)
+        sm.add_step(step_ssl_configuration)
         sm.add_step(step_set_mqtt_version)
         sm.add_step(step_set_mqtt_ssl_mode)
         sm.add_step(step_open_mqtt_connection)
@@ -156,7 +174,13 @@ class AWS:
             modem_response : str
                 Response of the modem.
         """
-
+        step_load_certificates = Step(
+            function=self.auth.load_certificates,
+            name="load_certificates",
+            success="register_network",
+            fail="failure",
+            cachable=True,
+        )
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
@@ -224,8 +248,9 @@ class AWS:
         # Add cache if it is not already existed
         function_name = "aws.post_message"
 
-        sm = StateManager(first_step = step_network_reg, function_name=function_name)
+        sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
+        sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
         sm.add_step(step_pdp_deactivate)
         sm.add_step(step_pdp_activate)

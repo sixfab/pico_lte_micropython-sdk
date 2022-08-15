@@ -32,6 +32,8 @@ class Modem:
         """
         Initialize modem class
         """
+        config["params"] = read_json_file("config.json")
+
         self.ulp = ULP()
         self.peripherals = Periph()
         self.atcom = ATCom()
@@ -46,14 +48,10 @@ class Modem:
         self.mqtt = MQTT(self.atcom)
         self.gps = GPS(self.atcom)
 
-        self.aws = AWS(self.base, self.network, self.ssl, self.mqtt, self.http)
+        self.aws = AWS(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
 
         # power up modem
         if self.base.power_status() != 0:
             self.base.power_on_off()
         self.base.wait_until_status_on()
         self.base.wait_until_modem_ready_to_communicate()
-
-        # check certificates in modem or upload them
-        self.auth.load_certificates()
-        config["params"] = read_json_file("config.json")
