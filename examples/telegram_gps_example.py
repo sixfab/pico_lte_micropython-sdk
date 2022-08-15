@@ -13,6 +13,7 @@ atcom = ATCom()
 BOT_TOKEN = '5469433192:AAH3L7t2RPrqHsY1r9rvXO_DU67Z5NdtMMw'
 BOT_CHAT_ID = '-645292239'
 HOST = "api.telegram.org/bot"
+PERIOD = 30 # seconds
 
 def send_message_to_telegram(message):
     publish_url = f'https://{HOST}{BOT_TOKEN}/sendMessage?chat_id={BOT_CHAT_ID}&text={message}'
@@ -41,7 +42,7 @@ def send_message_to_telegram(message):
 ##############################
 
 fix = False
-location_sentence = None
+loc_message = None
 
 modem = Modem()
 debug.set_debug_channel(0)
@@ -63,19 +64,9 @@ while True:
             debug.debug("GPS Fixed. Getting location data...")
             loc = result["response"]
             prefix_id = loc.find("+QGPSLOC: ")
-            loc = loc[prefix_id:].replace('"\n\r',"").split(",")
-            loc_dic = {}
-            loc_dic["utc"] = loc[0]
-            loc_dic["lat"] = loc[1]
-            loc_dic["lon"] = loc[2]
-            loc_dic["hdop"] = loc[3]
-            loc_dic["alt"] = loc[4]
-            loc_dic["fix"] = loc[5]
-            loc_dic["cog"] = loc[6]
-            loc_dic["spd"] = loc[7]
-            loc_dic["date"] = loc[9]
-
-            location_sentence = json.dumps(loc_dic)
+            len_prefix = len("+QGPSLOC: ")
+            loc = loc[prefix_id + len_prefix:].replace('"\n\r',"").split(",")
+            loc_message = f'{loc[1]},{loc[2]}'
             fix = True
             break
         time.sleep(2) # 45*2 = 90 seconds timeout for GPS fix.
@@ -86,9 +77,9 @@ while True:
         debug.info(modem.gps.turn_off())
 
         # Send the location data to the server.
-        send_message_to_telegram(location_sentence)
+        send_message_to_telegram(loc_message)
 
         if result["status"] == Status.SUCCESS:
             fix = False
 
-    time.sleep(30) # 30 seconds between each request.
+    time.sleep(PERIOD) # [PERIOD] seconds between each request.
