@@ -47,7 +47,6 @@ HTTP Server Response Codes
 ---------------------------
 """
 
-from core.temp import config
 from core.utils.status import Status
 from core.utils.helpers import get_parameter
 
@@ -172,7 +171,7 @@ class HTTP:
         command = f'AT+QHTTPCFG="contenttype",{content_type}'
         return self.atcom.send_at_comm(command,"OK")
 
-    def set_auth(self, username="", password=""):
+    def set_auth(self, username=None, password=None):
         """
         Function for setting modem HTTP auth
 
@@ -191,8 +190,20 @@ class HTTP:
             status : int
                 Status of the command.
         """
-        command = f'AT+QHTTPCFG="auth","{username}:{password}"'
-        return self.atcom.send_at_comm(command,"OK")
+
+        if username:
+            username = get_parameter(["https", "username"])
+
+        if password:
+            password = get_parameter(["https", "password"])
+
+        if username and password:
+            command = f'AT+QHTTPCFG="auth","{username}:{password}"'
+            return self.atcom.send_at_comm(command,"OK")
+        return {
+            "response": "Missing arguments : username and password",
+            "status": Status.ERROR
+            }
 
     def set_custom_header(self, header=None):
         """
@@ -211,9 +222,6 @@ class HTTP:
             status : int
                 Status of the command.
         """
-        if header is None:
-            header = get_parameter("http_header")
-
         if header:
             command = f'AT+QHTTPCFG="customheader","{header}"'
             return self.atcom.send_at_comm(command,"OK")
@@ -239,7 +247,7 @@ class HTTP:
                 Status of the command.
         """
         if url is None:
-            url = get_parameter("http_server")
+            url = get_parameter(["https","server"])
 
         if url:
             len_url = len(url)

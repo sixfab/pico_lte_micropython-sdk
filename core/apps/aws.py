@@ -7,6 +7,7 @@ import time
 from core.temp import config
 from core.utils.manager import StateManager, Step
 from core.utils.status import Status
+from core.utils.helpers import get_parameter
 
 class AWS:
     """
@@ -53,6 +54,16 @@ class AWS:
             modem_response : str
                 Response of the modem.
         """
+        if host is None:
+            host = get_parameter(["aws","mqtts","host"])
+
+        if port is None:
+            port = get_parameter(["aws","mqtts","port"], 8883)
+
+        if topic is None:
+            topic = get_parameter(["aws","mqtts","pub_topic"])
+
+        print("MQTT: {} {} {} {}".format(host, port, topic, payload))
 
         step_load_certificates = Step(
             function=self.auth.load_certificates,
@@ -174,6 +185,9 @@ class AWS:
             modem_response : str
                 Response of the modem.
         """
+        if url is None:
+            url = get_parameter(["aws","https","server"])
+
         step_load_certificates = Step(
             function=self.auth.load_certificates,
             name="load_certificates",
@@ -248,7 +262,7 @@ class AWS:
         # Add cache if it is not already existed
         function_name = "aws.post_message"
 
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
+        sm = StateManager(first_step=step_load_certificates, function_name=function_name)
 
         sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
