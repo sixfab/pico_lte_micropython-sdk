@@ -40,7 +40,7 @@ Create `config.json` file on the root path of the Picocell.
     "aws":{
         "mqtts":{
             "host":"[YOUR_AWS_MQTT_HOST]",
-            "port":[YOUR_AWS_MQTT_PORT],
+            "port":"[YOUR_AWS_MQTT_PORT]",
             "pub_topic":"[YOUR_AWS_MQTT_TOPIC]",
             "sub_topics":[
                 "[YOUR_MQTT_TOPIC/1]",
