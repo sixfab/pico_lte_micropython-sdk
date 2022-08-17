@@ -136,7 +136,6 @@ If you have successfully completed all the steps, when you run the program, you 
 
 ```log
 >>> %Run -c $EDITOR_CONTENT
-MQTT: a3k4qed7hludio-ats.iot.eu-central-1.amazonaws.com 8883 $aws/things/picocell_device/shadow/update {"state": {"reported": {"App": "AWS MQTT Example", "Timestamp": "1660745219"}}}
 INFO: Certificates uploaded secure storage. Deleting from file system...
 INFO: Certificates deleted from file system.
 INFO: Certificates found in modem.
