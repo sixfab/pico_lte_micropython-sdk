@@ -14,6 +14,43 @@ class GPS:
         """
         self.atcom = atcom
 
+    def get_priority(self):
+        """
+        Get the priority of the GPS.
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = 'AT+QGPSCFG="priority"'
+        return self.atcom.send_at_comm(command, "OK")
+
+    def set_priority(self, priority):
+        """
+        Set the priority of the GPS.
+
+        Parameters
+        ----------
+        priority : int
+            Priority of the GPS.
+                0 --> GNSS prior mode
+                1 --> WWAN prior mode
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = f'AT+QGPSCFG="priority",{priority}'
+        return self.atcom.send_at_comm(command, "OK")
+
     def turn_on(self, mode=1, accuracy=3, fix_count=0, fix_rate=1):
         """
         Turn on the GPS.
@@ -74,5 +111,5 @@ class GPS:
                 Status of the command.
 
         """
-        command = "AT+QGPSLOC"
+        command = "AT+QGPSLOC?"
         return self.atcom.send_at_comm(command, "OK")
