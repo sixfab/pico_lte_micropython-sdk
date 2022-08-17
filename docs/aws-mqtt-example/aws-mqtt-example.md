@@ -21,21 +21,21 @@ To getting started with the Picocell, first check the following requirements.
 You can complete the hardware installation by following the steps below.
 
 1. **Carefully plug your Quectel BG95 modem into the socket of your Sixfab Raspberry Pi Pico IoT Kit.**
-   ![](https://raw.githubusercontent.com/sixfab/picocell_python-sdk/dev/docs/aws-mqtt-example/assets/hw_step_1.png)
+   ![](./assets/hw_step_1.png)
 
 2. **After installing your modem as shown in the image in step one, gently push the airborne edge with your finger and place it on the mechanical bed.**
 
-   ![](https://raw.githubusercontent.com/sixfab/picocell_python-sdk/dev/docs/aws-mqtt-example/assets/hw_step_2.png)
+   ![](./assets/hw_step_2.png)
 
 3. **Connect the GPS and LTE cables of your Pulse antenna to the antenna sockets indicated in the image below.**
 
-   ![](https://raw.githubusercontent.com/sixfab/picocell_python-sdk/dev/docs/aws-mqtt-example/assets/hw_step_3.png)
+   ![](./assets/hw_step_3.png)
 
-   ![](https://raw.githubusercontent.com/sixfab/picocell_python-sdk/dev/docs/aws-mqtt-example/assets/hw_step_4.png)
+   ![](./assets/hw_step_4.png)
 
 4. **As a final step, connect your microUSB to USB-A converter to your board as in the image below so that you can program your development board.**
 
-   ![](https://raw.githubusercontent.com/sixfab/picocell_python-sdk/dev/docs/aws-mqtt-example/assets/hw_step_5.png)
+   ![](./assets/hw_step_5.png)
 
 5. **Connect the USB-A to your own computer. Check if the power switch is ON.**
 
