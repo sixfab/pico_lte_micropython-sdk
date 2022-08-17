@@ -63,14 +63,11 @@ class AWS:
         if topic is None:
             topic = get_parameter(["aws","mqtts","pub_topic"])
 
-        print("MQTT: {} {} {} {}".format(host, port, topic, payload))
-
         step_load_certificates = Step(
             function=self.auth.load_certificates,
             name="load_certificates",
             success="register_network",
             fail="failure",
-            cachable=True,
         )
         step_network_reg = Step(
             function=self.network.register_network,
@@ -120,16 +117,14 @@ class AWS:
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
-            function_params={"host":host, "port":port},
-            cachable=True,
+            function_params={"host":host, "port":port}
         )
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="publish_message",
-            fail="failure",
-            cachable=True,
+            fail="failure"
         )
 
         step_publish_message = Step(
@@ -186,14 +181,17 @@ class AWS:
                 Response of the modem.
         """
         if url is None:
-            url = get_parameter(["aws","https","server"])
+            endpoint = get_parameter(["aws","https","endpoint"])
+            topic = get_parameter(["aws","https","topic"])
+
+            if endpoint and topic:
+                url = f"https://{endpoint}:8443/topics/{topic}?qos=1"
 
         step_load_certificates = Step(
             function=self.auth.load_certificates,
             name="load_certificates",
             success="register_network",
             fail="failure",
-            cachable=True,
         )
         step_network_reg = Step(
             function=self.network.register_network,
@@ -213,8 +211,7 @@ class AWS:
             function=self.network.activate_pdp_context,
             name="pdp_activate",
             success="ssl_configuration",
-            fail="failure",
-            cachable=True,
+            fail="failure"
         )
 
         step_ssl_configuration = Step(
@@ -222,7 +219,6 @@ class AWS:
             name="ssl_configuration",
             success="http_ssl_configuration",
             fail="failure",
-            cachable=True,
         )
 
         step_http_ssl_configuration = Step(
@@ -231,7 +227,6 @@ class AWS:
             success="set_server_url",
             fail="failure",
             function_params={"id": 2},
-            cachable=True,
         )
 
         step_set_server_url = Step(
@@ -240,7 +235,6 @@ class AWS:
             success="post_request",
             fail="failure",
             function_params={"url": url},
-            cachable=True,
         )
 
         step_post_request = Step(
@@ -250,6 +244,7 @@ class AWS:
             fail="failure",
             function_params={"data": payload},
             cachable=True,
+            interval=2,
         )
 
         step_read_response = Step(
