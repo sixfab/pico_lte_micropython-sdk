@@ -16,6 +16,7 @@ class DebugLevel:
     WARNING = 2
     ERROR = 3
     CRITICAL = 4
+    FOCUS = -1
 
 
 class Debug:
@@ -75,3 +76,8 @@ class Debug:
         """Function for CRITICAL level messages."""
         if self.debug_enabled and self.debug_level <= DebugLevel.CRITICAL:
             self.print("CRITICAL:", *args)
+
+    def focus(self, *args):
+        """Function for FOCUSSED level messages."""
+        if self.debug_enabled and self.debug_level == DebugLevel.FOCUS:
+            self.print("FOCUS:", *args)
