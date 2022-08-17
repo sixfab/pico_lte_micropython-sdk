@@ -44,7 +44,7 @@ class Auth:
                 self.file.upload_file_to_modem("/security/user_key.pem", client_key)
             except Exception as error:
                 debug.error("Error occured while uploading certificates", error)
-                return Status.ERROR
+                return {"status" : Status.ERROR, "response" : str(error)}
 
             debug.info("Certificates uploaded secure storage. Deleting from file system...")
             try:
@@ -53,7 +53,7 @@ class Auth:
                 os.remove("../cert/user_key.pem")
             except Exception as error:
                 debug.error("Error occured while deleting certificates", error)
-                return Status.ERROR
+                return {"status" : Status.ERROR, "response" : str(error)}
 
             debug.info("Certificates deleted from file system.")
 
@@ -65,10 +65,16 @@ class Auth:
                     "client.pem" in result["response"] and \
                         "user_key.pem" in result["response"]:
                 debug.info("Certificates found in modem.")
-                return Status.SUCCESS
+                return {"status" : Status.SUCCESS, "response" : "Certificates found in modem."}
             else:
                 debug.error("Certificates couldn't find in modem!")
-                return Status.ERROR
+                return {
+                    "status" : Status.ERROR,
+                    "response" : "Certificates couldn't find in modem!"
+                    }
         else:
             debug.error("Error occured while getting certificates from modem!")
-            return Status.ERROR
+            return {
+                "status" : Status.ERROR,
+                "response" : "Error occured while getting certificates from modem!"
+                }

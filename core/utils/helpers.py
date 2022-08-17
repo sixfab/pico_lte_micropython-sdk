@@ -109,12 +109,18 @@ def write_file(file_path, data):
         return data
 
 
-def get_parameter(key, default=None):
+def get_parameter(path, default=None):
     """
     Function for getting parameters for SDK methods from global config dictionary.
     """
-    if isinstance(config["params"], dict):
-        return config["params"].get(key)
+    desired = config.get("params", None)
+
+    if isinstance(desired, dict):
+        for element in path:
+            if desired:
+                desired = desired.get(element, None)
+        if desired:
+            return desired
     if default:
         return default
     return None

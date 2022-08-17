@@ -269,10 +269,10 @@ class MQTT:
                         5 --> Network connection error
         """
         if host is None:
-            host = get_parameter("mqtt_host")
+            host = get_parameter(["mqtts","host"])
 
         if port is None:
-            port = get_parameter("mqtt_port", 8883) # default port is 8883
+            port = get_parameter(["mqtts","port"], 8883) # default port is 8883
 
         if host and port:
             command = f'AT+QMTOPEN={cid},"{host}",{port}'
@@ -352,8 +352,8 @@ class MQTT:
                             3 --> Connection Refused: Server Unavailable
         """
         if username is None and password is None:
-            username = get_parameter("mqtt_username")
-            password = get_parameter("mqtt_password")
+            username = get_parameter(["mqtts","username"])
+            password = get_parameter(["mqtts","password"])
 
         if username and password:
             command = f'AT+QMTCONN={cid},"{client_id_string}","{username}","{password}"'
@@ -436,7 +436,7 @@ class MQTT:
 
         """
         if topics is None:
-            topics = get_parameter("mqtt_sub_topics")
+            topics = get_parameter(["mqtts","sub_topics"])
 
         if topics:
             prefix = f'AT+QMTSUB={cid},{message_id},'
@@ -534,7 +534,7 @@ class MQTT:
                         If <result> is 0 or 2, it will not be presented
         """
         if topic is None:
-            topic = get_parameter("mqtt_pub_topic")
+            topic = get_parameter(["mqtts","pub_topic"])
 
         if payload and topic:
             command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
