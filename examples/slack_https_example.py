@@ -16,13 +16,23 @@ config = {}
 modem = Modem(config)
 atcom = ATCom()
 
-SERVICE_URL = "https://hooks.slack.com/services/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 "
-CUSTOM_HEADER = 'Content-type: application/json\n'
-DATA = {
-  "text": "Test Message"
+SERVER_DETAILS = {
+    'HOST': 'https://hooks.slack.com',
+    'QUERY': '/services/T03TQ6CSL1F/B03TMH5TZ51/s82yfH54cnxYo7sS3LQ4Dl57'
 }
 
-payload = json.dumps(DATA)
+DATA = {
+  'text': 'Message from PicoCell!'
+}
+
+data_post_json = json.dumps(DATA)
+
+header =    "POST " + SERVER_DETAILS["QUERY"] + " HTTP/1.1\n" + \
+            "Host: " + SERVER_DETAILS["HOST"][8:] + "\n" + \
+            "Custom-Header-Name: Custom-Data\n" + \
+            "Content-Type: application/json\n" + \
+            "Content-Length: " + str(len(data_post_json) + 1) + "\n" + \
+            "\n\n"
 
 # Check communication with modem
 print("COM: ", modem.check_modem_communication())
@@ -37,10 +47,9 @@ print("PDP Activatation: ", modem.activate_pdp_context())
 print("PDP Test: ", atcom.send_at_comm("AT+CGACT?","OK"))
 
 # HTTP
-print("HTTP URL: ", modem.set_modem_http_server_url(url=SERVICE_URL))
+print("HTTP URL: ", modem.set_modem_http_server_url(url = SERVER_DETAILS["HOST"]))
 atcom.send_at_comm('AT+QHTTPCFG="requestheader",1')
-#print("HTTP Header:", modem.set_modem_http_content_type(content_type=4))
-print("HTTP POST: ", modem.http_post_request(data = CUSTOM_HEADER + payload))
+print("HTTP POST: ", modem.http_post_request(data = header + data_post_json))
 
 time.sleep(5)
 print("HTTP READ: ", modem.http_read_response())
