@@ -152,3 +152,18 @@ In the given sample code, we first add the libraries we will use, including our 
 
 ## Troubleshooting
 
+1. **I'm getting `INFO: {'interval': 0, 'status': 1}` in logs, and I cannot see my message in Device Shadow Document.**
+     
+     It means that your endpoint address in the `config.json` file is corrupted or wrong. Please go to the Step 12, and provide the correct HTTP endpoint address information. Check if your file is same as the test configuration file provided above.
+
+2. **Picocell sends the message, however, the Device Shadow Document is not changing.**
+
+     If the status value is "1" in the information log you receive, it means that Picocell is performing its task correctly. If there is no update in your Device Shadow Document in AWS, first check your topic address in your `config.json` file. Check that the address of this topic belongs to the publish channel named `/update`.
+
+3. **It gives me an `Certificates couldn't find in modem!` error.** 
+
+     This error can have multiple causes. The most common of these is to  upload the certificate files into your Picocell module without changing  the names of the certificate files correctly (as described in Step 9.).  Another reason is that the installed certificate files are not installed in the `cert/` folder in the file system of your Picocell module. Please check both these conditions and try again.
+
+### Warning
+
+To further debugging, you may want to set the debug level to 0. It can be done by putting a line above to `Modem()` initialization that is `debug.set_debug_level(0)`.
