@@ -142,7 +142,7 @@ INFO: Certificates found in modem.
 INFO: {'interval': 0, 'status': 0}
 ```
 
-![](./test_step_2.png)
+![](./assets/test_step_2.png)
 
 ## Example Code Examination
 
