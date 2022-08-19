@@ -36,11 +36,8 @@ Slack is a cloud-based business chat platform that links users to the data they 
    
    You can go to the [link](https://www.raspberrypi.com/document/microcontrollers/micropython.html) to access more information about Raspberry Pi Pico and review the installation in more detail.
    
-   
 
-<img src="picocell_python-sdk/docs/slack-example/assets/Hardware_Setup.jpeg" alt="Hardware_setup" title="Hardware Setup" style="zoom:67%;" />
-
-
+![Hardware Setup][picocell_python-sdk/docs/slack-example/assets/Hardware_Setup.jpeg]
 
 ## Software Setup / Preparation ##
 
@@ -64,11 +61,11 @@ Slack is a cloud-based business chat platform that links users to the data they 
 
    Continue the first step of the four-step process by entering your company or team name (ex. *Sixfab*). 
 
-   <img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_1.png" alt="Software_Setup_1" title="Workspace creating step one" style="zoom:67%;" />
+   ![Workspace creating step one][picocell_python-sdk/docs/slack-example/assets/Software_Setup_1.png]
 
    In the second step, give brief information about the project that your company or team is currently working on it (ex. *PicoCell SDK Test*). 
 
-   <img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_2.png" alt="Software_Setup_2" title="Workspace creating step 2" style="zoom:67%;" />
+   ![Workspace creating step 2][picocell_python-sdk/docs/slack-example/assets/Software_Setup_2.png]
 
    Complete the third step by entering their e-mail addresses to add your teammates -you can choose the "Skip for now" option to quickly pass this stage.- Workspace has been successfully created!
 
@@ -78,27 +75,27 @@ Slack is a cloud-based business chat platform that links users to the data they 
 
    If you continue by creating a new App, select the "From scratch" option. 
 
-   <img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_3.png" alt="Software_Setup_3" title="App configuration" style="zoom:67%;" />
+   ![App configuration][picocell_python-sdk/docs/slack-example/assets/Software_Setup_3.png]
 
    Then enter the name of your App (ex. *Picocell_test*) and select the workspace to work in. You can choose the workspace you created in the previous step or a workspace you created earlier.
 
-   <img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_4.png" alt="Software_Setup_4" title="App creating" style="zoom:67%;" />
+   ![App creating][picocell_python-sdk/docs/slack-example/assets/Software_Setup_4.png]
 
 6. Add Webhook Feature
 
    On the screen that appears for editing the app, go to Incoming Webhooks from the Features section. You need to activate this feature.
 
-<img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_5.png" title="Webhook Feature" alt="Slack_Webhook" style="zoom:67%;" />
+![Webhook Feature][picocell_python-sdk/docs/slack-example/assets/Software_Setup_5.png]
 
 
 
 After activation, scroll down the page and click "Add New Webhook to Workspace". Then select the channel to which the App will be added, that is, to which you want to send a message.
 
-<img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_6.png" alt="Slack_Permission" title="App Permission and Channel Choosing" style="zoom:67%;" />
+![App Permission and Channel Choosing][picocell_python-sdk/docs/slack-example/assets/Software_Setup_6.png]
 
 If the actions are successful, you will have obtained a Webhook URL and will also be viewing your App in the channel you added.
 
-<img src="picocell_python-sdk/docs/slack-example/assets/Software_Setup_7.png" alt="Webhook_URL" title="Webhook URL" style="zoom:67%;" />
+![Webhook URL][picocell_python-sdk/docs/slack-example/assets/Software_Setup_7.png]
 
 Your Webhook URL that'll look something like this:
 
@@ -175,7 +172,7 @@ HTTP READ:  {'response': '\r\n+QHTTPPOST: 0,200\r\nAT+QHTTPREAD=60\r\r\nCONNECT\
 
 If the message is sent, it will be forwarded to the channel as shown in the image:
 
-<img src="picocell_python-sdk/docs/slack-example/assets/Test.png" title="Test" alt="Test" style="zoom:67%;" />
+![Test][picocell_python-sdk/docs/slack-example/assets/Test.png]
 
 
 
