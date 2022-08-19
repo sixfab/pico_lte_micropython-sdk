@@ -142,6 +142,27 @@ class Network:
         command = f'AT+QICSGP={context_id},{context_type},"{apn}","{username}","{password}",{auth}'
         return self.atcom.send_at_comm(command,"OK")
 
+
+    def check_pdp_context_status(self, context_id=1):
+        """
+        Function for checking PDP context status
+
+        Parameters
+        ----------
+        context_id : int
+            PDP context identifier (range 1:5) (default=1)
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = "AT+CGACT?"
+        return self.atcom.send_at_comm(command, f"+CGACT: {context_id},1")
+
     def activate_pdp_context(self, context_id=1):
         """
         Function for activating PDP context
@@ -250,6 +271,70 @@ class Network:
         sm.add_step(step_get_apn)
         sm.add_step(step_set_apn)
         sm.add_step(step_check_network)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
+    def get_pdp_ready(self):
+        """
+        Function for getting ready pdp context
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
+
+        step_precheck_pdp = Step(
+            function=self.check_pdp_context_status,
+            name="check_pdp_context_status",
+            success="success",
+            fail="configure_pdp_context",
+        )
+
+        step_configure_pdp = Step(
+            function=self.configure_tcp_ip_context,
+            name="configure_pdp_context",
+            success="deactivate_pdp_context",
+            fail="failure",
+        )
+
+        step_deactivate_pdp = Step(
+            function=self.deactivate_pdp_context,
+            name="deactivate_pdp_context",
+            success="activate_pdp_context",
+            fail="activate_pdp_context",
+        )
+
+        step_activate_pdp = Step(
+            function=self.activate_pdp_context,
+            name="activate_pdp_context",
+            success="success",
+            fail="failure",
+        )
+
+        step_check_pdp = Step(
+            function=self.check_pdp_context_status,
+            name="check_pdp_context_status",
+            success="success",
+            fail="failure",
+        )
+
+        sm = StateManager(first_step = step_precheck_pdp)
+        sm.add_step(step_precheck_pdp)
+        sm.add_step(step_configure_pdp)
+        sm.add_step(step_deactivate_pdp)
+        sm.add_step(step_activate_pdp)
+        sm.add_step(step_check_pdp)
 
         while True:
             result = sm.run()

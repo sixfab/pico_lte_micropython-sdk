@@ -63,6 +63,33 @@ class AWS:
         if topic is None:
             topic = get_parameter(["aws","mqtts","pub_topic"])
 
+        # Check if client is connected to the broker
+        step_check_mqtt_connected = Step(
+            function=self.mqtt.is_connected_to_broker,
+            name="check_connected",
+            success="publish_message",
+            fail="check_opened",
+            retry=2,
+        )
+
+        # Check if client connected to AWS IoT
+        step_check_mqtt_opened = Step(
+            function=self.mqtt.has_opened_connection,
+            name="check_opened",
+            success="connect_mqtt_broker",
+            fail="deactivate_pdp_context",
+            retry=2,
+        )
+
+        # If client is not connected to the broker and have no open connection with AWS IoT
+        # Deactivate PDP and begin first step of the state machine
+        step_deactivate_pdp_context = Step(
+            function=self.network.deactivate_pdp_context,
+            name="deactivate_pdp_context",
+            success="load_certificates",
+            fail="failure",
+        )
+
         step_load_certificates = Step(
             function=self.auth.load_certificates,
             name="load_certificates",
@@ -72,20 +99,13 @@ class AWS:
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
-            success="pdp_deactivate",
+            success="get_ready_pdp",
             fail="failure",
         )
 
-        step_pdp_deactivate = Step(
-            function=self.network.deactivate_pdp_context,
-            name="pdp_deactivate",
-            success="pdp_activate",
-            fail="failure",
-        )
-
-        step_pdp_activate= Step(
-            function=self.network.activate_pdp_context,
-            name="pdp_activate",
+        step_get_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_ready_pdp",
             success="ssl_configuration",
             fail="failure",
         )
@@ -139,12 +159,14 @@ class AWS:
         # Add cache if it is not already existed
         function_name = "aws.publish_message"
 
-        sm = StateManager(first_step=step_load_certificates, function_name=function_name)
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
+        sm.add_step(step_check_mqtt_connected)
+        sm.add_step(step_check_mqtt_opened)
+        sm.add_step(step_deactivate_pdp_context)
         sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_deactivate)
-        sm.add_step(step_pdp_activate)
+        sm.add_step(step_get_pdp_ready)
         sm.add_step(step_ssl_configuration)
         sm.add_step(step_set_mqtt_version)
         sm.add_step(step_set_mqtt_ssl_mode)
@@ -160,6 +182,158 @@ class AWS:
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
+
+    def subscribe_topics(self, host=None, port=None, topics=None):
+        """
+        Function for subscribing to topics of AWS.
+
+        Parameters
+        ----------
+        topics : list
+            List of topics.
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
+        if topics is None:
+            topics = get_parameter(["aws","mqtts","sub_topics"])
+
+        if host is None:
+            host = get_parameter(["aws","mqtts","host"])
+
+        if port is None:
+            port = get_parameter(["aws","mqtts","port"], 8883)
+
+        # Check if client is connected to the broker
+        step_check_mqtt_connected = Step(
+            function=self.mqtt.is_connected_to_broker,
+            name="check_connected",
+            success="subscribe_topics",
+            fail="check_opened",
+            retry=2,
+        )
+
+        # Check if client connected to AWS IoT
+        step_check_mqtt_opened = Step(
+            function=self.mqtt.has_opened_connection,
+            name="check_opened",
+            success="connect_mqtt_broker",
+            fail="deactivate_pdp_context",
+            retry=2,
+        )
+
+        # If client is not connected to the broker and have no open connection with AWS IoT
+        # Deactivate PDP and begin first step of the state machine
+        step_deactivate_pdp_context = Step(
+            function=self.network.deactivate_pdp_context,
+            name="deactivate_pdp_context",
+            success="load_certificates",
+            fail="failure",
+        )
+
+        step_load_certificates = Step(
+            function=self.auth.load_certificates,
+            name="load_certificates",
+            success="register_network",
+            fail="failure",
+        )
+
+        step_network_reg = Step(
+            function=self.network.register_network,
+            name="register_network",
+            success="get_pdp_ready",
+            fail="failure",
+        )
+
+        step_get_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_pdp_ready",
+            success="ssl_configuration",
+            fail="failure",
+        )
+
+        step_ssl_configuration = Step(
+            function=self.ssl.configure_for_x509_certification,
+            name="ssl_configuration",
+            success="set_mqtt_version",
+            fail="failure",
+            )
+
+        step_set_mqtt_version = Step(
+            function=self.mqtt.set_version_config,
+            name="set_mqtt_version",
+            success="set_mqtt_ssl_mode",
+            fail="failure",
+        )
+
+        step_set_mqtt_ssl_mode = Step(
+            function=self.mqtt.set_ssl_mode_config,
+            name="set_mqtt_ssl_mode",
+            success="open_mqtt_connection",
+            fail="failure",
+        )
+
+        step_open_mqtt_connection = Step(
+            function=self.mqtt.open_connection,
+            name="open_mqtt_connection",
+            success="connect_mqtt_broker",
+            fail="failure",
+            function_params={"host": host, "port":port}
+        )
+
+        step_connect_mqtt_broker = Step(
+            function=self.mqtt.connect_broker,
+            name="connect_mqtt_broker",
+            success="subscribe_topics",
+            fail="failure"
+        )
+
+        step_subscribe_topics = Step(
+            function=self.mqtt.subscribe_topics,
+            name="subscribe_topics",
+            success="success",
+            fail="failure",
+            function_params={"topics":topics},
+            cachable=True,
+        )
+
+        # Add cache if it is not already existed
+        function_name = "aws.subscribe_message"
+
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+
+        sm.add_step(step_check_mqtt_connected)
+        sm.add_step(step_check_mqtt_opened)
+        sm.add_step(step_deactivate_pdp_context)
+        sm.add_step(step_load_certificates)
+        sm.add_step(step_network_reg)
+        sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_ssl_configuration)
+        sm.add_step(step_set_mqtt_version)
+        sm.add_step(step_set_mqtt_ssl_mode)
+        sm.add_step(step_open_mqtt_connection)
+        sm.add_step(step_connect_mqtt_broker)
+        sm.add_step(step_subscribe_topics)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
+    def read_messages(self):
+        """
+        Read messages from subscribed topics.
+        """
+        return self.mqtt.read_messages()
 
     def post_message(self, payload, url=None):
         """
@@ -196,22 +370,15 @@ class AWS:
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
-            success="pdp_deactivate",
+            success="get_pdp_ready",
             fail="failure",
         )
 
-        step_pdp_deactivate = Step(
-            function=self.network.deactivate_pdp_context,
-            name="pdp_deactivate",
-            success="pdp_activate",
-            fail="failure",
-        )
-
-        step_pdp_activate= Step(
-            function=self.network.activate_pdp_context,
-            name="pdp_activate",
+        step_get_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_pdp_ready",
             success="ssl_configuration",
-            fail="failure"
+            fail="failure",
         )
 
         step_ssl_configuration = Step(
@@ -261,8 +428,7 @@ class AWS:
 
         sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_deactivate)
-        sm.add_step(step_pdp_activate)
+        sm.add_step(step_get_pdp_ready)
         sm.add_step(step_ssl_configuration)
         sm.add_step(step_http_ssl_configuration)
         sm.add_step(step_set_server_url)
