@@ -28,7 +28,7 @@ In this example, a message will be sent to the Telegram channel via Picocell usi
 
 
 
-![Hardware_Setup.jpg](:/b4937e4e72c2402aaeb50e5e9c7fa096)
+![Hardware Setup](assets/Hardware_Setup.jpg)
 
 
 
@@ -39,7 +39,7 @@ In this example, a message will be sent to the Telegram channel via Picocell usi
 1. **Download Thonny IDE from it's [website](https://thonny.org).**
 	- In Thonny, follow Tools > Options > Interpreter. Select MicroPython (Raspberry Pi Pico) in the list as an Interpreter. 
 
-	![Software_Setup1.png](:/6c731a367d6f4b01b726bf17a8a3920d)
+	![Software Setup1](assets/Software_Setup1.png)
 
 
 2. **Download the necessary UF2 file for Pico board from this [link](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html#drag-and-drop-micropython).**
@@ -47,7 +47,7 @@ In this example, a message will be sent to the Telegram channel via Picocell usi
 	- Then go ahead and:
 		- Push and hold the BOOTSEL button and plug your Pico into the USB port of your computer. Release the BOOTSEL button after your Pico is connected.
 	
-		![Software_Setup2.png](:/7a7549cef17241b9bf2d66c52655a858)
+		![Software Setup2](assets/Software_Setup2.png)
 
 		- It will be mounted as a Mass Storage Device Called RPI-RP2.
 		- Drag and drop the downloaded UF2 file onto the RPI-RP2 volume.
@@ -59,14 +59,14 @@ In this example, a message will be sent to the Telegram channel via Picocell usi
 - Search "BotFather" in Telegram's search bar.
 
 
-![Software_Setup3.png](:/d4dcfed7a8934e44bb4a5c352f5badf3)
+![Software Setup3](assets/Software_Setup3.png)
 
 
 -  Start conversation with BotFather. Type "**/start**" to see all available commands.
 -  Use "**/newbot**" command to create a new bot in Telegram.
 
 
-![Software_Setup4.png](:/2fb1b518ffb54d17a570e8aa8f5f44b2)
+![Software Setup4](assets/Software_Setup4.png)
 
 -  After creating a new bot, continue with typing your bot's name into conversation.
 -  Give a username for your bot. (**Warning: Bot's "name" and "username" are different. You will use the "username" in the next steps.**)
@@ -85,7 +85,7 @@ In this example, a message will be sent to the Telegram channel via Picocell usi
 - The required parameters are marked in the image below:
 
 
-![Software_Setup5.png](:/f793c87918c24832963dd6ba8e328772)
+![Software Setup5](assets/Software_Setup5.png)
 
 
 
@@ -98,7 +98,7 @@ In this example, a message will be sent to the Telegram channel via Picocell usi
 - Open Thonny IDE.
 - Replace marked variables with your own values.
 
-![Test1.png](:/1f85ac6805b842a5b6d34e384b64395c)
+![Test1](assets/Test1.png)
 
 - After all this stages, run the example code. The output you get in the code should look like this: 
 ```
@@ -135,7 +135,7 @@ HTTP READ:  {'response': 'AT+QHTTPREAD=60\r\r\n+CME ERROR: 703\r\n', 'status': 1
 
 
 
-![Test2.png](:/b64a2c845c844f88bfc67fe86699beee)
+![Test2](assets/Test2.png)
 
 
 
