@@ -1,10 +1,10 @@
 # Picocell GET Request to a Web Server using HTTP
 
-This section will lead you step by step to create a cellular connection to the a web server with the Picocell and HTTPS protocol. In the tutorial, we choose [webhook.site](https://webhook.site) as the web server to test our requests.
+This section will lead you step by step to create a cellular connection to the a web server with the Picocell and HTTP protocol. In the tutorial, we choose [webhook.site](https://webhook.site) as the web server to test our requests.
 
 ## Description
 
-The Picocell provides all the components you will need for establishing an HTTPS connection to a web server. You don't need any additional hardware equipments for this example. Getting started is pretty straight forward, first you will setup the hardware then complete the example code to start the connection. Each of the steps are mentioned in detail below.
+The Picocell provides all the components you will need for establishing an HTTP connection to a web server. You don't need any additional hardware equipments for this example. Getting started is pretty straight forward, first you will setup the hardware then complete the example code to start the connection. Each of the steps are mentioned in detail below.
 
 ## System Requirements
 
@@ -113,4 +113,12 @@ In the given sample code, we first add the libraries we will use, including our 
 1. **I'm getting `+CME ERROR: 703` error when reading the response.**
 
    Please increase the sleeping time before asking the Picocell to read response. It should be solved.
+
+2. **I'm getting `+CME ERROR: 712` error while sending a POST request.**
+
+   This error described as wrong or empty URL setting for the host. Please check your `config.json` file and put the proper URL which includes "https://" and its query.
+
+### Warning
+
+For future troubleshooting, you may want to refer to `+CME ERROR` codes and their meanings using [Picocell's `http.py` file](https://github.com/sixfab/picocell_python-sdk/blob/dev/core/modules/http.py#L4).
 
