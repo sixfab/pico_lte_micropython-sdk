@@ -57,12 +57,12 @@ while True:
     debug.info("Response: ", modem.http.read_response())
 
     # Send a PUT request.
-    HEADER =    "PUT / HTTP/1.1\n" + \
-                "Host: " + URL[8:] + "\n" + \
-                "Custom-Header-Name: Custom-Data\n" + \
-                "Content-Type: application/json\n" + \
-                "Content-Length: " + str(len(PAYLOAD_JSON_PUT) + 1) + "\n" + \
-                "\n\n"
+    HEADER = "PUT / HTTP/1.1\n" + \
+        "Host: " + URL[8:] + "\n" + \
+        "Custom-Header-Name: Custom-Data\n" + \
+        "Content-Type: application/json\n" + \
+        "Content-Length: " + str(len(PAYLOAD_JSON_PUT) + 1) + "\n" + \
+        "\n\n"
     debug.info("Send PUT Request: ", modem.http.put(data=HEADER+PAYLOAD_JSON_PUT, header_mode=1))
 
     # Read response.
