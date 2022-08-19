@@ -12,8 +12,8 @@ Create `config.json` file on the root path of the Picocell.
 {
     "https":{
         "server":"[HTTP_SERVER]",
-        "username":"[YOUR_MQTT_USERNAME]",
-        "password":"[YOUR_MQTT_PASSWORD]"
+        "username":"[YOUR_HTTP_USERNAME]",
+        "password":"[YOUR_HTTP_PASSWORD]"
     },
 }
 ```
