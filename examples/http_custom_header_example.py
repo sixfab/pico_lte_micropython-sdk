@@ -1,91 +1,73 @@
+"""
+Example code for performing HTTP request to a server with using custom headers.
+"""
+
 import json
 import time
 from core.modem import Modem
-from core.utils.debug import Debug
-from core.utils.status import Status
+from core.temp import debug
+from core.utils.helpers import get_parameter
 
+debug.set_debug_level(0)
 
-# Provide your server details to send HTTP
-# requests. For testing purposes, you may
-# use "webhook.site".
-# Example:
-#     Host: https://webhook.site
-#     Query: /6112efa6-4f8c-4bdb-8fa3-5787cc02f80a?query_param=DATA
-SERVER_DETAILS = {
-    'HOST': '[YOUR_SERVER_DOMAIN_ADDRESS]',
-    'QUERY': '[YOUR_REQUEST_QUERY_ADDRESS]'
-}
-
-# This messages are arbitrary, you can change
-# both attribute and data names.
-DATA_TO_POST = {
-    'messageType': 'picocell_status',
-    'message': 'Picocell can connect to the server.'
-}
-
-DATA_TO_PUT = {
-    'messageType': 'picocell_battery',
-    'message': '90%'
-}
-
-
-# Initilaze the instances for the Picocell SDK.
+# Prepare HTTP connection.
 modem = Modem()
-debug = Debug()
-
-# Send APN details.
 modem.network.set_apn()
-
-# Check the network registration.
 result = modem.network.check_network_registration()
-if result["status"] != Status.SUCCESS:
-    debug.error("Could not connected to the cellular network.")
-
-
-# Set the first HTTP context.
 modem.http.set_context_id()
-
-# Activate PDP.
-modem.network.deactivate_pdp_context()
 modem.network.activate_pdp_context()
+modem.http.set_server_url()
 
-# Set server URL.
-debug.info("Set Server URL: ", modem.http.set_server_url(SERVER_DETAILS["HOST"]))
+# Get URL from the config.json.
+URL = get_parameter(["https", "server"])
 
-# Send a POST request.
-data_post_json = json.dumps(DATA_TO_POST)
-header =    "POST " + SERVER_DETAILS["QUERY"] + " HTTP/1.1\n" + \
-            "Host: " + SERVER_DETAILS["HOST"][8:] + "\n" + \
-            "Custom-Header-Name: Custom-Data\n" + \
-            "Content-Type: application/json\n" + \
-            "Content-Length: " + str(len(data_post_json) + 1) + "\n" + \
-            "\n\n"
+while True:
+    # The messages that will be sent.
+    DATA_TO_POST = {'message': 'Picocell HTTP POST Example with Custom Header'}
+    DATA_TO_PUT = {'message': 'Picocell HTTP PUT Example with Custom Header'}
 
-debug.info("Send POST Request: ", modem.http.post(data=header+data_post_json, header_mode=1))
+    # Convert dicts to JSONs.
+    PAYLOAD_JSON_POST = json.dumps(DATA_TO_POST)
+    PAYLOAD_JSON_PUT = json.dumps(DATA_TO_PUT)
 
-# Wait for the modem to be ready.
-time.sleep(5)
+    # Send a POST request.
+    HEADER = "POST HTTP/1.1\n" + \
+        "Host: " + URL[8:] + "\n" + \
+        "Custom-Header-Name: Custom-Data\n" + \
+        "Content-Type: application/json\n" + \
+        "Content-Length: " + str(len(PAYLOAD_JSON_POST) + 1) + "\n" + \
+        "\n\n"
+    debug.info("Send POST Request: ", modem.http.post(data=HEADER+PAYLOAD_JSON_POST, header_mode=1))
 
-# Send a GET request.
-header =    "GET " + SERVER_DETAILS["QUERY"] + " HTTP/1.1\n" + \
-            "Host: " + SERVER_DETAILS["HOST"][8:] + "\n" + \
-            "Content-Type: text/plain\n" + \
-            "Content-Length: 0\n" + \
-            "Custom-Header-Name: Custom-Data\n" + \
-            "\n\n"
+    # Read response.
+    time.sleep(5)
+    debug.info("Response: ", modem.http.read_response())
 
-debug.info("Send GET Request: ", modem.http.get(data=header, header_mode=1))
+    # Send a GET request.
+    HEADER = "GET / HTTP/1.1\n" + \
+        "Host: " + URL[8:] + "\n" + \
+        "Content-Type: text/plain\n" + \
+        "Content-Length: 0\n" + \
+        "Custom-Header-Name: Custom-Data\n" + \
+        "\n\n"
+    debug.info("Send GET Request: ", modem.http.get(data=HEADER, header_mode=1))
 
-# Wait for the modem to be ready.
-time.sleep(5)
+    # Read response.
+    time.sleep(5)
+    debug.info("Response: ", modem.http.read_response())
 
-# Send a PUT request.
-data_put_json = json.dumps(DATA_TO_PUT)
-header =    "PUT " + SERVER_DETAILS["QUERY"] + " HTTP/1.1\n" + \
-            "Host: " + SERVER_DETAILS["HOST"][8:] + "\n" + \
-            "Custom-Header-Name: Custom-Data\n" + \
-            "Content-Type: application/json\n" + \
-            "Content-Length: " + str(len(data_put_json) + 1) + "\n" + \
-            "\n\n"
+    # Send a PUT request.
+    HEADER =    "PUT / HTTP/1.1\n" + \
+                "Host: " + URL[8:] + "\n" + \
+                "Custom-Header-Name: Custom-Data\n" + \
+                "Content-Type: application/json\n" + \
+                "Content-Length: " + str(len(PAYLOAD_JSON_PUT) + 1) + "\n" + \
+                "\n\n"
+    debug.info("Send PUT Request: ", modem.http.put(data=HEADER+PAYLOAD_JSON_PUT, header_mode=1))
 
-debug.info("Send PUT Request: ", modem.http.put(data=header+data_put_json, header_mode=1))
+    # Read response.
+    time.sleep(5)
+    debug.info("Response: ", modem.http.read_response())
+
+    # Wait for 10 seconds for the next iteration.
+    time.sleep(10)
