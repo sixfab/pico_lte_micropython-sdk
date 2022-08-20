@@ -1,5 +1,5 @@
 """
-Module for including functions of AWS IoT operations of picocell module.
+Module for including functions of Google Cloud IoT operations of picocell module.
 """
 
 import time
@@ -19,13 +19,30 @@ class GCloud:
 
     def __init__(self, base, network, ssl, mqtt, http,
                 region=None, project_id=None, registry_id=None, device_id=None, jwt=None):
-        """
-        Constructor of the class.
+        """Constructor of the class.
 
         Parameters
         ----------
-        cache : dict
-            Cache of the class.
+        base : Base
+            Picocell Base class
+        network : Network
+            Picocell Network class
+        ssl : SSL
+            Picocell SSL class
+        mqtt : MQTT
+            Picocell MQTT class
+        http : HTTP
+            Picocell HTTP class
+        region : str
+            Region ID of your Google Cloud IoT service. Defaults to None.
+        project_id : str
+            Project ID of your Google Cloud IoT service. Defaults to None.
+        registry_id : str
+            Registry ID of your Google Cloud IoT service. Defaults to None.
+        device_id : str
+            Device ID of your Google Cloud IoT service. Defaults to None.
+        jwt : str
+            JSON Web Token created using device's private key file. Defaults to None.
         """
         self.base = base
         self.network = network
@@ -45,7 +62,7 @@ class GCloud:
         self.jwt = get_parameter(["gcloud", "jwt"]) \
             if (jwt is None) else jwt
 
-        # Create HTTP Attributes.
+        # Create HTTP attributes.
         self.http_query= '/v1/projects/' + self.project_id + \
             '/locations/' + self.region + \
             '/registries/' + self.registry_id + \
@@ -66,6 +83,8 @@ class GCloud:
             Port of the MQTT broker.
         topic : str
             Topic of the message.
+        client_id : str
+            Client ID for the MQTT broker.
 
         Returns
         -------
@@ -191,7 +210,7 @@ class GCloud:
         payload : str
             Payload of the message.
         url : str
-            URL of the AWS device shadow
+            URL of the Google Cloud IoT Endpoint
 
         Returns
         -------
