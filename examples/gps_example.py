@@ -70,7 +70,7 @@ while True:
         debug.info("Turn off GPS: ", modem.gps.turn_off())
 
         # Send the location data to the server.
-        modem.http.post(data=LOCATION_TO_POST)
+        modem.http.post(LOCATION_TO_POST)
         if result["status"] == Status.SUCCESS:
             debug.info(f"The GPS data is sent: {LOCATION_TO_POST}")
             IS_GNSS_FIXED = False
