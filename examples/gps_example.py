@@ -8,9 +8,9 @@ from core.modem import Modem
 from core.temp import debug
 from core.utils.status import Status
 
-HOST = "[YOUR_WEB_SERVER_ADDRESS]"
+HOST = "[YOUR_WEB_SERVER_ADRESS]"
 IS_GPS_FIXED = False
-LOCATION_SENTENCE_TO_POST = None
+LOCATION_TO_POST = None
 
 modem = Modem()
 modem.network.set_apn()
@@ -21,19 +21,18 @@ modem.http.set_server_url(url=HOST)
 
 while True:
     # Go to GNSS prior mode and turn on GPS.
-    debug.info(modem.gps.set_priority(0))
+    debug.info("Set the GNSS prior mode: ", modem.gps.set_priority(0))
     time.sleep(3)
-    debug.info(modem.gps.turn_on())
+    debug.info("Turn on GPS: ", modem.gps.turn_on())
 
     # Try to fix GPS for 90 seconds.
     for _ in range(0, 45):
         result = modem.gps.get_location()
-        debug.debug(result)
         if result["status"] == Status.SUCCESS:
-            debug.debug("GPS Fixed. Getting location data...")
+            debug.info("GPS has been fixed. Getting location data...")
             location = result["response"]
             prefix_id = location.find("+QGPSLOC: ")
-            location = location[prefix_id:].replace('"\n\r',"").split(",")
+            location = location[prefix_id+10:].replace('"\n\r',"").split(",")
             location_dictionary = {
                 "utc": location[0],
                 "lat": location[1],
@@ -47,7 +46,7 @@ while True:
             }
 
             # Create the data to post, and set IS_GPS_FIXED.
-            LOCATION_SENTENCE_TO_POST = json.dumps(location_dictionary)
+            LOCATION_TO_POST = json.dumps(location_dictionary)
             IS_GPS_FIXED = True
             break
 
@@ -56,12 +55,13 @@ while True:
 
     if IS_GPS_FIXED:
         # Go to WWAN prior mode and turn on GPS.
-        debug.info(modem.gps.set_priority(1))
-        debug.info(modem.gps.turn_off())
+        debug.info("Set the WWAN prior mode: ", modem.gps.set_priority(1))
+        debug.info("Turn off GPS: ", modem.gps.turn_off())
 
         # Send the location data to the server.
-        modem.http.post(data=LOCATION_SENTENCE_TO_POST)
+        modem.http.post(data=LOCATION_TO_POST)
         if result["status"] == Status.SUCCESS:
+            debug.info(f"The GPS data sent to {HOST}: {LOCATION_TO_POST}")
             IS_GNSS_FIXED = False
 
     # 30 seconds between sending GPS data.
