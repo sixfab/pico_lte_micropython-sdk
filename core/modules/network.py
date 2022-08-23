@@ -4,7 +4,7 @@ Module for including network functions of picocell module.
 import time
 
 from core.temp import config
-from core.utils.helpers import get_desired_data_from_response
+from core.utils.helpers import get_desired_data
 from core.utils.manager import StateManager, Step
 from core.utils.status import Status
 
@@ -21,6 +21,25 @@ class Network:
         self.atcom = atcom
         self.base = base
 
+    def check_apn(self):
+        """
+        Function for checking modem APN is correct
+
+        Returns
+        -------
+        (response, status, value) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+            value : str
+                APN of modem
+        """
+        command = "AT+CGDCONT?"
+        desired = "super"
+        result = self.atcom.send_at_comm(command, desired)
+        return result
+
     def get_apn(self):
         """
         Function for getting modem APN
@@ -36,16 +55,8 @@ class Network:
                 APN of modem
         """
         command = "AT+CGDCONT?"
-        result = self.atcom.send_at_comm(command,"OK")
-        response = result.get("response")
-        value = get_desired_data_from_response(
-                                        response,
-                                        prefix="+CGDCONT: ",
-                                        separator=",",
-                                        data_index=2
-                                        )
-        result["value"] = value
-        return result
+        result = self.atcom.send_at_comm(command)
+        return get_desired_data(result, prefix="+CGDCONT: 2,", data_index=1)
 
     def set_apn(self, cid=1, pdp_type="IPV4V6", apn="super"):
         """
@@ -72,7 +83,7 @@ class Network:
                 Status of the command.
         """
         command = f'AT+CGDCONT={cid},"{pdp_type}","{apn}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def check_network_registration(self):
         """
@@ -102,7 +113,8 @@ class Network:
                 Status of the command.
         """
         command = "AT+COPS?"
-        return self.atcom.send_at_comm(command,"OK")
+        result = self.atcom.send_at_comm(command)
+        return get_desired_data(result, prefix="+COPS: ", data_index=2)
 
     def configure_tcp_ip_context(
         self, context_id=1, context_type=1, apn="super", username="", password="", auth=0
@@ -140,7 +152,28 @@ class Network:
                 Status of the command.
         """
         command = f'AT+QICSGP={context_id},{context_type},"{apn}","{username}","{password}",{auth}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
+
+
+    def check_pdp_context_status(self, context_id=1):
+        """
+        Function for checking PDP context status
+
+        Parameters
+        ----------
+        context_id : int
+            PDP context identifier (range 1:5) (default=1)
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = "AT+CGACT?"
+        return self.atcom.send_at_comm(command, f"+CGACT: {context_id},1")
 
 
     def check_pdp_context_status(self, context_id=1):
@@ -181,7 +214,7 @@ class Network:
                 Status of the command.
         """
         command = f'AT+QIACT={context_id}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def deactivate_pdp_context(self, context_id=1):
         """
@@ -201,7 +234,7 @@ class Network:
                 Status of the command.
         """
         command = f'AT+QIDEACT={context_id}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def register_network(self):
         """
@@ -237,12 +270,11 @@ class Network:
             fail="failure",
         )
 
-        step_get_apn = Step(
-            function=self.get_apn,
-            name="get_apn",
+        step_check_apn = Step(
+            function=self.check_apn,
+            name="check_apn",
             success="check_network_registration",
             fail="set_apn",
-            desired_response="super"
         )
 
         step_set_apn = Step(
@@ -268,7 +300,7 @@ class Network:
         sm.add_step(step_network_precheck)
         sm.add_step(step_atcom)
         sm.add_step(step_sim_ready)
-        sm.add_step(step_get_apn)
+        sm.add_step(step_check_apn)
         sm.add_step(step_set_apn)
         sm.add_step(step_check_network)
 

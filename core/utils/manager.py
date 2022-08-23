@@ -12,8 +12,8 @@ class Step:
     final_step = False
     def __init__(
         self, name, function, success, fail,
-            function_params=None, desired_response=None,
-            interval=0, retry=0, final_step=False, cachable=False
+            function_params=None, interval=0, retry=0,
+            final_step=False, cachable=False
         ):
         self.function = function
         self.name = name
@@ -23,7 +23,6 @@ class Step:
         self.retry = retry
         self.function_params = function_params
         self.final_step = final_step
-        self.desired_response = desired_response
         self.cachable = cachable
 
 class StateManager:
@@ -146,17 +145,10 @@ class StateManager:
 
         debug.debug(f"{self.current.function.__name__:<25} : {result}")
 
-        if self.current.desired_response:
-            if result["status"] == Status.SUCCESS and \
-                    self.current.desired_response in result["value"]:
-                self.current.is_ok = True
-            else:
-                self.current.is_ok = False
+        if result["status"] == Status.SUCCESS:
+            self.current.is_ok = True
         else:
-            if result["status"] == Status.SUCCESS:
-                self.current.is_ok = True
-            else:
-                self.current.is_ok = False
+            self.current.is_ok = False
 
         return result
 

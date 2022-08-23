@@ -69,7 +69,6 @@ class AWS:
             name="check_connected",
             success="publish_message",
             fail="check_opened",
-            retry=2,
         )
 
         # Check if client connected to AWS IoT
@@ -78,7 +77,6 @@ class AWS:
             name="check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
-            retry=2,
         )
 
         # If client is not connected to the broker and have no open connection with AWS IoT
@@ -419,6 +417,7 @@ class AWS:
             name="read_response",
             success="success",
             fail="failure",
+            function_params={"desired_response":'"message":"OK"'},
         )
 
         # Add cache if it is not already existed
@@ -437,7 +436,6 @@ class AWS:
 
         while True:
             result = sm.run()
-
             if result["status"] == Status.SUCCESS:
                 return result
             elif result["status"] == Status.ERROR:

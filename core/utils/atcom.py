@@ -65,13 +65,14 @@ class ATCom:
             compose = f"{command}\r".encode()
         else:
             compose = command.encode()
-        debug.focus(compose)
+            debug.focus(compose)
+
         try:
             self.modem_com.write(compose)
         except:
             debug.error("Error occured while AT command writing to modem")
 
-    def get_response(self, desired_responses="OK", timeout=5):
+    def get_response(self, desired_responses=None, timeout=5):
         """
 		Function for getting modem response
 
@@ -88,6 +89,13 @@ class ATCom:
             response from modem
 		"""
         response = ""
+        processed = []
+        f_waiting_input = False
+
+        if desired_responses:
+            if isinstance(desired_responses, str): # if desired response is string
+                desired_responses = [desired_responses] # make it list
+                print("Desired:", desired_responses)
 
         timer = time.time()
         while True:
@@ -102,20 +110,100 @@ class ATCom:
             else:
                 return {"status": Status.TIMEOUT, "response": "timeout"}
 
-            if isinstance(desired_responses, str):
-                if desired_responses in response:
-                    return {"status": Status.SUCCESS, "response": response}
-                elif "ERROR" in response:
-                    return {"status": Status.ERROR, "response": response}
+            if response != "":
+                responses = response.split("\r\n")
+                processed.extend([x for x in responses if x != ""])
+                print("Processed:", processed)
+                response = ""
 
-            elif isinstance(desired_responses, list):
-                for desired_response in desired_responses:
-                    if desired_response in response:
-                        return {"status": Status.SUCCESS, "response": response}
-                    elif "ERROR" in response:
-                        return {"status": Status.ERROR, "response": response}
+            head = 0
+            for index, value in enumerate(processed):
+                processed_part = processed[head:index+1]
 
-    def send_at_comm(self, command, response="OK", timeout=5, line_end=True):
+                if value == "OK":
+                    if not desired_responses: # if we don't look for specific responses
+                        return {"status": Status.SUCCESS, "response": processed_part}
+                    else:
+                        if index - head > 0: # we got an informative response here
+                            for desired in desired_responses: # get desired responses from list
+                                if desired in processed[index-1]:
+                                    print("Desired:", desired, processed[index-1])
+                                    return {"status": Status.SUCCESS, "response": processed_part}
+                                else:
+                                    head = index
+                        else:
+                            return {"status": Status.ERROR, "response": processed_part}
+
+                elif value == "+CME ERROR:" or value == "ERROR": # error
+                    return {"status": Status.ERROR, "response": processed_part}
+
+                elif value == "CONNECT" or value == "> ": # waiting input
+                    f_waiting_input = True # rise flag
+
+            # If no other responses ("OK", "ERROR", etc.) were found
+            # and "CONNECT" was found, return "waiting input" status
+            if f_waiting_input:
+                return {"status": Status.WAITING_INPUT, "response": processed_part}
+
+    def get_urc_response(self, desired_responses=None, fault_responses=None, timeout=5):
+        """
+		Function for getting modem urc response
+
+        Parameters
+        ----------
+        desired_response: str
+            desired response from modem
+        timeout: int
+            timeout for getting response
+
+        Returns
+        -------
+        response: dict
+            response from modem
+		"""
+        response = ""
+        processed = []
+
+        if desired_responses:
+            if isinstance(desired_responses, str): # if desired response is string
+                desired_responses = [desired_responses] # make it list
+        if fault_responses:
+            if isinstance(fault_responses, str): # if desired response is string
+                fault_responses = [fault_responses] # make it list
+
+        timer = time.time()
+        while True:
+            time.sleep(0.1) # wait for new chars
+
+            if time.time() - timer < timeout:
+                while self.modem_com.any():
+                    try:
+                        response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
+                    except:
+                        pass
+            else:
+                return {"status": Status.TIMEOUT, "response": "timeout"}
+
+            if response != "":
+                responses = response.split("\r\n")
+                processed.extend([x for x in responses if x != ""])
+                print("Processed:", processed)
+                response = ""
+
+            head = 0
+            for index, value in enumerate(processed):
+                processed_part = processed[head:index+1]
+
+                if desired_responses:
+                    for desired in desired_responses:
+                        if desired in value:
+                            return {"status": Status.SUCCESS, "response": processed_part}
+                if fault_responses:
+                    for fault in fault_responses:
+                        if fault in value:
+                            return {"status": Status.ERROR, "response": processed_part}
+
+    def send_at_comm(self, command, response=None, timeout=5, line_end=True):
         """
 		Function for writing AT command to modem and getting modem response
 
@@ -137,7 +225,7 @@ class ATCom:
         time.sleep(0.1)
         return self.get_response(response, timeout)
 
-    def retry_at_comm(self, command, response="OK", timeout=5, retry_count=3, interval=1):
+    def retry_at_comm(self, command, response=None, timeout=5, retry_count=3, interval=1):
         """
         Function for retrying AT command to modem and getting modem response
 
