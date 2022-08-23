@@ -79,7 +79,7 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPCFG="contextid",{http_context_id}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_request_header_status(self, status=0):
         """
@@ -101,7 +101,7 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPCFG="requestheader",{status}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_response_header_status(self, status=0):
         """
@@ -123,7 +123,7 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPCFG="responseheader",{status}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_ssl_context_id(self, id=1):
         """
@@ -143,7 +143,7 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPCFG="sslctxid",{id}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_content_type(self, content_type=0):
         """
@@ -169,7 +169,7 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPCFG="contenttype",{content_type}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_auth(self, username=None, password=None):
         """
@@ -199,7 +199,7 @@ class HTTP:
 
         if username and password:
             command = f'AT+QHTTPCFG="auth","{username}:{password}"'
-            return self.atcom.send_at_comm(command,"OK")
+            return self.atcom.send_at_comm(command)
         return {
             "response": "Missing arguments : username and password",
             "status": Status.ERROR
@@ -224,7 +224,7 @@ class HTTP:
         """
         if header:
             command = f'AT+QHTTPCFG="customheader","{header}"'
-            return self.atcom.send_at_comm(command,"OK")
+            return self.atcom.send_at_comm(command)
         return {"response": "Missing arguments : header", "status": Status.ERROR}
 
     def set_server_url(self, url=None ,timeout=5):
@@ -252,10 +252,10 @@ class HTTP:
         if url:
             len_url = len(url)
             command = f'AT+QHTTPURL={len_url},{timeout}'
-            result = self.atcom.send_at_comm(command,"CONNECT")
+            result = self.atcom.send_at_comm(command)
 
-            if result["status"] == Status.SUCCESS:
-                self.atcom.send_at_comm(url, line_end=False) # send url
+            if result["status"] == Status.WAITING_INPUT:
+                result = self.atcom.send_at_comm(url, line_end=False) # send url
             return result
         return {"response": "Missing arguments : url", "status": Status.ERROR}
 
@@ -296,14 +296,14 @@ class HTTP:
             if header_mode == 1:
                 # Send a GET request to the modem.
                 command = f'AT+QHTTPGET={timeout},{len(data)},{input_timeout}'
-                result =  self.atcom.send_at_comm(command, "CONNECT", timeout=60)
-                if result["status"] == Status.SUCCESS:
+                result =  self.atcom.send_at_comm(command, timeout=60)
+                if result["status"] == Status.WAITING_INPUT:
                     # Send the request header.
-                    return self.atcom.send_at_comm(data, "OK", line_end=False)
+                    return self.atcom.send_at_comm(data, line_end=False)
             else:
                 # Send a GET request without header.
                 command = f'AT+QHTTPGET={timeout}'
-                return self.atcom.send_at_comm(command,"OK")
+                return self.atcom.send_at_comm(command)
 
         # Return the result of request header if there is no SUCCESS.
         return result
@@ -345,10 +345,10 @@ class HTTP:
         if result["status"] == Status.SUCCESS:
             # Send a POST request to the modem.
             command = f'AT+QHTTPPOST={len(data)},{input_timeout},{timeout}'
-            result =  self.atcom.send_at_comm(command,"CONNECT", timeout=timeout)
-            if result["status"] == Status.SUCCESS:
+            result =  self.atcom.send_at_comm(command, timeout=timeout)
+            if result["status"] == Status.WAITING_INPUT:
                 # Send the request (header and) body.
-                result = self.atcom.send_at_comm(data, "OK", line_end=False)
+                result = self.atcom.send_at_comm(data, line_end=False)
         return result
 
     def post_from_file(self, file_path, header_mode=0, timeout=60):
@@ -384,7 +384,7 @@ class HTTP:
             return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'QHTTPPOSTFILE={file_path},{timeout}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def put(self, data, header_mode=0, input_timeout=5, timeout=60):
         """
@@ -422,10 +422,10 @@ class HTTP:
         if result["status"] == Status.SUCCESS:
             # Send a PUT request to the modem.
             command = f'AT+QHTTPPUT={len(data)},{input_timeout},{timeout}'
-            result = self.atcom.send_at_comm(command,"CONNECT")
-            if result["status"] == Status.SUCCESS:
+            result = self.atcom.send_at_comm(command)
+            if result["status"] == Status.WAITING_INPUT:
                 # Send the request (header and) body.
-                result = self.atcom.send_at_comm(data, "OK", line_end=False)
+                result = self.atcom.send_at_comm(data, line_end=False)
         return result
 
     def put_from_file(self, file_path, file_type=0, header_mode=0, timeout=60):
@@ -469,9 +469,9 @@ class HTTP:
             return {"response": "Not implemented yet!", "status": Status.ERROR}
 
         command = f'AT+QHTTPPUTFILE={file_path},{timeout},{file_type}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
-    def read_response(self, timeout=60):
+    def read_response(self, desired_response=None, timeout=60):
         """
         Function for retrieving the HTTP(S) response from an HTTP(S) server via the UART/USB port,
         after HTTP(S) GET/POST/PUT requests are sent.
@@ -496,7 +496,8 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPREAD={timeout}'
-        return self.atcom.send_at_comm(command,"OK", timeout=timeout)
+        result = self.atcom.send_at_comm(command, desired_response, timeout=timeout)
+        return result
 
     def read_response_to_file(self, file_path, timeout=60):
         """
@@ -526,4 +527,4 @@ class HTTP:
                 Status of the command.
         """
         command = f'AT+QHTTPREADFILE={file_path},{timeout}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)

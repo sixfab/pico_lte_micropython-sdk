@@ -57,3 +57,4 @@ class Modem:
             self.base.power_on_off()
         self.base.wait_until_status_on()
         self.base.wait_until_modem_ready_to_communicate()
+        self.base.turn_off_at_echo()

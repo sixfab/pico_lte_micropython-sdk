@@ -12,8 +12,8 @@ class Step:
     final_step = False
     def __init__(
         self, name, function, success, fail,
-            function_params=None, desired_response=None,
-            interval=0, retry=0, final_step=False, cachable=False
+            function_params=None, interval=0, retry=0,
+            final_step=False, cachable=False
         ):
         self.function = function
         self.name = name
@@ -23,7 +23,6 @@ class Step:
         self.retry = retry
         self.function_params = function_params
         self.final_step = final_step
-        self.desired_response = desired_response
         self.cachable = cachable
 
 class StateManager:
@@ -38,8 +37,6 @@ class StateManager:
         """Initializes state manager"""
         self.first_step = first_step
         self.function_name = function_name
-
-        debug.debug("Init: Cache:", self.cache.states.get(self.function_name))
 
         if function_name:
             if not self.cache.states.get(function_name):
@@ -92,16 +89,13 @@ class StateManager:
             self.current = self.first_step
 
             cached_step = self.cache.get_state(self.function_name)
-            debug.debug("Org: Cache:", cached_step)
             if cached_step: # if cached step is not None
                 self.current = self.get_step(cached_step)
 
         else:
             if self.current.is_ok: # step succieded
-                debug.debug(f"Step {self.current.name}, cachable: {self.current.cachable}")
                 if self.current.cachable: # Assign new cache if step cachable
                     self.cache.set_state(self.function_name, self.current.name)
-                    debug.debug("Set cache:", self.cache.states.get(self.function_name))
 
                 self.current.is_ok = False
                 self.current = self.get_step(self.current.success)
@@ -151,17 +145,10 @@ class StateManager:
 
         debug.debug(f"{self.current.function.__name__:<25} : {result}")
 
-        if self.current.desired_response:
-            if result["status"] == Status.SUCCESS and \
-                    self.current.desired_response in result["value"]:
-                self.current.is_ok = True
-            else:
-                self.current.is_ok = False
+        if result["status"] == Status.SUCCESS:
+            self.current.is_ok = True
         else:
-            if result["status"] == Status.SUCCESS:
-                self.current.is_ok = True
-            else:
-                self.current.is_ok = False
+            self.current.is_ok = False
 
         return result
 

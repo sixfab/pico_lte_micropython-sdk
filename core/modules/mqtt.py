@@ -3,7 +3,8 @@ Module for including functions of MQTT related operations of picocell module.
 """
 
 from core.utils.status import Status
-from core.utils.helpers import get_parameter, extract_messages
+from core.utils.helpers import get_parameter
+
 
 class MQTT:
     """
@@ -39,7 +40,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="version",{cid},{version}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_pdpcid_config(self, cid=0, pdpcid=0):
         """
@@ -61,7 +62,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="pdpcid",{cid},{pdpcid}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_ssl_mode_config(self, cid=0, ssl_mode=1, ssl_ctx_index=2):
         """
@@ -87,7 +88,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="SSL",{cid},{ssl_mode},{ssl_ctx_index}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_keep_alive_time_config(self, cid=0, keep_alive_time=120):
         """
@@ -114,7 +115,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="keepalive",{cid},{keep_alive_time}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_clean_session_config(self, cid=0, clean_session=0):
         """
@@ -139,7 +140,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="clean_session",{cid},{clean_session}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_timeout_config(self, cid=0, timeout=5, retry_count=3, timeout_notice=0):
         """
@@ -167,7 +168,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="timeout",{cid},{timeout},{retry_count},{timeout_notice}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_will_config(
         self, will_topic, will_message, cid=0, will_flag=0, will_qos=0, will_retain=0
@@ -211,7 +212,7 @@ class MQTT:
         """
         command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},\
                         {will_retain},"{will_topic}","{will_message}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_message_recieve_mode_config(self, cid=0, message_recieve_mode=0):
         """
@@ -235,7 +236,7 @@ class MQTT:
                 Status of the command.
         """
         command = f'AT+QMTCFG="message_recieve_mode",{cid},{message_recieve_mode}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def open_connection(self, host=None, port=None, cid=0):
         """
@@ -276,14 +277,42 @@ class MQTT:
 
         if host and port:
             command = f'AT+QMTOPEN={cid},"{host}",{port}'
-            result = self.atcom.send_at_comm(command,"OK")
+            result = self.atcom.send_at_comm(command)
 
             desired_response = f"+QMTOPEN: {cid},0"
+            fault_responses = [
+                f"+QMTOPEN: {cid},1",
+                f"+QMTOPEN: {cid},2",
+                f"+QMTOPEN: {cid},3",
+                f"+QMTOPEN: {cid},4",
+                f"+QMTOPEN: {cid},5",
+                ]
 
             if result["status"] == Status.SUCCESS:
-                result = self.atcom.get_response(desired_response, timeout=60)
+                result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
             return result
         return {"status": Status.ERROR, "response": "Missing parameters"}
+
+    def has_opened_connection(self, cid=0):
+        """
+        Function for checking if MQTT connection is opened for client
+
+        Parameters
+        ----------
+        cid : int
+            MQTT Client ID (range 0:5) (default=0)
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : "client_idx, result" str
+                Response of the modem.
+        """
+        command = "AT+QMTOPEN?"
+        desired = f"+QMTOPEN: {cid}"
+        return self.atcom.send_at_comm(command, desired)
 
     def close_connection(self, cid=0):
         """
@@ -306,11 +335,11 @@ class MQTT:
 
         """
         command = f'AT+QMTCLOSE={cid}'
-        result =  self.atcom.send_at_comm(command,"OK")
+        result =  self.atcom.send_at_comm(command)
 
         if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCLOSE: {cid},0"
-            result = self.atcom.get_response(desired_response, timeout=60)
+            result = self.atcom.get_urc_response(desired_response, timeout=60)
         return result
 
     def connect_broker(self, client_id_string="Picocell", username=None, password=None, cid=0):
@@ -360,12 +389,32 @@ class MQTT:
         else:
             command = f'AT+QMTCONN={cid},"{client_id_string}"'
 
-        result = self.atcom.send_at_comm(command,"OK")
+        result = self.atcom.send_at_comm(command)
 
         if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCONN: {cid},0,0"
-            result = self.atcom.get_response(desired_response, timeout=60)
+            result = self.atcom.get_urc_response(desired_response, timeout=60)
         return result
+
+    def is_connected_to_broker(self, cid=0):
+        """
+        Function for checking modem MQTT connection status
+
+        Parameters
+        ----------
+        cid : int
+            Client ID (range 0:5) (default=0)
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = "AT+QMTCONN?"
+        desired = f"+QMTCONN: {cid},3"
+        return self.atcom.send_at_comm(command, desired)
 
     def disconnect_broker(self, cid=0):
         """
@@ -391,7 +440,7 @@ class MQTT:
                         -1 --> Failed to disconnect from the MQTT server
         """
         command = f'AT+QMTDISC={cid}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def subscribe_topics(self, topics=None, cid=0, message_id=1):
         """
@@ -441,11 +490,12 @@ class MQTT:
         if topics:
             prefix = f'AT+QMTSUB={cid},{message_id},'
             command = prefix + ",".join(f'"{topic}",{qos}' for topic, qos in topics)
-            result = self.atcom.send_at_comm(command,"OK")
+            print("COMMAND: ", command)
+            result = self.atcom.send_at_comm(command)
 
             if result["status"] == Status.SUCCESS:
                 desired_response = f"+QMTSUB: {cid},{message_id},0"
-                result = self.atcom.get_response(desired_response, timeout=60)
+                result = self.atcom.get_urc_response(desired_response, timeout=60)
             return result
         return {"response": "Missing parameter : topic", "status": Status.ERROR}
 
@@ -481,7 +531,7 @@ class MQTT:
                         2 --> Failed to send a packet
         """
         command = f'AT+QMTUNS={cid},{message_id},"{topic}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def publish_message(self, payload, topic=None, qos=1, retain=0, message_id=1, cid=0):
         """
@@ -538,14 +588,13 @@ class MQTT:
 
         if payload and topic:
             command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
-            result = self.atcom.send_at_comm(command,">")
+            result = self.atcom.send_at_comm(command)
 
-            if result["status"] == Status.SUCCESS:
+            if result["status"] == Status.WAITING_INPUT:
                 self.atcom.send_at_comm_once(payload, line_end=False) # Send message
-                result = self.atcom.send_at_comm(self.CTRL_Z,"OK") # Send end char --> CTRL+Z
+                result = self.atcom.send_at_comm(self.CTRL_Z) # Send end char --> CTRL+Z
             return result
         return {"response": "Missing parameter", "status": Status.ERROR}
-
 
     def read_messages(self, cid=0):
         """
@@ -571,7 +620,33 @@ class MQTT:
 
         if result["status"] == Status.SUCCESS:
             prefix = f"+QMTRECV: {cid},"
-            messages = extract_messages(result["response"], prefix)
+            messages = self.extract_messages(result["response"], prefix)
 
         result["messages"] = messages
         return result
+
+    @staticmethod
+    def extract_messages(whole_message, prefix):
+        """_Function for extracting meaningful messages as an array
+        from the response of +QMTRECV.
+
+        Args:
+            whole_message (str): The response from the "+QMTRECV" command.
+            prefix (str): The prefix string for each meaningful message.
+            remove_nones (bool, optional): Delete None messages. Defaults to True.
+
+        Returns:
+            array: Array of messages arrays.
+        """
+        messages = []
+
+        for message in whole_message:
+            start_pos = message.find(prefix)
+
+            if start_pos != -1:
+                if "0,0,0,0,0,0" in message[start_pos:]:
+                    pass
+                else:
+                    messages.append(message[start_pos+len(prefix):])
+
+        return messages

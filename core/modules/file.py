@@ -34,7 +34,7 @@ class File:
                 Status of the command.
         """
         command = f'AT+QFLST="{path}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def delete_file_from_modem(self, file_name):
         """
@@ -54,7 +54,7 @@ class File:
                 Status of the command.
         """
         command = f'AT+QFDEL="{file_name}"'
-        return self.atcom.send_at_comm(command, "OK")
+        return self.atcom.send_at_comm(command)
 
     def upload_file_to_modem(self, filename, file, timeout=5000):
         """
@@ -77,9 +77,9 @@ class File:
         """
         len_file = len(file)
         command = f'AT+QFUPL="{filename}",{len_file},{timeout}'
-        result = self.atcom.send_at_comm(command,"CONNECT")
+        result = self.atcom.send_at_comm(command)
 
-        if result["status"] == Status.SUCCESS:
+        if result["status"] == Status.WAITING_INPUT:
             self.atcom.send_at_comm_once(file) # send ca cert
             return self.atcom.send_at_comm(self.CTRL_Z) # send end char -> CTRL_Z
         return result

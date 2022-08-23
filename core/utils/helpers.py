@@ -4,6 +4,7 @@ Module for storing helper functions
 
 import json
 from core.temp import config, debug
+from core.utils.status import Status
 
 def read_json_file(file_path):
     """
@@ -30,58 +31,52 @@ def write_json_file(file_path, data):
         return data
 
 
-def extract_messages(whole_message, prefix, remove_nones=True):
-    """_Function for extracting meaningful messages as an array
-    from the response of +QMTRECV.
-
-    Args:
-        whole_message (str): The response from the "+QMTRECV" command.
-        prefix (str): The prefix string for each meaningful message.
-        remove_nones (bool, optional): Delete None messages. Defaults to True.
-
-    Returns:
-        array: Array of messages arrays.
-    """
-    messages = []
-    start_pos = 0
-    end_pos = 0
-
-    # Pre-processing the string.
-    whole_message = whole_message.replace("\r","\n").replace('"','')
-
-    while True:
-        start_pos = whole_message.find(prefix, start_pos)
-
-        # If there is no, exit the function.
-        if start_pos == -1:
-            return messages
-
-        # Find the end
-        end_pos = whole_message.find("\n", start_pos)
-
-        # Extract the non-relational information.
-        if "0,0,0,0,0,0" not in whole_message[start_pos:end_pos] and remove_nones is True:
-            # Extract and clean the unformatted string.
-            message = whole_message[(start_pos + len(prefix)) : end_pos]
-            message_as_array = message.split(",")
-            message_as_array[0] = int(message_as_array[0])
-            # Save it to the array.
-            messages.append(message_as_array)
-
-        # Increase the searching position.
-        start_pos += len(prefix)
-
-
-def get_desired_data_from_response(response, prefix, separator="\n", data_index=0):
+def get_desired_data(result, prefix, separator=",", data_index=0):
     """Function for getting actual data from response"""
-    debug.debug(response)
-    response = response.replace("\r","\n").replace('"','') # Simplify response
-    index = response.find(prefix) + len(prefix) # Find index of meaningful data
-    data_array = response[index:].split("\n")[0].split(separator)
+    valuable_lines = None
 
-    if isinstance(data_index, list):    # If desired multiple data, data_index should be list
-        return [data_array[i] for i in data_index]
-    return data_array[data_index]
+    if result.get("status") != Status.SUCCESS:
+        result["value"] = None
+        return result
+
+    response = result.get("response")
+
+    for index, value in enumerate(response):
+        if value == "OK" and index > 0:
+            valuable_lines = [response[i] for i in range(0, index)]
+
+    if valuable_lines:
+        for line in valuable_lines:
+            prefix_index = line.find(prefix)
+
+            if prefix_index != -1:
+                index =  prefix_index + len(prefix) # Find index of meaningful data
+                data_array = line[index:].split(separator)
+
+                if isinstance(data_index, list): # If desired multiple data
+                    data_index = data_index[:len(data_array)] # Truncate data_index
+                    result["value"] = [simplify(data_array[i]) for i in data_index] # Return list
+                elif isinstance(data_index, int):
+                    # If data_index is out of range, return first element
+                    data_index = data_index if data_index < len(data_array) else 0
+                    result["value"] = simplify(data_array[data_index]) # Return single data
+                elif data_index == "all":
+                    result["value"] = [simplify(data) for data in data_array]
+                else:
+                    # If data_index is unknown type, return first element
+                    data_index = 0
+                    result["value"] = simplify(data_array[data_index]) # Return single data
+                return result
+    # if no valuable data found
+    result["value"] = None
+    return result
+
+
+def simplify(text):
+    """Function for simplifying strings"""
+    if isinstance(text, str):
+        return text.replace('"', "").replace("'", "")
+    return text
 
 
 def read_file(file_path):
