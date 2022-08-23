@@ -13,7 +13,6 @@ config = {}
 ############################
 ### Telegram API example ###
 ############################
-
 modem = Modem()
 atcom = ATCom()
 
@@ -21,8 +20,9 @@ atcom = ATCom()
 user_text = 'Your text message here!'
 
 # Telegram Bot configurations 
-bot_token = '5469433192:AAH3L7t2RPrqHsY1r9rvXO_DU67Z5NdtMMw'
-bot_chatID = '-645292239'
+bot_token = 'YOUT_BOT_TOKEN'
+bot_chatID = 'YOUR_BOT_CHAT_ID'
+
 
 HOST = "api.telegram.org/bot"
 PAYLOAD_JSON = {""}
@@ -32,6 +32,7 @@ publish_url = 'https://' + HOST + bot_token + '/sendMessage?chat_id=' + bot_chat
 
 # Check communication with modem
 print("COM: ", modem.base.check_communication())
+
 print("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
 print("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
 print(atcom.send_at_comm('AT+QICSGP=1,1,"super","","",1',"OK"))

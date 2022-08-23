@@ -175,6 +175,27 @@ class Network:
         command = "AT+CGACT?"
         return self.atcom.send_at_comm(command, f"+CGACT: {context_id},1")
 
+
+    def check_pdp_context_status(self, context_id=1):
+        """
+        Function for checking PDP context status
+
+        Parameters
+        ----------
+        context_id : int
+            PDP context identifier (range 1:5) (default=1)
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = "AT+CGACT?"
+        return self.atcom.send_at_comm(command, f"+CGACT: {context_id},1")
+
     def activate_pdp_context(self, context_id=1):
         """
         Function for activating PDP context
