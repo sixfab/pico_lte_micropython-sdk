@@ -59,11 +59,22 @@ class Auth:
 
         # check certificates in modem
         result = self.file.get_file_list("ufs:/security/*")
+        response = result.get("response", [])
+
+        cacert_in_modem = False
+        client_cert_in_modem = False
+        client_key_in_modem = False
 
         if result["status"] == Status.SUCCESS:
-            if "cacert.pem" in result["response"] and \
-                    "client.pem" in result["response"] and \
-                        "user_key.pem" in result["response"]:
+            for line in response:
+                if "cacert.pem" in line:
+                    cacert_in_modem = True
+                if "client.pem" in line:
+                    client_cert_in_modem = True
+                if "user_key.pem" in line:
+                    client_key_in_modem = True
+
+            if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
                 debug.info("Certificates found in modem.")
                 return {"status" : Status.SUCCESS, "response" : "Certificates found in modem."}
             else:

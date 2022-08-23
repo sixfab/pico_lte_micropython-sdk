@@ -38,7 +38,7 @@ class SSL:
                 Status of the command.
         """
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_client_cert(self, ssl_context_id=2, file_path="/security/client.pem"):
         """
@@ -61,7 +61,7 @@ class SSL:
                 Status of the command.
         """
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_client_key(self, ssl_context_id=2, file_path="/security/user_key.pem"):
         """
@@ -84,7 +84,7 @@ class SSL:
                 Status of the command.
         """
         command = f'AT+QSSLCFG="clientkey",{ssl_context_id},"{file_path}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_sec_level(self, ssl_context_id=2, sec_level=2):
         """
@@ -110,7 +110,7 @@ class SSL:
                 Status of the command.
         """
         command = f'AT+QSSLCFG="seclevel",{ssl_context_id},{sec_level}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_version(self, ssl_context_id=2, ssl_version=4):
         """
@@ -138,7 +138,7 @@ class SSL:
                 Status of the command.
         """
         command = f'AT+QSSLCFG="sslversion",{ssl_context_id},{ssl_version}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def set_cipher_suite(self,ssl_context_id=2, cipher_suite="0xFFFF"):
         """
@@ -222,7 +222,7 @@ class SSL:
                 Status of the command.
         """
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def configure_for_x509_certification(self):
         """

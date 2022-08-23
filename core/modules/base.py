@@ -8,7 +8,7 @@ import time
 from machine import Pin
 from core.temp import debug
 from core.utils.status import Status
-from core.utils.helpers import get_desired_data_from_response
+from core.utils.helpers import get_desired_data
 
 
 class Base:
@@ -70,6 +70,20 @@ class Base:
         """
         return self.atcom.send_at_comm("AT")
 
+    def turn_off_at_echo(self):
+        """
+        Function for turning off AT echo
+
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        return self.atcom.send_at_comm("ATE0")
+
     def wait_until_modem_ready_to_communicate(self, timeout=30):
         """
         Function for waiting until modem is ready to communicate
@@ -89,7 +103,7 @@ class Base:
         """
         start_time = time.time()
         while time.time() - start_time < timeout:
-            result = self.atcom.send_at_comm("AT","OK")
+            result = self.atcom.send_at_comm("AT")
             debug.debug("COM:", result)
             if result["status"] == Status.SUCCESS:
                 return result
@@ -159,7 +173,7 @@ class Base:
                 Status of the command.
         """
         command = f'AT+CPIN="{pin_code}"'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def get_sim_iccid(self):
         """
@@ -176,11 +190,8 @@ class Base:
                 ICCID of modem
         """
         command = "AT+QCCID"
-        result = self.atcom.send_at_comm(command,"OK")
-        response = result.get("response")
-        value = get_desired_data_from_response(response, "+QCCID: ")
-        result["value"] = value
-        return result
+        result = self.atcom.send_at_comm(command)
+        return get_desired_data(result, "+QCCID: ")
 
     ####################
     ### Modem Config ###
@@ -206,7 +217,7 @@ class Base:
                 Status of the command.
         """
         command = f'AT+QCFG="nwscanmode",{scan_mode}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def config_network_scan_sequence(self, scan_sequence="00"):
         """
@@ -230,7 +241,7 @@ class Base:
                 Status of the command.
         """
         command = f'AT+QCFG="nwscanseq",{scan_sequence}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
 
     def config_network_iot_operation_mode(self, iotopmode=2):
         """
@@ -253,4 +264,4 @@ class Base:
                 Status of the command.
         """
         command = f'AT+QCFG="iotopmode",{iotopmode}'
-        return self.atcom.send_at_comm(command,"OK")
+        return self.atcom.send_at_comm(command)
