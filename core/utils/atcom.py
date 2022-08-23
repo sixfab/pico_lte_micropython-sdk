@@ -65,7 +65,7 @@ class ATCom:
             compose = f"{command}\r".encode()
         else:
             compose = command.encode()
-        debug.debug(compose)
+        debug.focus(compose)
         try:
             self.modem_com.write(compose)
         except:

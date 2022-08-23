@@ -3,7 +3,8 @@ Module for including functions of MQTT related operations of picocell module.
 """
 
 from core.utils.status import Status
-from core.utils.helpers import get_parameter, extract_messages
+from core.utils.helpers import get_parameter
+
 
 class MQTT:
     """
@@ -285,6 +286,27 @@ class MQTT:
             return result
         return {"status": Status.ERROR, "response": "Missing parameters"}
 
+    def has_opened_connection(self, cid=0):
+        """
+        Function for checking if MQTT connection is opened for client
+
+        Parameters
+        ----------
+        cid : int
+            MQTT Client ID (range 0:5) (default=0)
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : "client_idx, result" str
+                Response of the modem.
+        """
+        command = "AT+QMTOPEN?"
+        desired = f"+QMTOPEN: {cid}"
+        return self.atcom.send_at_comm(command, desired)
+
     def close_connection(self, cid=0):
         """
         Function for closing MQTT connection for client
@@ -367,6 +389,26 @@ class MQTT:
             result = self.atcom.get_response(desired_response, timeout=60)
         return result
 
+    def is_connected_to_broker(self, cid=0):
+        """
+        Function for checking modem MQTT connection status
+
+        Parameters
+        ----------
+        cid : int
+            Client ID (range 0:5) (default=0)
+        Returns
+        -------
+        (response, status) : tuple
+            response : str
+                Response from the command
+            status : int
+                Status of the command.
+        """
+        command = "AT+QMTCONN?"
+        desired = f"+QMTCONN: {cid},3"
+        return self.atcom.send_at_comm(command,desired)
+
     def disconnect_broker(self, cid=0):
         """
         Function for disconnecting from MQTT broker. This function is used when a client
@@ -441,6 +483,7 @@ class MQTT:
         if topics:
             prefix = f'AT+QMTSUB={cid},{message_id},'
             command = prefix + ",".join(f'"{topic}",{qos}' for topic, qos in topics)
+            print("COMMAND: ", command)
             result = self.atcom.send_at_comm(command,"OK")
 
             if result["status"] == Status.SUCCESS:
@@ -546,7 +589,6 @@ class MQTT:
             return result
         return {"response": "Missing parameter", "status": Status.ERROR}
 
-
     def read_messages(self, cid=0):
         """
         Function for receiving MQTT messages.
@@ -571,7 +613,49 @@ class MQTT:
 
         if result["status"] == Status.SUCCESS:
             prefix = f"+QMTRECV: {cid},"
-            messages = extract_messages(result["response"], prefix)
+            messages = self.extract_messages(result["response"], prefix)
 
         result["messages"] = messages
         return result
+
+    @staticmethod
+    def extract_messages(whole_message, prefix, remove_nones=True):
+        """_Function for extracting meaningful messages as an array
+        from the response of +QMTRECV.
+
+        Args:
+            whole_message (str): The response from the "+QMTRECV" command.
+            prefix (str): The prefix string for each meaningful message.
+            remove_nones (bool, optional): Delete None messages. Defaults to True.
+
+        Returns:
+            array: Array of messages arrays.
+        """
+        messages = []
+        start_pos = 0
+        end_pos = 0
+
+        # Pre-processing the string.
+        whole_message = whole_message.replace("\r","\n").replace('"','')
+
+        while True:
+            start_pos = whole_message.find(prefix, start_pos)
+
+            # If there is no, exit the function.
+            if start_pos == -1:
+                return messages
+
+            # Find the end
+            end_pos = whole_message.find("\n", start_pos)
+
+            # Extract the non-relational information.
+            if "0,0,0,0,0,0" not in whole_message[start_pos:end_pos] and remove_nones is True:
+                # Extract and clean the unformatted string.
+                message = whole_message[(start_pos + len(prefix)) : end_pos]
+                message_as_array = message.split(",")
+                message_as_array[0] = int(message_as_array[0])
+                # Save it to the array.
+                messages.append(message_as_array)
+
+            # Increase the searching position.
+            start_pos += len(prefix)

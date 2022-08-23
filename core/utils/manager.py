@@ -39,8 +39,6 @@ class StateManager:
         self.first_step = first_step
         self.function_name = function_name
 
-        debug.debug("Init: Cache:", self.cache.states.get(self.function_name))
-
         if function_name:
             if not self.cache.states.get(function_name):
                 self.cache.add_cache(function_name)
@@ -92,16 +90,13 @@ class StateManager:
             self.current = self.first_step
 
             cached_step = self.cache.get_state(self.function_name)
-            debug.debug("Org: Cache:", cached_step)
             if cached_step: # if cached step is not None
                 self.current = self.get_step(cached_step)
 
         else:
             if self.current.is_ok: # step succieded
-                debug.debug(f"Step {self.current.name}, cachable: {self.current.cachable}")
                 if self.current.cachable: # Assign new cache if step cachable
                     self.cache.set_state(self.function_name, self.current.name)
-                    debug.debug("Set cache:", self.cache.states.get(self.function_name))
 
                 self.current.is_ok = False
                 self.current = self.get_step(self.current.success)
