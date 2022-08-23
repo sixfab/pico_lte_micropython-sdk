@@ -2,7 +2,8 @@
 Module for managing processes on modem step by step.
 """
 
-from core.status import Status
+from core.temp import config, debug
+from core.utils.status import Status
 
 class Step:
     """Data class for storing step data"""
@@ -25,43 +26,24 @@ class Step:
         self.desired_response = desired_response
         self.cachable = cachable
 
-
-class StateCache:
-    """Data class for storing state data"""
-
-    states = {}
-
-    def add_cache(self, function_name):
-        """Gets cache for #function_name or adds new cache with #function_name key"""
-        if not self.states.get(function_name):
-            self.states[function_name] = None
-
-    def get_state(self, function_name):
-        """Returns state of function_name"""
-        return self.states.get(function_name)
-
-    def set_state(self, function_name, state):
-        """Sets state of function_name"""
-        self.states[function_name] = state
-
-
 class StateManager:
     """Class for managing states"""
 
     NO_WAIT_INTERVAL = 0
-    cache_available = False
     retry_counter = 0
     steps = {}
+    cache = config["cache"]
 
-    def __init__(self, first_step, cache=None, function_name=None):
+    def __init__(self, first_step, function_name=None):
         """Initializes state manager"""
         self.first_step = first_step
-        self.cache = cache
         self.function_name = function_name
 
-        if function_name and cache.states.get(function_name):
-            self.cache_available = True
-            self.cache.add_cache(function_name)
+        debug.debug("Init: Cache:", self.cache.states.get(self.function_name))
+
+        if function_name:
+            if not self.cache.states.get(function_name):
+                self.cache.add_cache(function_name)
 
         self.organizer_step = Step(
             function=self.organizer,
@@ -108,32 +90,27 @@ class StateManager:
         """Organizer step function"""
         if self.current.name == "organizer":
             self.current = self.first_step
-            print("CACHE AVAILABLE:", self.cache_available)
-            print("FUNC:", self.function_name)
-            # assign cache step as current if specific cache is exists
-            if self.cache_available:
-                if self.function_name in self.cache.states:
-                    self.current = self.get_step(self.cache.states[self.function_name])
-                    print("CURRENT: ", self.current)
+
+            cached_step = self.cache.get_state(self.function_name)
+            debug.debug("Org: Cache:", cached_step)
+            if cached_step: # if cached step is not None
+                self.current = self.get_step(cached_step)
+
         else:
             if self.current.is_ok: # step succieded
+                debug.debug(f"Step {self.current.name}, cachable: {self.current.cachable}")
                 if self.current.cachable: # Assign new cache if step cachable
                     self.cache.set_state(self.function_name, self.current.name)
+                    debug.debug("Set cache:", self.cache.states.get(self.function_name))
 
                 self.current.is_ok = False
                 self.current = self.get_step(self.current.success)
             else:
                 if self.retry_counter >= self.current.retry:
                     # step failed and retry counter is exceeded
-
-                    if self.cache_available:
-                        if self.current.name == self.cache.states[self.function_name]:
-                            # step failed and current step is cache step
-                            # go to first step and clear function spesific cache
-                            self.current = self.first_step
-                            self.cache.set_state(self.function_name, None)
-                    else:
-                        self.current = self.get_step(self.current.fail)
+                    self.current = self.get_step(self.current.fail)
+                    # clear cache
+                    self.cache.set_state(self.function_name, None)
 
                     self.clear_counter()
                     self.current.interval = self.NO_WAIT_INTERVAL
@@ -145,11 +122,19 @@ class StateManager:
 
     def success(self):
         """Success step function"""
-        return {"status": Status.SUCCESS, "interval": self.NO_WAIT_INTERVAL}
+        return {
+            "status": Status.SUCCESS,
+            "response": "Successfully completed",
+            "interval": self.NO_WAIT_INTERVAL
+            }
 
     def failure(self):
         """Fail step function"""
-        return {"status": Status.ERROR, "interval": self.NO_WAIT_INTERVAL}
+        return {
+            "status": Status.ERROR,
+            "response": "Failed",
+            "interval": self.NO_WAIT_INTERVAL
+            }
 
     def execute_organizer_step(self):
         """Executes organizer step"""
@@ -164,7 +149,7 @@ class StateManager:
         else:
             result = self.current.function()
 
-        print(result)
+        debug.debug(f"{self.current.function.__name__:<25} : {result}")
 
         if self.current.desired_response:
             if result["status"] == Status.SUCCESS and \
@@ -178,6 +163,8 @@ class StateManager:
             else:
                 self.current.is_ok = False
 
+        return result
+
     def run(self, begin=None, end=None):
         """Runs state manager"""
         result={}
@@ -185,7 +172,7 @@ class StateManager:
             self.current = self.get_step(begin)
 
         self.execute_organizer_step()
-        self.execute_current_step()
+        step_result = self.execute_current_step()
 
         if end:
             if self.current.name == self.get_step(end).name:
@@ -194,6 +181,7 @@ class StateManager:
         if not self.current.final_step:
             result["status"] = Status.ONGOING
             result["interval"] = self.current.interval
+            result["response"] = step_result.get("response")
             return result
         else:
             if self.current.name == "success":

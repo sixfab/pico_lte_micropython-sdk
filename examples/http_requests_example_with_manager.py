@@ -6,8 +6,8 @@ import json
 import time
 
 from core.modem import Modem
-from core.status import Status
-from core.manager import StateManager, Step
+from core.utils.status import Status
+from core.utils.manager import StateManager, Step
 
 def step_for_setting_server_url(modem_object, next_function, url=None, query=""):
     """This function returns a step for setting server's URL with a query.
@@ -25,7 +25,7 @@ def step_for_setting_server_url(modem_object, next_function, url=None, query="")
     url_with_query = url + "/?" + query
     # Set-up the steps for state manager.
     step_set_server_url = Step(
-        function=modem_object.set_modem_http_server_url,
+        function=modem_object.http.set_server_url,
         name="set_server_url",
         success=next_function,
         fail="failure",
@@ -49,21 +49,21 @@ def prepare_communication_for_http(modem_object):
 
     # Set-up the steps for state manager.
     step_network_reg = Step(
-        function=modem_object.register_network,
+        function=modem_object.network.register_network,
         name="register_network",
         success="pdp_deactivate",
         fail="failure"
     )
 
     step_pdp_deactivate = Step(
-        function=modem_object.deactivate_pdp_context,
+        function=modem_object.network.deactivate_pdp_context,
         name="pdp_deactivate",
         success="pdp_activate",
         fail="failure"
     )
 
     step_pdp_activate = Step(
-        function=modem_object.activate_pdp_context,
+        function=modem_object.network.activate_pdp_context,
         name="pdp_activate",
         success="success",
         fail="failure",
@@ -76,7 +76,6 @@ def prepare_communication_for_http(modem_object):
 
     # Create the state manager.
     state_manager = StateManager(first_step=step_network_reg,
-                                cache=modem_object.cache,
                                 function_name=function_name)
 
     # Add each step.
@@ -112,7 +111,7 @@ def post_message_to_http_server(modem_object, payload, url=None, query=""):
         modem_object, "post_request", url, query)
 
     step_post_request = Step(
-        function=modem_object.http_post_request,
+        function=modem_object.http.post,
         name="post_request",
         success="success",
         fail="failure",
@@ -126,7 +125,6 @@ def post_message_to_http_server(modem_object, payload, url=None, query=""):
 
     # Create the state manager.
     state_manager = StateManager(first_step=step_set_server_url,
-                                cache=modem_object.cache,
                                 function_name=function_name)
 
     # Add each step.
@@ -160,7 +158,7 @@ def get_message_to_http_server(modem_object, url=None, query=""):
         modem_object, "get_request", url, query)
 
     step_get_request = Step(
-        function=modem_object.http_get_request,
+        function=modem_object.http.get,
         name="get_request",
         success="success",
         fail="failure",
@@ -173,7 +171,6 @@ def get_message_to_http_server(modem_object, url=None, query=""):
 
     # Create the state manager.
     state_manager = StateManager(first_step=step_set_server_url,
-                                cache=modem_object.cache,
                                 function_name=function_name)
 
     # Add each step.
@@ -208,7 +205,7 @@ def put_message_to_http_server(modem_object, payload, url=None, query=""):
         modem_object, "put_request", url, query)
 
     step_put_request = Step(
-        function=modem_object.http_put_request,
+        function=modem_object.http.put,
         name="put_request",
         success="success",
         fail="failure",
@@ -222,7 +219,6 @@ def put_message_to_http_server(modem_object, payload, url=None, query=""):
 
     # Create the state manager.
     state_manager = StateManager(first_step=step_set_server_url,
-                                cache=modem_object.cache,
                                 function_name=function_name)
 
     # Add each step.
@@ -241,24 +237,30 @@ def put_message_to_http_server(modem_object, payload, url=None, query=""):
 
 if __name__ == "__main__":
     # Initilize the modem object.
-    modem = Modem({})
+    modem = Modem()
+
     # Prepare communication for HTTP.
     prepare_communication_for_http(modem)
+
     # Server address to send requests.
-    HOST = "https://webhook.site/6112efa6-4f8c-4bdb-8fa3-5787cc02f80a"
+    HOST = "https://webhook.site/e2519ab2-9f74-48c3-9346-0e2e93fa6ff3"
     # Prepare a payload to post into the server.
     payload_to_post = {"ProjectTopic": "PicocellHTTPExampleWithManager"}
     payload_to_post_as_json = json.dumps(payload_to_post)
+
     # Post it to the server with given query.
     post_message_to_http_server(
         modem, payload_to_post_as_json, HOST, "device=Pico&try=0")
     time.sleep(4)
+
     # Get a request from the server.
     get_message_to_http_server(modem, HOST, "company=Sixfab&course=Picocell")
     time.sleep(6)
+
     # Prepare a payload to put into the server.
     payload_to_put = {"Temperature(*C)": 28}
     payload_to_put_as_json = json.dumps(payload_to_put)
+
     # Send the request into the server.
     put_message_to_http_server(
         modem, payload_to_put_as_json, HOST, "sensor=Garden2")

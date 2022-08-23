@@ -1,53 +1,49 @@
 """
-Example code for publishing data to AWS IoT by using SDK funtions.
+Example code for publishing data to AWS IoT by using SDK functions.
 """
 
 import json
 
 from core.modem import Modem
-from core.atcom import ATCom
-
-config = {}
+from core.temp import debug
+from core.utils.atcom import ATCom
 
 ###################
 ### AWS example ###
 ###################
 
-modem = Modem(config)
+modem = Modem()
 atcom = ATCom()
 
-HOST = "[CHANGE WITH YOUR AWS IOT ENDPOINT]"
-TOPIC = "[CHANGE WITH YOUR AWS IOT TOPIC]"
-PORT = 8883
-PAYLOAD_JSON = {"state": {"reported": {"Status": "Hello from Picocell!"}}}
+PAYLOAD_JSON = {"state": {"reported": {"Status": "Hello from Picocell --> MQTT"}}}
 payload = json.dumps(PAYLOAD_JSON)
 
 # Check communication with modem
-print("COM: ", modem.check_modem_communication())
-print("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
-print("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
+debug.info("COM: ", modem.base.check_communication())
+debug.info("Set APN: ", atcom.send_at_comm('AT+CGDCONT=1,"IP","super"',"OK"))
+debug.info("COPS: ", atcom.retry_at_comm("AT+COPS?","+COPS: 0,0", timeout=1, retry_count=10))
 
 # TCP/IP
-print("TCPIP Context Configuration: ", modem.configure_tcp_ip_context())
-print("PDP Deactivation: ", modem.deactivate_pdp_context())
-print("PDP Activatation: ", modem.activate_pdp_context())
-print("PDP Test: ", atcom.send_at_comm("AT+CGACT?","OK"))
+debug.info("TCPIP Context Configuration: ", modem.network.configure_tcp_ip_context())
+debug.info("PDP Deactivation: ", modem.network.deactivate_pdp_context())
+debug.info("PDP Activatation: ", modem.network.activate_pdp_context())
+debug.info("PDP Test: ", atcom.send_at_comm("AT+CGACT?","OK"))
 
 # Configurations
 # SSL
-print("Modem SSL CA: ", modem.set_modem_ssl_ca_cert())
-print("Modem SSL Client Cert: ", modem.set_modem_ssl_client_cert())
-print("Modem SSL Client Key: ", modem.set_modem_ssl_client_key())
-print("Set Modem Security Level: ", modem.set_modem_ssl_sec_level())
-print("Set modem SSL Version: ", modem.set_modem_ssl_version())
-print("Set modem SSL Cipher: ", modem.set_modem_ssl_cipher_suite())
-print("Set modem ignore local time: ", modem.set_modem_ssl_ignore_local_time())
+debug.info("Modem SSL CA: ", modem.ssl.set_ca_cert())
+debug.info("Modem SSL Client Cert: ", modem.ssl.set_client_cert())
+debug.info("Modem SSL Client Key: ", modem.ssl.set_client_key())
+debug.info("Set Modem Security Level: ", modem.ssl.set_sec_level())
+debug.info("Set modem SSL Version: ", modem.ssl.set_version())
+debug.info("Set modem SSL Cipher: ", modem.ssl.set_cipher_suite())
+debug.info("Set modem ignore local time: ", modem.ssl.set_ignore_local_time())
 
 # MQTT
-print("Modem MQTT version: ", modem.set_modem_mqtt_version_config())
-print("Modem MQTT SSL Mode: ", modem.set_modem_mqtt_ssl_mode_config())
+debug.info("Modem MQTT version: ", modem.mqtt.set_version_config())
+debug.info("Modem MQTT SSL Mode: ", modem.mqtt.set_ssl_mode_config())
 
-print("Open MQTT Connection: ", modem.open_mqtt_connection(host=HOST, port=PORT))
-print("Connect MQTT Broker: ", modem.connect_mqtt_broker())
-print("Publish MQTT Message: ", modem.publish_mqtt_message(topic=TOPIC, payload=payload))
-print("Close MQTT Connection: ", modem.close_mqtt_connection())
+debug.info("Open MQTT Connection: ", modem.mqtt.open_connection())
+debug.info("Connect MQTT Broker: ", modem.mqtt.connect_broker())
+debug.info("Publish MQTT Message: ", modem.mqtt.publish_message(payload))
+debug.info("Close MQTT Connection: ", modem.mqtt.close_connection())
