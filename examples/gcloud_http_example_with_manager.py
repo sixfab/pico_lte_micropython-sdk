@@ -8,8 +8,7 @@ from core.temp import debug
 modem = Modem()
 
 while True:
-    PAYLOAD = "Picocell Google Cloud IoT Example using HTTP"
-    result = modem.gcloud.post_message(PAYLOAD)
+    result = modem.gcloud.post_message("Picocell Google Cloud IoT Example using HTTP")
 
     debug.info(result)
     time.sleep(10)
