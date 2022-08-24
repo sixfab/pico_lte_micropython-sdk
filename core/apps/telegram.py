@@ -17,19 +17,43 @@ class Telegram:
     cache = config["cache"]
 
     def __init__(self, base, network, http):
-        """_summary_
+        """Constructor of the class.
 
-        Args:
-            base (_type_): _description_
-            network (_type_): _description_
-            http (_type_): _description_
+        Parameters
+        ----------
+        base : Base
+            Picocell Base class
+        network : Network
+            Picocell Network class
+        http : HTTP
+            Picocell HTTP class
         """
         self.base = base
         self.network = network
         self.http = http
 
     def send_message(self, payload, host=None, bot_token=None, chat_id=None):
-        """ This function sends a message to the bot. """
+        """This function sends a message to the bot.
+
+        Parameters
+        ----------
+        payload : str
+            Payload of the message.
+        host : str
+            Telegram's server endpoint address.
+        bot_token : str
+            Bot's private token.
+        chat_id : str
+            Chat ID of where the bot lives.
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
         if host is None:
             host = get_parameter(["telegram", "server"], "api.telegram.org/bot")
 
