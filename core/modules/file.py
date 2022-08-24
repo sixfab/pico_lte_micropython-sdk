@@ -77,9 +77,9 @@ class File:
         """
         len_file = len(file)
         command = f'AT+QFUPL="{filename}",{len_file},{timeout}'
-        result = self.atcom.send_at_comm(command)
+        result = self.atcom.send_at_comm(command, "CONNECT", urc=True)
 
-        if result["status"] == Status.WAITING_INPUT:
+        if result["status"] == Status.SUCCESS:
             self.atcom.send_at_comm_once(file) # send ca cert
             return self.atcom.send_at_comm(self.CTRL_Z) # send end char -> CTRL_Z
         return result

@@ -72,7 +72,7 @@ class ATCom:
         except:
             debug.error("Error occured while AT command writing to modem")
 
-    def get_response(self, desired_responses=None, timeout=5):
+    def get_response(self, desired_responses=None, fault_responses=None, timeout=5):
         """
 		Function for getting modem response
 
@@ -90,12 +90,13 @@ class ATCom:
 		"""
         response = ""
         processed = []
-        f_waiting_input = False
 
         if desired_responses:
             if isinstance(desired_responses, str): # if desired response is string
                 desired_responses = [desired_responses] # make it list
-                print("Desired:", desired_responses)
+        if fault_responses:
+            if isinstance(fault_responses, str): # if desired response is string
+                fault_responses = [fault_responses] # make it list
 
         timer = time.time()
         while True:
@@ -105,6 +106,7 @@ class ATCom:
                 while self.modem_com.any():
                     try:
                         response += self.modem_com.read(self.modem_com.any()).decode('utf-8')
+                        debug.debug("Response:", [response])
                     except:
                         pass
             else:
@@ -113,7 +115,7 @@ class ATCom:
             if response != "":
                 responses = response.split("\r\n")
                 processed.extend([x for x in responses if x != ""])
-                print("Processed:", processed)
+                debug.debug("Processed:", processed)
                 response = ""
 
             head = 0
@@ -124,26 +126,21 @@ class ATCom:
                     if not desired_responses: # if we don't look for specific responses
                         return {"status": Status.SUCCESS, "response": processed_part}
                     else:
-                        if index - head > 0: # we got an informative response here
-                            for desired in desired_responses: # get desired responses from list
-                                if desired in processed[index-1]:
-                                    print("Desired:", desired, processed[index-1])
-                                    return {"status": Status.SUCCESS, "response": processed_part}
-                                else:
-                                    head = index
-                        else:
+                        if index - head < 1: # we haven't got an informative response here
                             return {"status": Status.ERROR, "response": processed_part}
+
+                        for focus_line in processed[head:index]: # scan lines before 'OK'
+                            if desired_responses:
+                                if any(desired in focus_line for desired in desired_responses):
+                                    debug.debug("Desired:", focus_line)
+                                    return {"status": Status.SUCCESS, "response": processed_part}
+                            if fault_responses:
+                                if any(fault in focus_line for fault in fault_responses):
+                                    debug.debug("Fault:", focus_line)
+                                    return {"status": Status.ERROR, "response": processed_part}
 
                 elif value == "+CME ERROR:" or value == "ERROR": # error
                     return {"status": Status.ERROR, "response": processed_part}
-
-                elif value == "CONNECT" or value == "> ": # waiting input
-                    f_waiting_input = True # rise flag
-
-            # If no other responses ("OK", "ERROR", etc.) were found
-            # and "CONNECT" was found, return "waiting input" status
-            if f_waiting_input:
-                return {"status": Status.WAITING_INPUT, "response": processed_part}
 
     def get_urc_response(self, desired_responses=None, fault_responses=None, timeout=5):
         """
@@ -187,7 +184,7 @@ class ATCom:
             if response != "":
                 responses = response.split("\r\n")
                 processed.extend([x for x in responses if x != ""])
-                print("Processed:", processed)
+                debug.debug("Processed:", processed)
                 response = ""
 
             head = 0
@@ -203,7 +200,7 @@ class ATCom:
                         if fault in value:
                             return {"status": Status.ERROR, "response": processed_part}
 
-    def send_at_comm(self, command, response=None, timeout=5, line_end=True):
+    def send_at_comm(self, command, desired=None, fault=None, timeout=5, line_end=True, urc=False):
         """
 		Function for writing AT command to modem and getting modem response
 
@@ -223,7 +220,9 @@ class ATCom:
 		"""
         self.send_at_comm_once(command, line_end=line_end)
         time.sleep(0.1)
-        return self.get_response(response, timeout)
+        if urc:
+            return self.get_urc_response(desired, fault, timeout)
+        return self.get_response(desired, fault, timeout)
 
     def retry_at_comm(self, command, response=None, timeout=5, retry_count=3, interval=1):
         """

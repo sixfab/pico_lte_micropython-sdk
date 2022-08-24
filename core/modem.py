@@ -22,6 +22,8 @@ from core.modules.gps import GPS
 
 from core.apps.aws import AWS
 from core.apps.telegram import Telegram
+from core.apps.gcloud import GCloud
+
 
 
 class Modem:
@@ -51,6 +53,8 @@ class Modem:
 
         self.aws = AWS(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
         self.telegram = Telegram(self.base, self.network, self.http)
+        self.gcloud = GCloud(self.base, self.network, self.ssl, self.mqtt, self.http)
+
 
         # power up modem
         if self.base.power_status() != 0:

@@ -490,7 +490,6 @@ class MQTT:
         if topics:
             prefix = f'AT+QMTSUB={cid},{message_id},'
             command = prefix + ",".join(f'"{topic}",{qos}' for topic, qos in topics)
-            print("COMMAND: ", command)
             result = self.atcom.send_at_comm(command)
 
             if result["status"] == Status.SUCCESS:
@@ -588,9 +587,9 @@ class MQTT:
 
         if payload and topic:
             command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
-            result = self.atcom.send_at_comm(command)
+            result = self.atcom.send_at_comm(command, ">", urc=True)
 
-            if result["status"] == Status.WAITING_INPUT:
+            if result["status"] == Status.SUCCESS:
                 self.atcom.send_at_comm_once(payload, line_end=False) # Send message
                 result = self.atcom.send_at_comm(self.CTRL_Z) # Send end char --> CTRL+Z
             return result
