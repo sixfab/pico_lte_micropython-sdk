@@ -301,7 +301,7 @@ class GCloud:
         step_set_server_url = Step(
             function=self.http.set_server_url,
             name="set_server_url",
-            success="post_request",
+            success="get_request_to_register",
             fail="failure",
             function_params={"url": url},
         )
@@ -309,27 +309,38 @@ class GCloud:
         step_get_request = Step(
             function=self.http.get,
             name="get_request_to_register",
+            success="read_get_response",
+            fail="failure",
+            function_params={"data": header_get, "header_mode": 1},
+            interval=1
+        )
+
+        step_read_get_response = Step(
+            function=self.http.read_response,
+            name="read_get_response",
             success="post_request",
             fail="failure",
-            function_params={"data": header_get, "header_mode": 1}
+            function_params={"desired_response": "200"},
+            retry=3
         )
 
         step_post_request = Step(
             function=self.http.post,
             name="post_request",
-            success="read_response",
+            success="read_post_response",
             fail="failure",
             function_params={"data": header_post + payload_to_post,
                             "header_mode": 1},
-            cachable=True,
-            interval=2,
+            interval=1.5
         )
 
-        step_read_response = Step(
+        step_read_post_response = Step(
             function=self.http.read_response,
-            name="read_response",
+            name="read_post_response",
             success="success",
             fail="failure",
+            function_params={"desired_response": "200"},
+            retry=3
         )
 
         # Add cache if it is not already existed
@@ -343,8 +354,9 @@ class GCloud:
         sm.add_step(step_pdp_activate)
         sm.add_step(step_set_server_url)
         sm.add_step(step_get_request)
+        sm.add_step(step_read_get_response)
         sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
+        sm.add_step(step_read_post_response)
 
         while True:
             result = sm.run()
