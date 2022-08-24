@@ -181,8 +181,8 @@ class GCloud:
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
-            function_params={"client_id_string":client_id, \
-                "username":"unused", "password": "none"}
+            function_params={"client_id_string": client_id, \
+                "username":"unused", "password": self.jwt}
         )
 
         step_publish_message = Step(
@@ -190,7 +190,7 @@ class GCloud:
             name="publish_message",
             success="success",
             fail="failure",
-            function_params={"payload":payload, "topic":topic},
+            function_params={"payload": payload, "topic": topic},
         )
 
         # Add cache if it is not already existed
@@ -319,7 +319,7 @@ class GCloud:
             name="post_request",
             success="read_response",
             fail="failure",
-            function_params={"data": header_post+payload_to_post,
+            function_params={"data": header_post + payload_to_post,
                             "header_mode": 1},
             cachable=True,
             interval=2,
@@ -354,3 +354,152 @@ class GCloud:
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
+
+    def subscribe_topics(self, host=None, port=None, topics=None, client_id=None):
+        """
+        Function for subscribing to topics of Google Cloud IoT.
+
+        Parameters
+        ----------
+        topics : list
+            List of topics.
+
+        Returns
+        -------
+        (status, modem_response) : tuple
+            status : int
+                Status of the command.
+            modem_response : str
+                Response of the modem.
+        """
+        if host is None:
+            host = get_parameter(["gcloud", "mqtts", "host"], default="mqtt.googleapis.com")
+
+        if port is None:
+            port = get_parameter(["gcloud", "mqtts", "port"], default=8883)
+
+        if topics is None:
+            topics = get_parameter(["gcloud", "mqtts", "sub_topics"],  \
+                default=f'/devices/{self.device_id}/commands/#')
+
+        if client_id is None:
+            client_id = 'projects/' + self.project_id + '/locations/' + self.region +\
+                        '/registries/' + self.registry_id + '/devices/' + self.device_id
+
+        # Check if client is connected to the broker
+        step_check_mqtt_connected = Step(
+            function=self.mqtt.is_connected_to_broker,
+            name="check_connected",
+            success="publish_message",
+            fail="check_opened",
+        )
+
+        # Check if client connected to Google Cloud IoT
+        step_check_mqtt_opened = Step(
+            function=self.mqtt.has_opened_connection,
+            name="check_opened",
+            success="connect_mqtt_broker",
+            fail="register_network",
+        )
+
+        # If client is not connected to the broker and have no open connection with
+        # AWS IoT, begin the first step of the state machine.
+        step_network_reg = Step(
+            function=self.network.register_network,
+            name="register_network",
+            success="configure_tcp_ip_context",
+            fail="failure",
+        )
+
+        step_tcpip_context = Step(
+            function=self.network.configure_tcp_ip_context,
+            name="configure_tcp_ip_context",
+            success="pdp_deactivate",
+            fail="failure"
+        )
+
+        step_pdp_deactivate = Step(
+            function=self.network.deactivate_pdp_context,
+            name="pdp_deactivate",
+            success="pdp_activate",
+            fail="failure",
+        )
+
+        step_pdp_activate= Step(
+            function=self.network.activate_pdp_context,
+            name="pdp_activate",
+            success="set_mqtt_version",
+            fail="failure",
+        )
+
+        step_set_mqtt_version = Step(
+            function=self.mqtt.set_version_config,
+            name="set_mqtt_version",
+            success="set_mqtt_ssl_mode",
+            fail="failure",
+        )
+
+        step_set_mqtt_ssl_mode = Step(
+            function=self.mqtt.set_ssl_mode_config,
+            name="set_mqtt_ssl_mode",
+            success="open_mqtt_connection",
+            fail="failure",
+        )
+
+        step_open_mqtt_connection = Step(
+            function=self.mqtt.open_connection,
+            name="open_mqtt_connection",
+            success="connect_mqtt_broker",
+            fail="failure",
+            function_params={"host": host, "port": port}
+        )
+
+        step_connect_mqtt_broker = Step(
+            function=self.mqtt.connect_broker,
+            name="connect_mqtt_broker",
+            success="subscribe_topics",
+            fail="failure",
+            function_params={"client_id_string": client_id, \
+                "username":"unused", "password": self.jwt}
+        )
+
+        step_subscribe_topics = Step(
+            function=self.mqtt.subscribe_topics,
+            name="subscribe_topics",
+            success="success",
+            fail="failure",
+            function_params={"topics": topics},
+            cachable=True,
+        )
+
+        # Add cache if it is not already existed
+        function_name = "gcloud.subscribe_message"
+
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+
+        sm.add_step(step_check_mqtt_connected)
+        sm.add_step(step_check_mqtt_opened)
+        sm.add_step(step_network_reg)
+        sm.add_step(step_tcpip_context)
+        sm.add_step(step_pdp_deactivate)
+        sm.add_step(step_pdp_activate)
+        sm.add_step(step_set_mqtt_version)
+        sm.add_step(step_set_mqtt_ssl_mode)
+        sm.add_step(step_open_mqtt_connection)
+        sm.add_step(step_connect_mqtt_broker)
+        sm.add_step(step_subscribe_topics)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
+    def read_messages(self):
+        """
+        Read messages from subscribed topics.
+        """
+        return self.mqtt.read_messages()
