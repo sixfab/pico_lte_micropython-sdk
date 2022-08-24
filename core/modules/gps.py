@@ -1,9 +1,6 @@
 """
 Module for including functions of location service of picocell module.
 """
-
-from core.temp import config, debug
-
 class GPS:
     """
     Class for inculding functions of location service of picocell module.
@@ -27,7 +24,7 @@ class GPS:
                 Status of the command.
         """
         command = 'AT+QGPSCFG="priority"'
-        return self.atcom.send_at_comm(command, "OK")
+        return self.atcom.send_at_comm(command)
 
     def set_priority(self, priority):
         """
@@ -49,7 +46,7 @@ class GPS:
                 Status of the command.
         """
         command = f'AT+QGPSCFG="priority",{priority}'
-        return self.atcom.send_at_comm(command, "OK")
+        return self.atcom.send_at_comm(command)
 
     def turn_on(self, mode=1, accuracy=3, fix_count=0, fix_rate=1):
         """
@@ -81,7 +78,7 @@ class GPS:
                 Status of the command.
         """
         command = f'AT+QGPS={mode},{accuracy},{fix_count},{fix_rate}'
-        return self.atcom.send_at_comm(command, "OK")
+        return self.atcom.send_at_comm(command)
 
     def turn_off(self):
         """
@@ -96,7 +93,7 @@ class GPS:
                 Status of the command.
         """
         command = "AT+QGPSEND"
-        return self.atcom.send_at_comm(command, "OK")
+        return self.atcom.send_at_comm(command)
 
     def get_location(self):
         """
@@ -112,4 +109,4 @@ class GPS:
 
         """
         command = "AT+QGPSLOC?"
-        return self.atcom.send_at_comm(command, "OK")
+        return self.atcom.send_at_comm(command)
