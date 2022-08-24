@@ -108,6 +108,24 @@ class GCloud:
             client_id = 'projects/' + self.project_id + '/locations/' + self.region +\
                         '/registries/' + self.registry_id + '/devices/' + self.device_id
 
+        # Check if client is connected to the broker
+        step_check_mqtt_connected = Step(
+            function=self.mqtt.is_connected_to_broker,
+            name="check_connected",
+            success="publish_message",
+            fail="check_opened",
+        )
+
+        # Check if client connected to Google Cloud IoT
+        step_check_mqtt_opened = Step(
+            function=self.mqtt.has_opened_connection,
+            name="check_opened",
+            success="connect_mqtt_broker",
+            fail="register_network",
+        )
+
+        # If client is not connected to the broker and have no open connection with
+        # AWS IoT, begin the first step of the state machine.
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
@@ -162,9 +180,9 @@ class GCloud:
             function=self.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="publish_message",
-            fail="publish_message",
+            fail="failure",
             function_params={"client_id_string":client_id, \
-                "username":"unused", "password": self.jwt}
+                "username":"unused", "password": "none"}
         )
 
         step_publish_message = Step(
@@ -173,14 +191,15 @@ class GCloud:
             success="success",
             fail="failure",
             function_params={"payload":payload, "topic":topic},
-            cachable=True,
         )
 
         # Add cache if it is not already existed
         function_name = "gcloud.publish_message"
 
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
+        sm.add_step(step_check_mqtt_connected)
+        sm.add_step(step_check_mqtt_opened)
         sm.add_step(step_network_reg)
         sm.add_step(step_tcpip_context)
         sm.add_step(step_pdp_deactivate)
