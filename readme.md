@@ -56,6 +56,16 @@ Create `config.json` file on the root path of the Picocell.
 }
 ```
 
+ ### For Telegram app module
+```config.json
+{
+    "telegram": {
+        "token": "[YOUR_BOT_TOKEN_ID]",
+        "chat_id": "[YOUR_GROUP_CHAT_ID]"
+        }
+}
+```
+
  ### For GCloud app module
 ```config.json
 {
