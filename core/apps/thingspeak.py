@@ -138,8 +138,9 @@ class ThingSpeak:
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
-            function_params={"client_id_string": client_id, \
-                "username": username, "password": password}
+            function_params={"client_id_string": client_id,
+                            "username": username,
+                            "password": password}
         )
 
         step_publish_message = Step(
@@ -147,7 +148,9 @@ class ThingSpeak:
             name="publish_message",
             success="success",
             fail="failure",
-            function_params={"payload": "field1=15&field2=35&status=MQTT_PICOCELL_PUBLISH", "topic": "channels/1825431/publish", "qos": 0},
+            function_params={"payload": payload,
+                            "topic": topic,
+                            "qos": 1},
             retry=3,
             interval=1
         )
