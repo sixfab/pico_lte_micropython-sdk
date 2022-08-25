@@ -78,3 +78,13 @@ Create `config.json` file on the root path of the Picocell.
     }
 }
 ```
+
+### For Slack app module
+
+```config.json
+{
+    "slack":{
+        "webhook_url": "[INCOMING_WEBHOOK_URL]"
+    }
+}
+```
