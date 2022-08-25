@@ -78,3 +78,17 @@ Create `config.json` file on the root path of the Picocell.
     }
 }
 ```
+
+### For ThingSpeak app module
+```config.json
+{
+    "thingspeak": {
+        "channel_id": "[YOUR_CHANNEL_ID]",
+        "mqtts": {
+            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
+            "username": "[DEVICE_MQTT_USERNAME]",
+            "password": "[DEVICE_MQTT_PASSWORD]"
+        }
+    }
+}
+```
