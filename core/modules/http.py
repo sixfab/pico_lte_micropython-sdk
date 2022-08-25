@@ -3,47 +3,49 @@ Module for including functions of HTTP related operations of picocell module.
 
 HTTP Result Codes
 ------------------------------------------
-0 --> Operation successful
-701 --> HTTP(S) unknown error
-702 --> HTTP(S) timeout
-703 --> HTTP(S) busy
-704 --> HTTP(S) UART busy
-705 --> HTTP(S) no GET/POST/PUT requests
-706 --> HTTP(S) network busy
-707 --> HTTP(S) network open failed
-708 --> HTTP(S) network no configuration
-709 --> HTTP(S) network deactivated
-710 --> HTTP(S) network error
-711 --> HTTP(S) URL error
-712 --> HTTP(S) empty URL
-713 --> HTTP(S) IP address error
-714 --> HTTP(S) DNS error
-715 --> HTTP(S) socket create error
-716 --> HTTP(S) socket connect error
-717 --> HTTP(S) socket read error
-718 --> HTTP(S) socket write error
-719 --> HTTP(S) socket closed
-720 --> HTTP(S) data encode error
-721 --> HTTP(S) data decode error
-722 --> HTTP(S) read timeout
-723 --> HTTP(S) response failed
-724 --> Incoming call busy
-725 --> Voice call busy
-726 --> Input timeout
-727 --> Wait data timeout
-728 --> Wait HTTP(S) response timeout
-729 --> Memory allocation failed
-730 --> Invalid parameter
+* 0 --> Operation successful
+* 701 --> HTTP(S) unknown error
+* 702 --> HTTP(S) timeout
+* 703 --> HTTP(S) busy
+* 704 --> HTTP(S) UART busy
+* 705 --> HTTP(S) no GET/POST/PUT requests
+* 706 --> HTTP(S) network busy
+* 707 --> HTTP(S) network open failed
+* 708 --> HTTP(S) network no configuration
+* 709 --> HTTP(S) network deactivated
+* 710 --> HTTP(S) network error
+* 711 --> HTTP(S) URL error
+* 712 --> HTTP(S) empty URL
+* 713 --> HTTP(S) IP address error
+* 714 --> HTTP(S) DNS error
+* 715 --> HTTP(S) socket create error
+* 716 --> HTTP(S) socket connect error
+* 717 --> HTTP(S) socket read error
+* 718 --> HTTP(S) socket write error
+* 719 --> HTTP(S) socket closed
+* 720 --> HTTP(S) data encode error
+* 721 --> HTTP(S) data decode error
+* 722 --> HTTP(S) read timeout
+* 723 --> HTTP(S) response failed
+* 724 --> Incoming call busy
+* 725 --> Voice call busy
+* 726 --> Input timeout
+* 727 --> Wait data timeout
+* 728 --> Wait HTTP(S) response timeout
+* 729 --> Memory allocation failed
+* 730 --> Invalid parameter
+
 ------------------------------------------
 
 HTTP Server Response Codes
 ---------------------------
-200 OK
-403 Forbidden
-404 Not found
-409 Conflict
-411 Length required
-500 Internal server error
+* 200 OK
+* 403 Forbidden
+* 404 Not found
+* 409 Conflict
+* 411 Length required
+* 500 Internal server error
+
 ---------------------------
 """
 
@@ -67,16 +69,13 @@ class HTTP:
 
         Parameters
         ----------
-        http_context_id : int
-            HTTP context identifier (default=1)(1-16)
+        http_context_id : int, default: 1
+            HTTP context identifier (1-16)
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPCFG="contextid",{http_context_id}'
         return self.atcom.send_at_comm(command)
@@ -89,16 +88,13 @@ class HTTP:
         ----------
         status : int
             Status of the command.
-                0 --> Disable
-                1 --> Enable
+            * 0 --> Disable
+            * 1 --> Enable
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPCFG="requestheader",{status}'
         return self.atcom.send_at_comm(command)
@@ -111,16 +107,13 @@ class HTTP:
         ----------
         status : int
             Status of the command.
-                0 --> Disable
-                1 --> Enable
+            * 0 --> Disable
+            * 1 --> Enable
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPCFG="responseheader",{status}'
         return self.atcom.send_at_comm(command)
@@ -131,16 +124,13 @@ class HTTP:
 
         Parameters
         ----------
-        id : int
-            SSL context identifier (default=1)(0-5)
+        id : int, default: 1
+            SSL context identifier (0-5)
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPCFG="sslctxid",{id}'
         return self.atcom.send_at_comm(command)
@@ -151,22 +141,19 @@ class HTTP:
 
         Parameters
         ----------
-        content_type : str
-            Content type (default=0)
-                0 --> application/x-www-form-urlencoded
-                1 --> text/plain
-                2 --> application/octet-stream
-                3 --> multipart/form-data
-                4 --> application/json
-                5 --> image/jpeg
+        content_type : str, default: 0
+            Content type
+            * 0 --> application/x-www-form-urlencoded
+            * 1 --> text/plain
+            * 2 --> application/octet-stream
+            * 3 --> multipart/form-data
+            * 4 --> application/json
+            * 5 --> image/jpeg
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPCFG="contenttype",{content_type}'
         return self.atcom.send_at_comm(command)
@@ -177,18 +164,15 @@ class HTTP:
 
         Parameters
         ----------
-        username : str
-            Username (default="")
-        password : str
-            Password (default="")
+        username : str, default: None
+            Username
+        password : str, default: None
+            Password
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
 
         if username:
@@ -211,16 +195,13 @@ class HTTP:
 
         Parameters
         ----------
-        header : str
-            Custom header (default="")
+        header : str, default: None
+            Custom header
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         if header:
             command = f'AT+QHTTPCFG="customheader","{header}"'
@@ -235,16 +216,15 @@ class HTTP:
 
         Parameters
         ----------
-        url : str
-            Server URL (default="")
+        url : str, default: None
+            Server URL.
+            If None, checked the config.yaml or environment variables.
+            If not found anywhere returns missing arguments error.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         if url is None:
             url = get_parameter(["https","server"])
@@ -267,28 +247,19 @@ class HTTP:
         ----------
         data : str
             The full header for the GET request if header_mode is set.
-        header_mode : int
-            Customization of HTTP(S) request header)(default=0)
-                0 --> Disable
-                1 --> Enable
-        input_timeout : int
-            Input timeout (default=5)
-        timeout : int
-            Timeout (default=60)
+        header_mode : int, default: 0
+            Customization of HTTP(S) request header.
+            * 0 --> Disable
+            * 1 --> Enable
+        input_timeout : int, default: 5
+            Input timeout in seconds
+        timeout : int, default: 60
+            Timeout in seconds
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
@@ -315,30 +286,20 @@ class HTTP:
         Parameters
         ----------
         data : str
-            Data to send (default="")
-        header_mode : int
-            Customization of HTTP(S) request header)(default=0)
-                0 --> Only the HTTP(S) POST body should be inputted via a UART/USB port.
-                1 --> Both the HTTP(S) POST header and body should be inputted via a UART/USB port.
-        input_timeout : int
-            Input timeout (default=5)
-        timeout : int
-            Timeout (default=60)
+            Data to send
+        header_mode : int, default: 0
+            Customization of HTTP(S) request header.
+            * 0 --> Only the HTTP(S) POST body should be inputted via a UART/USB port.
+            * 1 --> Both the HTTP(S) POST header and body should be inputted via a UART/USB port.
+        input_timeout : int, default: 5
+            Input timeout in seconds.
+        timeout : int, default: 60
+            Timeout in seconds.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
@@ -359,26 +320,17 @@ class HTTP:
         ----------
         file_path : str
             File path to send
-        header_mode : int
-            Customization of HTTP(S) request header)(default=0)
-                0 --> The file in a file system will be the HTTP(S) POST body only.
-                1 --> The file in a file system will be the HTTP(S) POST header and body.
-        timeout : int
-            Timeout (default=60)
+        header_mode : int, default: 0
+            Customization of HTTP(S) request header
+            * 0 --> The file in a file system will be the HTTP(S) POST body only.
+            * 1 --> The file in a file system will be the HTTP(S) POST header and body.
+        timeout : int, default: 60
+            Timeout in seconds.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         if header_mode == 1:
             return {"response": "Not implemented yet!", "status": Status.ERROR}
@@ -394,28 +346,19 @@ class HTTP:
         ----------
         data : str
             Data to send
-        header_mode : int
-            Customization of HTTP(S) request header)(default=0)
-                0 --> Only the HTTP(S) PUT body should be inputted via a UART/USB port.
-                1 --> Both the HTTP(S) PUT header and body should be inputted via a UART/USB port.
-        input_timeout : int
-            Input timeout (default=5)
-        timeout : int
-            Timeout (default=60)
+        header_mode : int, default: 0
+            Customization of HTTP(S) request header
+            * 0 --> Only the HTTP(S) PUT body should be inputted via a UART/USB port.
+            * 1 --> Both the HTTP(S) PUT header and body should be inputted via a UART/USB port.
+        input_timeout : int, default: 5
+            Input timeout in seconds.
+        timeout : int, default: 60
+            Timeout in seconds.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
@@ -436,34 +379,25 @@ class HTTP:
         ----------
         file_path : str
             File path to send
-        file_type : int
-            File type File information to be sent. This parameter can only be omitted 
-            when <file_type>=0.(default=0)
-                0 -->
+        file_type : int, default: 0
+            File type File information to be sent. This parameter can only be omitted
+            when <file_type>=0.
+                * 0 -->
                     * If <request_header>=0, it indicates request body
                     * If <request_header>=1, it indicates both request header and body
-                1 --> Request header (<request_header> must be set to 1)
-                2 --> Request body (<request_header> must be set to 1)
-        header_mode : int
-            Customization of HTTP(S) request header)(default=0)
-                0 --> Disable
-                1 --> Enable
-        timeout : int
-            Timeout (default=60)
+                * 1 --> Request header (<request_header> must be set to 1)
+                * 2 --> Request body (<request_header> must be set to 1)
+        header_mode : int, default: 0
+            Customization of HTTP(S) request header.
+            * 0 --> Disable
+            * 1 --> Enable
+        timeout : int, default: 60
+            Timeout in seconds.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         if header_mode == 1:
             return {"response": "Not implemented yet!", "status": Status.ERROR}
@@ -478,22 +412,13 @@ class HTTP:
 
         Parameters
         ----------
-        timeout : int
-            Timeout (default=60)
+        timeout : int, default: 60
+            Timeout in seconds.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPREAD={timeout}'
         result = self.atcom.send_at_comm(
@@ -511,22 +436,13 @@ class HTTP:
         ----------
         file_path : str
             File path to save
-        timeout : int
-            Timeout (default=60)
+        timeout : int, default: 60
+            Timeout in seconds.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str (<result>[,<httprspcode>[,<content_length>]])
-                Response from the command
-                    - result : int
-                        Result Code of HTTP(S)
-                    - httprspcode : int
-                        HTTP(S) response code
-                    - content_length : int
-                        Length of HTTP(S) response body.
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QHTTPREADFILE={file_path},{timeout}'
         return self.atcom.send_at_comm(command)

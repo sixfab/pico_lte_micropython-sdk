@@ -21,11 +21,10 @@ from core.modules.ssl import SSL
 from core.modules.gps import GPS
 
 from core.apps.aws import AWS
+from core.apps.slack import Slack
 from core.apps.telegram import Telegram
 from core.apps.gcloud import GCloud
 from core.apps.thingspeak import ThingSpeak
-
-
 
 class Modem:
     """
@@ -56,7 +55,7 @@ class Modem:
         self.telegram = Telegram(self.base, self.network, self.http)
         self.gcloud = GCloud(self.base, self.network, self.ssl, self.mqtt, self.http)
         self.thingspeak = ThingSpeak(self.base, self.network, self.mqtt)
-
+        self.slack = Slack(self.base, self.network, self.http)
 
         # power up modem
         if self.base.power_status() != 0:

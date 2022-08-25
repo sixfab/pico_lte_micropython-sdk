@@ -74,7 +74,24 @@ Create `config.json` file on the root path of the Picocell.
         "region": "[YOUR_GCLOUDIOT_REGION]",
         "registry_id": "[YOUR_GCLOUDIOT_REGISTRY_ID]",
         "device_id": "[YOUR_GCLOUDIOT_DEVICE_ID]",
-        "jwt": "[YOUR_JSON_WEB_TOKEN_FOR_DEVICE]"
+        "jwt": "[YOUR_JSON_WEB_TOKEN_FOR_DEVICE]",
+        "mqtts": {
+            "pub_topic": [YOUR_MQTT_TOPIC],
+            "sub_topics": [
+                "[YOUR_MQTT_TOPIC/1]",
+                "[YOUR_MQTT_TOPIC/2]"
+            ] 
+        }
+    }
+}
+```
+
+### For Slack app module
+
+```config.json
+{
+    "slack":{
+        "webhook_url": "[INCOMING_WEBHOOK_URL]"
     }
 }
 ```

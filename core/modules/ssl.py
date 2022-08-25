@@ -26,16 +26,13 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str (default="cacert.pem")
+        file_path : str, default: "/security/cacert.pem"
             Path to the CA certificate file
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
@@ -49,16 +46,13 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str (default="client.pem")
+        file_path : str, default: "/security/client.pem"
             Path to the client certificate file
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
@@ -72,16 +66,13 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str (default="user_key.pem")
+        file_path : str, default: "/security/user_key.pem"
             Path to the client key file
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="clientkey",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
@@ -92,22 +83,19 @@ class SSL:
 
         Parameters
         ----------
-        ssl_context_id : int
+        ssl_context_id : int, default: 2
             SSL context identifier
 
         sec_level : int
             SSL Security level
-                0 --> No authentication
-                1 --> Perform server authentication
-                2 --> Perform server and client authentication if requested by the remote server
+            * 0 --> No authentication
+            * 1 --> Perform server authentication
+            * 2 --> Perform server and client authentication if requested by the remote server
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="seclevel",{ssl_context_id},{sec_level}'
         return self.atcom.send_at_comm(command)
@@ -118,24 +106,21 @@ class SSL:
 
         Parameters
         ----------
-        ssl_context_id : int
-            SSL context identifier(default=2)
+        ssl_context_id : int, default: 2
+            SSL context identifier
 
         ssl_version : int
             SSL version (default=4)
-                0 --> SSL3.0
-                1 --> TLS1.0
-                2 --> TLS1.1
-                3 --> TLS1.2
-                4 --> All
+            * 0 --> SSL3.0
+            * 1 --> TLS1.0
+            * 2 --> TLS1.1
+            * 3 --> TLS1.2
+            * 4 --> All
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="sslversion",{ssl_context_id},{ssl_version}'
         return self.atcom.send_at_comm(command)
@@ -146,55 +131,52 @@ class SSL:
 
         Parameters
         ----------
-        ssl_context_id : int
-            SSL context identifier (default=2)
+        ssl_context_id : int, default: 2
+            SSL context identifier
 
-        cipher_suite : str
+        cipher_suite : str, default: "0xFFFF"
             SSL Cipher suite.
-                0X0035 --> TLS_RSA_WITH_AES_256_CBC_SHA
-                0X002F --> TLS_RSA_WITH_AES_128_CBC_SHA
-                0X0005 --> TLS_RSA_WITH_RC4_128_SHA
-                0X0004 --> TLS_RSA_WITH_RC4_128_MD5
-                0X000A --> TLS_RSA_WITH_3DES_EDE_CBC_SHA
-                0X003D --> TLS_RSA_WITH_AES_256_CBC_SHA256
-                0XC002 --> TLS_ECDH_ECDSA_WITH_RC4_128_SHA
-                0XC003 --> TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA
-                0XC004 --> TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA
-                0XC005 --> TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA
-                0XC007 --> TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
-                0XC008 --> TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
-                0XC009 --> TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
-                0XC00A --> TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
-                0XC011 --> TLS_ECDHE_RSA_WITH_RC4_128_SHA
-                0XC012 --> TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
-                0XC013 --> TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
-                0XC014 --> TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
-                0XC00C --> TLS_ECDH_RSA_WITH_RC4_128_SHA
-                0XC00D --> TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA
-                0XC00E --> TLS_ECDH_RSA_WITH_AES_128_CBC_SHA
-                0XC00F --> TLS_ECDH_RSA_WITH_AES_256_CBC_SHA
-                0XC023 --> TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-                0XC024 --> TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
-                0XC025 --> TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
-                0XC026 --> TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384
-                0XC027 --> TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-                0XC028 --> TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
-                0XC029 --> TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256
-                0XC02A --> TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384
-                0XC02B --> TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256
-                0XC02F --> TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-                0XC0A8 --> TLS_PSK_WITH_AES_128_CCM_8
-                0X00AE --> TLS_PSK_WITH_AES_128_CBC_SHA256
-                0XC0AE --> TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8
-                0XFFFF --> Support all cipher suites
+            * 0X0035 --> TLS_RSA_WITH_AES_256_CBC_SHA
+            * 0X002F --> TLS_RSA_WITH_AES_128_CBC_SHA
+            * 0X0005 --> TLS_RSA_WITH_RC4_128_SHA
+            * 0X0004 --> TLS_RSA_WITH_RC4_128_MD5
+            * 0X000A --> TLS_RSA_WITH_3DES_EDE_CBC_SHA
+            * 0X003D --> TLS_RSA_WITH_AES_256_CBC_SHA256
+            * 0XC002 --> TLS_ECDH_ECDSA_WITH_RC4_128_SHA
+            * 0XC003 --> TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA
+            * 0XC004 --> TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA
+            * 0XC005 --> TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA
+            * 0XC007 --> TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
+            * 0XC008 --> TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
+            * 0XC009 --> TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+            * 0XC00A --> TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+            * 0XC011 --> TLS_ECDHE_RSA_WITH_RC4_128_SHA
+            * 0XC012 --> TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
+            * 0XC013 --> TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+            * 0XC014 --> TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+            * 0XC00C --> TLS_ECDH_RSA_WITH_RC4_128_SHA
+            * 0XC00D --> TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA
+            * 0XC00E --> TLS_ECDH_RSA_WITH_AES_128_CBC_SHA
+            * 0XC00F --> TLS_ECDH_RSA_WITH_AES_256_CBC_SHA
+            * 0XC023 --> TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+            * 0XC024 --> TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+            * 0XC025 --> TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
+            * 0XC026 --> TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384
+            * 0XC027 --> TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+            * 0XC028 --> TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+            * 0XC029 --> TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256
+            * 0XC02A --> TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384
+            * 0XC02B --> TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256
+            * 0XC02F --> TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+            * 0XC0A8 --> TLS_PSK_WITH_AES_128_CCM_8
+            * 0X00AE --> TLS_PSK_WITH_AES_128_CBC_SHA256
+            * 0XC0AE --> TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8
+            * 0XFFFF --> Support all cipher suites
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="ciphersuite",{ssl_context_id},{cipher_suite}'
         return self.atcom.send_at_comm(command)
@@ -205,21 +187,18 @@ class SSL:
 
         Parameters
         ----------
-        ssl_context_id : int
-            SSL context identifier (default=2)
+        ssl_context_id : int, default: 2
+            SSL context identifier
 
-        ignore_local_time : int
-            Ignore local time (default=1)
-                0 --> Do not ignore local time
-                1 --> Ignore local time
+        ignore_local_time : int, default: 1
+            Ignore local time
+            * 0 --> Do not ignore local time
+            * 1 --> Ignore local time
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
         return self.atcom.send_at_comm(command)
@@ -230,11 +209,8 @@ class SSL:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
 
         step_set_ca = Step(

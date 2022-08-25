@@ -57,9 +57,8 @@ class ATCom:
         ----------
         command: str
             AT command to send
-        line_end: bool
-            if True, send line end
-
+        line_end: bool, default: True
+            If True, send line end
         """
         if line_end:
             compose = f"{command}\r".encode()
@@ -78,15 +77,15 @@ class ATCom:
 
         Parameters
         ----------
-        desired_response: str
-            desired response from modem
+        desired_response: str, default: None
+            Desired response from modem
         timeout: int
-            timeout for getting response
+            Timeout for getting response
 
         Returns
         -------
-        response: dict
-            response from modem
+        dict
+            Result that includes "status" and "response" keys
 		"""
         response = ""
         processed = []
@@ -148,15 +147,17 @@ class ATCom:
 
         Parameters
         ----------
-        desired_response: str
-            desired response from modem
+        desired_response: str or list, default: None
+            List of desired responses
+        fault_response: str or list, default: None
+            List of fault response from modem
         timeout: int
             timeout for getting response
 
         Returns
         -------
-        response: dict
-            response from modem
+        dict
+            Result that includes "status" and "response" keys
 		"""
         response = ""
         processed = []
@@ -208,15 +209,21 @@ class ATCom:
         ----------
         command: str
             AT command to send
-        response: str
-            desired response from modem
+        desired: str or list, default: None
+            List of desired responses
+        fault: str or list, default: None
+            List of fault responses
         timeout: int
-            timeout for getting response
+            Timeout for getting response
+        line_end: bool, default: True
+            If True, send line end
+        urc: bool, default: False
+            If True, get urc response
 
         Returns
         -------
-        response: dict
-            response from modem
+        dict
+            Result that includes "status" and "response" keys
 		"""
         self.send_at_comm_once(command, line_end=line_end)
         time.sleep(0.1)
@@ -224,7 +231,7 @@ class ATCom:
             return self.get_urc_response(desired, fault, timeout)
         return self.get_response(desired, fault, timeout)
 
-    def retry_at_comm(self, command, response=None, timeout=5, retry_count=3, interval=1):
+    def retry_at_comm(self, command, desired=None, timeout=5, retry_count=3, interval=1):
         """
         Function for retrying AT command to modem and getting modem response
 
@@ -232,7 +239,7 @@ class ATCom:
         ----------
         command: str
             AT command to send
-        response: str
+        desired: str or list, default: None
             desired response from modem
         timeout: int
             timeout for getting response
@@ -243,11 +250,11 @@ class ATCom:
 
         Returns
         -------
-        response: dict
-            response from modem
+        dict
+            Result that includes "status" and "response" keys
         """
         for _ in range(retry_count):
-            result = self.send_at_comm(command, response, timeout)
+            result = self.send_at_comm(command, desired, timeout)
             if result["status"] == Status.SUCCESS:
                 return result
             else:

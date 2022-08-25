@@ -62,12 +62,6 @@ class GCloud:
         self.jwt = get_parameter(["gcloud", "jwt"]) \
             if (jwt is None) else jwt
 
-        # Create HTTP attributes.
-        self.http_query= '/v1/projects/' + self.project_id + \
-            '/locations/' + self.region + \
-            '/registries/' + self.registry_id + \
-            '/devices/' + self.device_id
-
 
     def publish_message(self, payload, host=None, port=None, topic=None, client_id=None):
         """
@@ -88,11 +82,8 @@ class GCloud:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["gcloud", "mqtts", "host"], default="mqtt.googleapis.com")
@@ -233,19 +224,21 @@ class GCloud:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if url is None:
             url = get_parameter(["gcloud","https","endpoint"],
                 "https://cloudiotdevice.googleapis.com")
 
 
-        gcloud_get_query = '/config?local_version=1'
-        gcloud_post_query = ':publishEvent'
+        # Create HTTP attributes.
+        http_query = '/v1/projects/' + self.project_id + \
+            '/locations/' + self.region + \
+            '/registries/' + self.registry_id + \
+            '/devices/' + self.device_id
+        get_extra_query = '/config?local_version=1'
+        post_extra_query = ':publishEvent'
 
         # Create the payload json.
         data_in_base64 = ubinascii.b2a_base64(payload)
@@ -255,14 +248,14 @@ class GCloud:
 
         # Construct the header for the request to register the device.
         # It is needed before publishing a message.
-        header_get = "GET " + self.http_query + gcloud_get_query + " HTTP/1.1\n" + \
+        header_get = "GET " + http_query + get_extra_query + " HTTP/1.1\n" + \
                     "Host: " + url[8:] + "\n" + \
                     "Content-Type: text/plain\n" + \
                     "Content-Length: 0\n" + \
                     "Authorization: Bearer " + self.jwt + "\n" + \
                     "\n\n"
         # Construct the header for the request to publish the message.
-        header_post = "POST " + self.http_query + gcloud_post_query + " HTTP/1.1\n" + \
+        header_post = "POST " + http_query + post_extra_query + " HTTP/1.1\n" + \
                     "Host: " + url[8:] + "\n" + \
                     "Content-Type: application/json\n" + \
                     "Authorization: Bearer " + self.jwt + "\n" + \
@@ -378,11 +371,8 @@ class GCloud:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["gcloud", "mqtts", "host"], default="mqtt.googleapis.com")
@@ -402,7 +392,7 @@ class GCloud:
         step_check_mqtt_connected = Step(
             function=self.mqtt.is_connected_to_broker,
             name="check_connected",
-            success="publish_message",
+            success="subscribe_topics",
             fail="check_opened",
         )
 

@@ -48,11 +48,8 @@ class AWS:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["aws","mqtts","host"])
@@ -192,11 +189,8 @@ class AWS:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if topics is None:
             topics = get_parameter(["aws","mqtts","sub_topics"])
@@ -346,11 +340,8 @@ class AWS:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if url is None:
             endpoint = get_parameter(["aws","https","endpoint"])
