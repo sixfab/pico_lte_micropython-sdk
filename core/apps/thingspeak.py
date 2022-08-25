@@ -213,8 +213,8 @@ class ThingSpeak:
             password = get_parameter(["thingspeak", "mqtts", "password"])
 
         if topics is None:
-            topics = get_parameter(["thingspeak", "mqtts", "sub_topic"],  \
-                "channels/" + str(self.channel_id) + "/subscribe/fields/+")
+            topics = get_parameter(["thingspeak", "mqtts", "sub_topics"],  \
+                ("channels/" + str(self.channel_id) + "/subscribe/fields/+", 0))
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
