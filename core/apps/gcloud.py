@@ -401,7 +401,7 @@ class GCloud:
         step_check_mqtt_connected = Step(
             function=self.mqtt.is_connected_to_broker,
             name="check_connected",
-            success="publish_message",
+            success="subscribe_topics",
             fail="check_opened",
         )
 
