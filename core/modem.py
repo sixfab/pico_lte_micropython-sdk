@@ -23,6 +23,7 @@ from core.modules.gps import GPS
 from core.apps.aws import AWS
 from core.apps.telegram import Telegram
 from core.apps.gcloud import GCloud
+from core.apps.thingspeak import ThingSpeak
 
 
 
@@ -54,6 +55,7 @@ class Modem:
         self.aws = AWS(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
         self.telegram = Telegram(self.base, self.network, self.http)
         self.gcloud = GCloud(self.base, self.network, self.ssl, self.mqtt, self.http)
+        self.thingspeak = ThingSpeak(self.base, self.network, self.mqtt)
 
 
         # power up modem
