@@ -55,3 +55,26 @@ Create `config.json` file on the root path of the Picocell.
     }
 }
 ```
+
+ ### For Telegram app module
+```config.json
+{
+    "telegram": {
+        "token": "[YOUR_BOT_TOKEN_ID]",
+        "chat_id": "[YOUR_GROUP_CHAT_ID]"
+        }
+}
+```
+
+ ### For GCloud app module
+```config.json
+{
+    "gcloud":{
+        "project_id": "[YOUR_GCLOUDIOT_PROJECT_ID]",
+        "region": "[YOUR_GCLOUDIOT_REGION]",
+        "registry_id": "[YOUR_GCLOUDIOT_REGISTRY_ID]",
+        "device_id": "[YOUR_GCLOUDIOT_DEVICE_ID]",
+        "jwt": "[YOUR_JSON_WEB_TOKEN_FOR_DEVICE]"
+    }
+}
+```
