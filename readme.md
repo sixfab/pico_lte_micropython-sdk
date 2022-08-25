@@ -104,7 +104,11 @@ Create `config.json` file on the root path of the Picocell.
         "mqtts": {
             "client_id": "[DEVICE_MQTT_CLIENT_ID]",
             "username": "[DEVICE_MQTT_USERNAME]",
-            "password": "[DEVICE_MQTT_PASSWORD]"
+            "password": "[DEVICE_MQTT_PASSWORD]",
+            "sub_topics": [
+                ["[YOUR_MQTT_TOPIC]", [QOS]]
+            ],
+            "pub_topic": "[YOUR_MQTT_TOPIC]"
         }
     }
 }
