@@ -71,8 +71,8 @@ class ULP:
 
         Parameters
         ----------
-        period : int
-            Timer period in minutes. Must be power of CONTS_TIMER. (default = 60)(1 hour)
+        period : int, default: 60
+            Timer period in minutes. Must be power of CONTS_TIMER.
         """
         config["ulp"]["desired_timer_count"] = int(period / CONST_TIMER)
         self.save_ulp_config()

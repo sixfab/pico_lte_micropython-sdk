@@ -48,11 +48,8 @@ class Telegram:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["telegram", "server"], "api.telegram.org/bot")

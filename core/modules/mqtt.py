@@ -24,20 +24,17 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (default=0)
-        version : int
-            MQTT version (default=4)
-                4 --> MQTT 3.1.1
-                3 --> MQTT 3.1
+        cid : int, default: 0
+            Client ID (range 0:5).
+        version : int, default: 4
+            MQTT version.
+            * 4 --> MQTT 3.1.1
+            * 3 --> MQTT 3.1
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys.
         """
         command = f'AT+QMTCFG="version",{cid},{version}'
         return self.atcom.send_at_comm(command)
@@ -48,18 +45,15 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (default=0)
-        pdpcid : int
-            PDP context identifier (range 0:5) (default=0)
+        cid : int, default: 0
+            Client ID
+        pdpcid : int, default: 0
+            PDP context identifier (range 0:5)
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys.
         """
         command = f'AT+QMTCFG="pdpcid",{cid},{pdpcid}'
         return self.atcom.send_at_comm(command)
@@ -70,22 +64,19 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Context identifier (range 0:5) (default=0)
-        ssl_mode : int
-            SSL mode (default=0)
-                0 --> Use normal TCP connection for MQTT
-                1 --> Use SSL TCP secure connection for MQTT
-        ssl_ctx_index : int
-            SSL context index (default=2)
+        cid : int, default: 0
+            Context identifier (range 0:5)
+        ssl_mode : int, default: 1
+            SSL mode
+            * 0 --> Use normal TCP connection for MQTT
+            * 1 --> Use SSL TCP secure connection for MQTT
+        ssl_ctx_index : int, default: 2
+            SSL context index
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCFG="SSL",{cid},{ssl_mode},{ssl_ctx_index}'
         return self.atcom.send_at_comm(command)
@@ -96,10 +87,10 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (range 0:5) (default=0)
-        keep_alive_time : int
-            Keep alive time (unit: seconds)(range 0:3600)(default=120)
+        cid : int, default: 0
+            Client ID (range 0:5)
+        keep_alive_time : int, default: 120
+            Keep alive time (unit: seconds)(range 0:3600)
                 It defines the maximum interval between messages received from a client. If the
                 server does not receive a message from the client within 1.5 times of the
                 keep-alive time value, it disconnects the client as if the client sent a
@@ -108,11 +99,8 @@ class MQTT:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCFG="keepalive",{cid},{keep_alive_time}'
         return self.atcom.send_at_comm(command)
@@ -123,21 +111,18 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (range 0:5) (default=0)
-        clean_session : int
-            Clean session (default=1)
-                0 --> The server must store the subscriptions of the client after it disconnects.
-                1 --> The server must discard any previously maintained information about the
+        cid : int, default: 0
+            Client ID (range 0:5)
+        clean_session : int, default: 0
+            Clean session
+            * 0 --> The server must store the subscriptions of the client after it disconnects.
+            * 1 --> The server must discard any previously maintained information about the
                     client after it disconnects and treat the connection as “clean”
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCFG="clean_session",{cid},{clean_session}'
         return self.atcom.send_at_comm(command)
@@ -148,24 +133,21 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (range 0:5) (default=0)
-        timeout : int
-            Packet delivery timeout (unit: seconds)(range 1:60)(default=5)
-        retry_count : int
-            Retry count (range 1:10)(default=3)
-        timeout_notice : int
-            Timeout notice (default=0)
-                0 --> Do not report
-                1 --> Report
+        cid : int, default: 0
+            Client ID (range 0:5)
+        timeout : int, default: 5
+            Packet delivery timeout in seconds(range 1:60)
+        retry_count : int, default: 3
+            Retry count (range 1:10)
+        timeout_notice : int, default: 0
+            Timeout notice
+            * 0 --> Do not report
+            * 1 --> Report
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCFG="timeout",{cid},{timeout},{retry_count},{timeout_notice}'
         return self.atcom.send_at_comm(command)
@@ -184,31 +166,28 @@ class MQTT:
             Will message. Maximum length: 255 bytes.
                 The Will message defines the content of the message published on the Will topic
                 if the client is unexpectedly disconnected. It can be a zero-length message.
-        cid : int
-            Client ID (range 0:5) (default=0)
-        will_flag : int
-            Will flag (default=0)
-                0 --> Ignore the Will flag configuration
-                1 --> Require the Will flag configuration
-        will_qos : int
-            Will QoS (default=0)
-                0 --> At most once
-                1 --> At least once
-                2 --> Exactly once
-        will_retain : int
-            Will retain. Will Retain flag is only used for PUBLISH messages.(default=0)
-                0 --> When a client sends a PUBLISH message to a server, the server will not
-                    retain the message after it has been delivered to the current subscribers.
-                1 --> When a client sends a PUBLISH message to a server, the server should
-                    retain the message after it has been delivered to the current subscribers.
+        cid : int, default: 0
+            Client ID (range 0:5)
+        will_flag : int, default: 0
+            Will flag
+            * 0 --> Ignore the Will flag configuration
+            * 1 --> Require the Will flag configuration
+        will_qos : int, default: 0
+            Will QoS
+            * 0 --> At most once
+            * 1 --> At least once
+            * 2 --> Exactly once
+        will_retain : int, default: 0
+            Will retain. Will Retain flag is only used for PUBLISH messages.
+            * 0 --> When a client sends a PUBLISH message to a server, the server will not
+                retain the message after it has been delivered to the current subscribers.
+            * 1 --> When a client sends a PUBLISH message to a server, the server should
+                retain the message after it has been delivered to the current subscribers.
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},\
                         {will_retain},"{will_topic}","{will_message}"'
@@ -220,20 +199,17 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (range 0:5) (default=0)
-        message_recieve_mode : int
-            MQTT message recieve mode (default=0)
-                0 --> MQTT message received from server will be contained in URC
-                1 --> MQTT message received from server will not be contained in URC
+        cid : int, default: 0
+            Client ID (range 0:5)
+        message_recieve_mode : int, default: 0
+            MQTT message recieve mode
+            * 0 --> MQTT message received from server will be contained in URC
+            * 1 --> MQTT message received from server will not be contained in URC
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCFG="message_recieve_mode",{cid},{message_recieve_mode}'
         return self.atcom.send_at_comm(command)
@@ -244,30 +220,17 @@ class MQTT:
 
         Parameters
         ----------
-        host : str
-            Server address. It could be an IP address or a domain name.(default=None)
-        port : int
-            Port number of the server (range 0:65535)(default=None)
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+        host : str, default: None
+            Server address. It could be an IP address or a domain name.
+        port : int, default: None
+            Port number of the server (range 0:65535)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, result" str
-                Response of the modem.
-                    client_idx : int
-                        MQTT client index
-                    result : int
-                        -1 --> Failed to open a network
-                        0 --> Network opened successfully
-                        1 --> Wrong parameter
-                        2 --> MQTT client identifier is occupied
-                        3 --> Failed to activate PDP
-                        4 --> Failed to parse domain name
-                        5 --> Network connection error
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["mqtts","host"])
@@ -299,16 +262,13 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, result" str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = "AT+QMTOPEN?"
         desired = f"+QMTOPEN: {cid}"
@@ -320,19 +280,13 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
-        -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
-                0 --> Network closed successfully
-                -1 --> Failed to close the network
-
+        -------    
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTCLOSE={cid}'
         result =  self.atcom.send_at_comm(command)
@@ -350,35 +304,19 @@ class MQTT:
 
         Parameters
         ----------
-        client_id_string : str
-            Client ID string. Maximum length: 23 bytes. (default="Picocell")
-        username : str
-            Username. Maximum length: 23 bytes. (default=None)
-        password : str
-            Password. Maximum length: 23 bytes. (default=None)
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+        client_id_string : str, default: "Picocell"
+            Client ID string. Maximum length: 23 bytes.
+        username : str, default: None
+            Username. Maximum length: 23 bytes.
+        password : str, default: None
+            Password. Maximum length: 23 bytes.
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, result, ret_code" str
-                Response of the modem.
-                    client_idx : int
-                        Client ID (range 0:5)
-                    result : int
-                        Command execution result.
-                            0 --> Packet sent successfully and ACK received from the server
-                            1 --> Packet retransmission
-                            2 --> Failed to send the packet
-                    ret_code : int
-                        Connection status return code
-                            0 --> Connection Accepted
-                            1 --> Connection Refused: Unacceptable Protocol Version
-                            2 --> Connection Refused: Identifier Rejected
-                            3 --> Connection Refused: Server Unavailable
+        dict
+            Result that includes "status" and "response" keys
         """
         if username is None and password is None:
             username = get_parameter(["mqtts","username"])
@@ -402,15 +340,12 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            Client ID (range 0:5) (default=0)
+        cid : int, default: 0
+            Client ID (range 0:5)
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = "AT+QMTCONN?"
         desired = f"+QMTCONN: {cid},3"
@@ -423,21 +358,13 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, result" str
-                Response of the modem.
-                    client_idx : int
-                        Client ID (range 0:5)
-                    result : int
-                        0 --> Disconnection successful
-                        -1 --> Failed to disconnect from the MQTT server
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTDISC={cid}'
         return self.atcom.send_at_comm(command)
@@ -450,39 +377,22 @@ class MQTT:
         Parameters
         ----------
         topics : list of tupple [(topic1, qos1),(topic2, qos2),...]
-            topic : str
-                Maximum length: 255 bytes. (default=None)
-            qos : int
-                QoS. (default=0)
-                    0 --> At most once
-                    1 --> At least once
-                    2 --> Exactly once
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
-        message_id : int
-            Message ID. (range 1:65535)(default=1)
+            topic : str, default: None
+                Maximum length: 255 bytes.
+            qos : int, default: 0
+                QoS.
+                * 0 --> At most once
+                * 1 --> At least once
+                * 2 --> Exactly once
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
+        message_id : int, default: 1
+            Message ID. (range 1:65535)
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, message_id, result, value" str
-                Response of the modem.
-                    client_idx : int
-                        Client ID (range 0:5)
-                    message_id : int
-                        Message ID.
-                    result : int
-                        Command execution result.
-                        0 --> Packet sent successfully and ACK received from the server
-                        1 --> Packet retransmission
-                        2 --> Failed to send a packet
-                    value : int
-                        If <result> is 0, a vector of granted QoS levels
-                        If <result> is 1, the number of times the packet has been retransmitted
-                        If <result> is 2, it will not be presented
-
+        dict
+            Result that includes "status" and "response" keys
         """
         if topics is None:
             topics = get_parameter(["mqtts","sub_topics"])
@@ -505,29 +415,17 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
-        message_id : int
-            Message ID. (range 1:65535)(default=1)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
+        message_id : int, default: 1
+            Message ID. (range 1:65535)
         topic : str
-            Topic. Maximum length: 255 bytes. (default="")
+            Topic. Maximum length: 255 bytes.
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, message_id, result" str
-                Response of the modem.
-                    client_idx : int
-                        Client ID (range 0:5)
-                    message_id : int
-                        Message ID.
-                    result : int
-                        Command execution result.
-                        0 --> Packet sent successfully and ACK received from the server
-                        1 --> Packet retransmission
-                        2 --> Failed to send a packet
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QMTUNS={cid},{message_id},"{topic}"'
         return self.atcom.send_at_comm(command)
@@ -543,44 +441,28 @@ class MQTT:
             Payload.
         topic : str
             Topic. Maximum length: 255 bytes.
-        qos : int
-            QoS. (default=0)
-                0 --> At most once
-                1 --> At least once
-                2 --> Exactly once
-        retain : int
-            Retain. (default=0)
+        qos : int, default: 1
+            QoS.
+            * 0 --> At most once
+            * 1 --> At least once
+            * 2 --> Exactly once
+        retain : int, default: 0
+            Retain.
             Determines whether the server will retain the message after it has been delivered
             to the current subscribers.
-                0 --> The server will not retain the message after it has been
-                    delivered to the current subscriber
-                1 --> The server will retain the message after it has been delivered
-                    to the current subscribers
-        message_id : int
-            Message ID. (range 1:65535)(default=1)
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+            * 0 --> The server will not retain the message after it has been
+                delivered to the current subscriber
+            * 1 --> The server will retain the message after it has been delivered
+                to the current subscribers
+        message_id : int, default: 1
+            Message ID. (range 1:65535)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : "client_idx, message_id, result, value" str
-                Response of the modem.
-                    client_idx : int
-                        Client ID (range 0:5)
-                    message_id : int
-                        Message ID.
-                    result : int
-                        Command execution result.
-                        0 --> Packet sent successfully and ACK received from the server
-                            (message that is published when <qos>=0 does not require ACK)
-                        1 --> Packet retransmission
-                        2 --> Failed to send a packet
-                    value : int
-                        If <result> is 1, number of times a packet has been retransmitted.
-                        If <result> is 0 or 2, it will not be presented
+        dict
+            Result that includes "status" and "response" keys
         """
         if topic is None:
             topic = get_parameter(["mqtts","pub_topic"])
@@ -601,18 +483,13 @@ class MQTT:
 
         Parameters
         ----------
-        cid : int
-            MQTT Client ID (range 0:5) (default=0)
+        cid : int, default: 0
+            MQTT Client ID (range 0:5)
 
         Returns
         -------
-        (status, modem_response, messages) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
-            messages : list ["client_idx,topic,payload"]
-                List of messages.
+        dict
+            Result that includes "status" and "response" keys
         """
         messages = []
         result = self.atcom.send_at_comm("AT+QMTRECV?","+QMTRECV:")
@@ -626,16 +503,19 @@ class MQTT:
 
     @staticmethod
     def extract_messages(whole_message, prefix):
-        """_Function for extracting meaningful messages as an array
+        """
+        Function for extracting meaningful messages as an array
         from the response of +QMTRECV.
 
-        Args:
-            whole_message (str): The response from the "+QMTRECV" command.
-            prefix (str): The prefix string for each meaningful message.
-            remove_nones (bool, optional): Delete None messages. Defaults to True.
+        Parameters
+        ----------
+        whole_message : str
+            The response from the "+QMTRECV" command.
+        prefix : str
+            The prefix string for each meaningful message.
 
         Returns:
-            array: Array of messages arrays.
+            array: List of messages.
         """
         messages = []
 

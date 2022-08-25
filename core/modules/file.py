@@ -22,16 +22,13 @@ class File:
 
         Parameters
         ----------
-        path : str
-            Path to the directory (default="*")
+        path : str, default: "*"
+            Path to the directory
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QFLST="{path}"'
         return self.atcom.send_at_comm(command)
@@ -47,11 +44,8 @@ class File:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QFDEL="{file_name}"'
         return self.atcom.send_at_comm(command)
@@ -64,16 +58,13 @@ class File:
         ----------
         file : str
             Path to the file
-        timeout : int (default=5000)
+        timeout : int, default: 5000
             Timeout for the command
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         len_file = len(file)
         command = f'AT+QFUPL="{filename}",{len_file},{timeout}'

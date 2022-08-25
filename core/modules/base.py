@@ -34,6 +34,11 @@ class Base:
     def power_status(self):
         """
         Function for getting power status of modem
+
+        Returns
+        -------
+        power_status : int
+            Power status of modem (0=on, 1=off)
         """
         status_pin = Pin(3, Pin.IN)
         debug.debug("Power status:", status_pin.value())
@@ -45,16 +50,21 @@ class Base:
 
         Parameters
         ----------
-        timeout : int, optional
-            Timeout for waiting. The default is 30.
+        timeout : int, default: 30
+            Timeout in seconds for waiting.
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
         """
         start_time = time.time()
         while time.time() - start_time < timeout:
             status = self.power_status()
             if status == 0:
-                return {"status": Status.SUCCESS, "response": ""}
+                return {"status": Status.SUCCESS, "response": "Success"}
             time.sleep(1)
-        return {"status": Status.TIMEOUT, "response": ""}
+        return {"status": Status.TIMEOUT, "response": "Timeout"}
 
     def check_communication(self):
         """
@@ -62,11 +72,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         return self.atcom.send_at_comm("AT")
 
@@ -76,11 +83,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         return self.atcom.send_at_comm("ATE0")
 
@@ -95,11 +99,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -118,11 +119,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         return self.atcom.send_at_comm("ATE0")
 
@@ -132,11 +130,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         return self.atcom.send_at_comm("ATE1")
 
@@ -146,11 +141,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         desired_reponses = ["+CPIN: READY"]
         return self.atcom.send_at_comm("AT+CPIN?", desired_reponses)
@@ -166,11 +158,8 @@ class Base:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+CPIN="{pin_code}"'
         return self.atcom.send_at_comm(command)
@@ -181,13 +170,8 @@ class Base:
 
         Returns
         -------
-        (response, status, value) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
-            value : str
-                ICCID of modem
+        dict
+            Result that includes "status", "response" and "value" keys
         """
         command = "AT+QCCID"
         result = self.atcom.send_at_comm(command)
@@ -204,17 +188,14 @@ class Base:
         ----------
         scan_mode : int
             Scan mode (default=0)
-                0 --> Automatic
-                1 --> GSM Only
-                3 --> LTE Only
+            * 0 --> Automatic
+            * 1 --> GSM Only
+            * 3 --> LTE Only
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QCFG="nwscanmode",{scan_mode}'
         return self.atcom.send_at_comm(command)
@@ -227,18 +208,15 @@ class Base:
         ----------
         scan_sequence : str
             Scan sequence (default=00)
-                00 --> Automatic (eMTC → NB-IoT → GSM)
-                01 --> GSM
-                02 --> eMTC
-                03 --> NB-IoT
+            * 00 --> Automatic (eMTC → NB-IoT → GSM)
+            * 01 --> GSM
+            * 02 --> eMTC
+            * 03 --> NB-IoT
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QCFG="nwscanseq",{scan_sequence}'
         return self.atcom.send_at_comm(command)
@@ -251,17 +229,14 @@ class Base:
         ----------
         iotopmode : int
             Operation mode (default=2)
-                0 --> eMTC
-                1 --> NB-IoT
-                2 --> eMTC and NB-IoT
+            * 0 --> eMTC
+            * 1 --> NB-IoT
+            * 2 --> eMTC and NB-IoT
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QCFG="iotopmode",{iotopmode}'
         return self.atcom.send_at_comm(command)
