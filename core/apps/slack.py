@@ -19,7 +19,7 @@ class Slack:
 
     def __init__(self, base, network, http):
         """
-        __DESC__
+        Initialize Slack class.
         """
         self.base = base
         self.network = network
@@ -27,7 +27,20 @@ class Slack:
 
     def send_message(self, message, webhook_url=None):
         """
-        __DESC__
+        Function for sending message to Slack channel by using 
+        incoming webhook feature of Slack.
+
+        Parameters
+        ----------
+        message: str
+            Message to send
+        webhook_url: str
+            Webhook URL of the Slack application
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status" and "message" keys.
         """
 
         payload_json = {"text": message}
