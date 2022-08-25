@@ -7,7 +7,6 @@ from core.temp import debug
 from core.utils.status import Status
 
 modem = Modem()
-debug.set_debug_level(0)
 
 while True:
     result = modem.thingspeak.subscribe_topics()

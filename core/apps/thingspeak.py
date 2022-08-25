@@ -36,7 +36,7 @@ class ThingSpeak:
     def publish_message(self, payload, host=None, port=None, topic=None,
                         client_id=None, username=None, password=None):
         """
-        Function for publishing a message to GCloud IoT by using MQTT.
+        Function for publishing a message to ThingSpeak.
 
         Parameters
         ----------
@@ -51,11 +51,8 @@ class ThingSpeak:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["thingspeak", "mqtts", "host"], "mqtt3.thingspeak.com")
@@ -182,7 +179,7 @@ class ThingSpeak:
     def subscribe_topics(self, host=None, port=None, topics=None,
                         client_id=None, username=None, password=None):
         """
-        Function for subscribing to topics of Google Cloud IoT.
+        Function for subscribing to topics of ThingSpeak.
 
         Parameters
         ----------
@@ -191,11 +188,8 @@ class ThingSpeak:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["thingspeak", "mqtts", "host"], "mqtt3.thingspeak.com")
