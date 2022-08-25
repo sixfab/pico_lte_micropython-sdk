@@ -27,13 +27,8 @@ class Network:
 
         Returns
         -------
-        (response, status, value) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
-            value : str
-                APN of modem
+        dict
+            Result that includes "status" and "response" keys
         """
         command = "AT+CGDCONT?"
         desired = "super"
@@ -46,13 +41,8 @@ class Network:
 
         Returns
         -------
-        (response, status, value) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
-            value : str
-                APN of modem
+        dict
+            Result that includes "status" and "response" keys
         """
         command = "AT+CGDCONT?"
         result = self.atcom.send_at_comm(command)
@@ -64,23 +54,20 @@ class Network:
 
         Parameters
         ----------
-        cid : int
-            Context ID (default=1)
-        pdp_type : str
-            PDP type (default="IPV4V6")
-                IPV4V6 --> IPv4v6
-                IP --> IPv4
-                IPV6 --> IPv6
-        apn : str
-            APN (default="super")
+        cid : int, default: 1
+            Context ID
+        pdp_type : str, default: "IPV4V6"
+            PDP type
+            * IPV4V6 --> IPv4v6
+            * IP --> IPv4
+            * IPV6 --> IPv6
+        apn : str, default: "super"
+            APN
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+CGDCONT={cid},"{pdp_type}","{apn}"'
         return self.atcom.send_at_comm(command)
@@ -91,11 +78,8 @@ class Network:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         desired_reponses = ["+CREG: 0,1", "+CREG: 0,5"]
         return self.atcom.retry_at_comm("AT+CREG?", desired_reponses, retry_count=20, interval=1)
@@ -106,11 +90,8 @@ class Network:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = "AT+COPS?"
         result = self.atcom.send_at_comm(command)
@@ -124,32 +105,29 @@ class Network:
 
         Parameters
         ----------
-        context_id : int
-            TCP/IP context identifier (range 1:5) (default=1)
-        context_type : int
-            TCP/IP context type (default=1)
-                1 --> IPv4
-                2 --> IPv6
-                3 --> IPv4v6
-        apn : str
-            APN (default="super")
-        username : str
-            Username (default="")
-        password : str
-            Password (default="")
-        auth : int
-            Authentication type (default=0)
-                0 --> No authentication
-                1 --> PAP
-                2 --> CHAP
+        context_id : int, default: 1
+            TCP/IP context identifier (range 1:5)
+        context_type : int, default: 1
+            TCP/IP context type
+            * 1 --> IPv4
+            * 2 --> IPv6
+            * 3 --> IPv4v6
+        apn : str, default: "super"
+            APN
+        username : str, default: ""
+            Username
+        password : str, default: ""
+            Password
+        auth : int, default: 0
+            Authentication type
+            * 0 --> No authentication
+            * 1 --> PAP
+            * 2 --> CHAP
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QICSGP={context_id},{context_type},"{apn}","{username}","{password}",{auth}'
         return self.atcom.send_at_comm(command)
@@ -161,37 +139,13 @@ class Network:
 
         Parameters
         ----------
-        context_id : int
-            PDP context identifier (range 1:5) (default=1)
+        context_id : int, default: 1
+            PDP context identifier (range 1:5)
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
-        """
-        command = "AT+CGACT?"
-        return self.atcom.send_at_comm(command, f"+CGACT: {context_id},1")
-
-
-    def check_pdp_context_status(self, context_id=1):
-        """
-        Function for checking PDP context status
-
-        Parameters
-        ----------
-        context_id : int
-            PDP context identifier (range 1:5) (default=1)
-
-        Returns
-        -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = "AT+CGACT?"
         return self.atcom.send_at_comm(command, f"+CGACT: {context_id},1")
@@ -202,16 +156,13 @@ class Network:
 
         Parameters
         ----------
-        context_id : int
-            PDP context identifier (range 1:5) (default=1)
+        context_id : int, default: 1
+            PDP context identifier (range 1:5)
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QIACT={context_id}'
         return self.atcom.send_at_comm(command)
@@ -222,16 +173,13 @@ class Network:
 
         Parameters
         ----------
-        context_id : int
-            PDP context identifier (range 1:5) (default=1)
+        context_id : int, default: 1
+            PDP context identifier (range 1:5)
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         command = f'AT+QIDEACT={context_id}'
         return self.atcom.send_at_comm(command)
@@ -242,11 +190,8 @@ class Network:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
 
         step_network_precheck = Step(
@@ -319,11 +264,8 @@ class Network:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
 
         step_precheck_pdp = Step(

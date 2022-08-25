@@ -9,11 +9,6 @@ class Config:
     """
     Class for including extended configuration functions.
     """
-    def __init__(self, atcom):
-        """
-        Constructor of the Config class.
-        """
-        self.atcom = atcom
 
     def set_parameters(self, parameters):
         """
@@ -26,11 +21,8 @@ class Config:
 
         Returns
         -------
-        (response, status) : tuple
-            response : str
-                Response from the command
-            status : int
-                Status of the command.
+        dict
+            Result that includes "status" and "response" keys
         """
         config["params"] = parameters
 

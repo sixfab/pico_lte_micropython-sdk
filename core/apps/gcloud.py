@@ -82,11 +82,8 @@ class GCloud:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["gcloud", "mqtts", "host"], default="mqtt.googleapis.com")
@@ -227,11 +224,8 @@ class GCloud:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if url is None:
             url = get_parameter(["gcloud","https","endpoint"],
@@ -377,11 +371,8 @@ class GCloud:
 
         Returns
         -------
-        (status, modem_response) : tuple
-            status : int
-                Status of the command.
-            modem_response : str
-                Response of the modem.
+        dict
+            Result that includes "status" and "response" keys
         """
         if host is None:
             host = get_parameter(["gcloud", "mqtts", "host"], default="mqtt.googleapis.com")

@@ -24,6 +24,11 @@ class Auth:
     def load_certificates(self):
         """
         Function for loading certificates from file
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
         """
         cacert = read_file("../cert/cacert.pem")
         client_cert = read_file("../cert/client.pem")
