@@ -4,6 +4,11 @@ cert/
 ### Configs
 config.json
 
+### Mock modules
+machine.py
+neopixel.py
+ubinascii.py
+
 ### PYTHON
 # Byte-compiled / optimized / DLL files
 __pycache__/
