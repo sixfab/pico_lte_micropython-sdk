@@ -20,4 +20,3 @@ while True:
 
     debug.info(result)
     time.sleep(10)
-    

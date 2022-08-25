@@ -284,7 +284,7 @@ class MQTT:
             MQTT Client ID (range 0:5)
 
         Returns
-        -------    
+        -------
         dict
             Result that includes "status" and "response" keys
         """
