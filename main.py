@@ -2,24 +2,16 @@
 Main code file.
 """
 
-import json
 from core.modem import Modem
 from core.temp import debug
 
-
-HOST = "a2q4ztq1aigmmt-ats.iot.us-west-2.amazonaws.com"
-PORT = 8883
-TOPIC = "$aws/things/picocell_test/shadow/update"
-PAYLOAD_JSON = {"state": {"reported": {"Status": "Test message from Picocell!"}}}
-payload = json.dumps(PAYLOAD_JSON)
-
-
 modem = Modem()
 
-
 def main():
-    debug.info("Starting...")
-
+    debug.info("Hello from Sixfab...")
+    debug.info("Your Picocell is ready to use!")
+    debug.info("Visit the following link to get started")
+    debug.info("http://docs.sixfab.com/picocell/")
 
 if __name__ == "__main__":
     main()
