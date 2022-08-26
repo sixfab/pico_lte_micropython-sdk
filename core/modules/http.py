@@ -421,9 +421,15 @@ class HTTP:
             Result that includes "status" and "response" keys
         """
         if desired_response is None:
-            desired_response = ["200"]
+             desired_response = [
+                 "200", "201", "202", "203", "204", "205", "206", "207", "208", "226"
+                 ]
+
         if fault_response is None:
-            fault_response = ["403", "404", "409", "411", "500"]
+             fault_response = [
+                 "400", "401", "402", "403", "404", "500", "501", "502", "503","504",
+                 "505", "506", "507", "508", "509", "510", "511"
+                 ]
 
         command = f'AT+QHTTPREAD={timeout}'
         result = self.atcom.send_at_comm(
