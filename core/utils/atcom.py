@@ -260,14 +260,3 @@ class ATCom:
             else:
                 time.sleep(interval)
         return result
-
-    def listen_and_save_messages(self):
-        """
-        Function for listening modem messages and add them to buffer
-        """
-        len = self.modem_com.any()
-        if len:
-            message = self.modem_com.read(len).decode('utf-8')
-            message = message.replace("\r", "\n") # replace carriage return with line end
-            self.buffer.add_message(message)
-         
