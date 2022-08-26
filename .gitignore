@@ -5,7 +5,7 @@ cert/
 config.json
 
 ### VSCode Config
-.vscode/
+#.vscode/
 
 ### Mock modules
 machine.py
