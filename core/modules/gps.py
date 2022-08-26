@@ -1,6 +1,10 @@
 """
 Module for including functions of location service of picocell module.
 """
+
+from core.utils.helpers import get_desired_data
+from core.utils.status import Status
+
 class GPS:
     """
     Class for inculding functions of location service of picocell module.
@@ -90,7 +94,15 @@ class GPS:
         Returns
         -------
         dict
-            Result that includes "status" and "response" keys
+            Result that includes "status","response" and "value" keys
+            * "status" --> Status.SUCCESS or Status.ERROR
+            * "response" --> Response of the command
+            * "value" --> [lat,lon] Location of the device
         """
         command = "AT+QGPSLOC?"
-        return self.atcom.send_at_comm(command)
+        desired = "+QGPSLOC: "
+        result = self.atcom.send_at_comm(command, desired)
+
+        if result["status"] == Status.SUCCESS:
+            return get_desired_data(result, desired, data_index=[1,2])
+        return result
