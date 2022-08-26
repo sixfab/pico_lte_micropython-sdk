@@ -8,27 +8,6 @@ from core.temp import debug
 from core.utils.status import Status
 
 
-class MessageBuffer:
-    """Buffer class for storing messages"""
-
-    buffer = ""
-
-    def add_message(self, message):
-        self.buffer += message
-
-    def any_data(self):
-        return len(self.buffer)
-
-    def get_message(self):
-        return self.buffer
-
-    def clear(self):
-        self.buffer = ""
-
-    def clear_before_id(self, id):
-        self.buffer = self.buffer[id:]
-
-
 class ATCom:
     """Class for handling AT communication with modem"""
 
@@ -40,7 +19,6 @@ class ATCom:
         baudrate = 115200,
         timeout = 10000
         ):
-        self.buffer = MessageBuffer()
         self.modem_com = UART(
             uart_number,
             tx = tx_pin,
@@ -138,7 +116,7 @@ class ATCom:
                                     debug.debug("Fault:", focus_line)
                                     return {"status": Status.ERROR, "response": processed_part}
 
-                elif value == "+CME ERROR:" or value == "ERROR": # error
+                elif "+CME ERROR:" in value or value == "ERROR": # error
                     return {"status": Status.ERROR, "response": processed_part}
 
     def get_urc_response(self, desired_responses=None, fault_responses=None, timeout=5):
@@ -168,6 +146,9 @@ class ATCom:
         if fault_responses:
             if isinstance(fault_responses, str): # if desired response is string
                 fault_responses = [fault_responses] # make it list
+
+        if not desired_responses and not fault_responses:
+            return {"status": Status.SUCCESS, "response": "No desired or fault responses"}
 
         timer = time.time()
         while True:

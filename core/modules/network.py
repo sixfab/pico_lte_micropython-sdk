@@ -303,7 +303,10 @@ class Network:
             fail="failure",
         )
 
-        sm = StateManager(first_step = step_precheck_pdp)
+        # Add cache if it is not already existed
+        function_name = "get_pdp_ready"
+
+        sm = StateManager(first_step = step_precheck_pdp, function_name=function_name)
         sm.add_step(step_precheck_pdp)
         sm.add_step(step_configure_pdp)
         sm.add_step(step_deactivate_pdp)

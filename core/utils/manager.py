@@ -118,16 +118,14 @@ class StateManager:
         """Success step function"""
         return {
             "status": Status.SUCCESS,
-            "response": "Successfully completed",
-            "interval": self.NO_WAIT_INTERVAL
+            "response": self.cache.get_last_response(),
             }
 
     def failure(self):
         """Fail step function"""
         return {
             "status": Status.ERROR,
-            "response": "Failed",
-            "interval": self.NO_WAIT_INTERVAL
+            "response": self.cache.get_last_response(),
             }
 
     def execute_organizer_step(self):
@@ -144,6 +142,7 @@ class StateManager:
             result = self.current.function()
 
         debug.debug(f"{self.current.function.__name__:<25} : {result}")
+        self.cache.set_last_response(result.get("response"))
 
         if result["status"] == Status.SUCCESS:
             self.current.is_ok = True
@@ -173,8 +172,10 @@ class StateManager:
         else:
             if self.current.name == "success":
                 result["status"] = Status.SUCCESS
+                result["response"] = step_result.get("response")
             elif self.current.name == "failure":
                 result["status"] = Status.ERROR
+                result["response"] = step_result.get("response")
 
             result["interval"] = self.NO_WAIT_INTERVAL
             return result
