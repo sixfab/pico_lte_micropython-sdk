@@ -29,15 +29,15 @@ class Debug:
         self.debug_channel = channel
         self.debug_level = level
 
-    def set_debug_channel(self, channel):
+    def set_channel(self, channel):
         """Sets the debug channel."""
         self.debug_channel = channel
 
-    def set_debug_level(self, level):
+    def set_level(self, level):
         """Sets the debug level."""
         self.debug_level = level
 
-    def set_debug_enabled(self, enabled):
+    def enable(self, enabled):
         """Sets the debug enabled."""
         self.debug_enabled = enabled
 
