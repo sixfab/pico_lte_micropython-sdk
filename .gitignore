@@ -4,6 +4,9 @@ cert/
 ### Configs
 config.json
 
+### VSCode Config
+.vscode/
+
 ### Mock modules
 machine.py
 neopixel.py
