@@ -1,5 +1,19 @@
 """
 Example code for performing GET request to a server with using HTTP.
+
+Example Configuration
+---------------------
+Create a config.json file in the root directory of the picocell device.
+config.json file must include the following parameters for this example:
+
+config.json
+{
+    "https":{
+        "server":"[HTTP_SERVER]",
+        "username":"[YOUR_HTTP_USERNAME]",
+        "password":"[YOUR_HTTP_PASSWORD]"
+    },
+}
 """
 
 import time
@@ -14,18 +28,15 @@ modem.http.set_context_id()
 modem.network.get_pdp_ready()
 modem.http.set_server_url()
 
-while True:
-    debug.info("Sending a GET request.")
 
-    result = modem.http.get()
-    debug.info(result)
+debug.info("Sending a GET request.")
 
-    # Read the response after 5 seconds.
-    time.sleep(5)
-    result = modem.http.read_response("200")
-    debug.info(result)
-    if result["status"] == Status.SUCCESS:
-        debug.info("Get request succeeded.")
+result = modem.http.get()
+debug.info(result)
 
-    # Wait 10 seconds in each iteration.
-    time.sleep(10)
+# Read the response after 5 seconds.
+time.sleep(5)
+result = modem.http.read_response()
+debug.info(result)
+if result["status"] == Status.SUCCESS:
+    debug.info("Get request succeeded.")
