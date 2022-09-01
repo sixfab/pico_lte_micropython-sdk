@@ -348,3 +348,26 @@ class Azure:
         Read messages from subscribed topics.
         """
         return self.mqtt.read_messages()
+    
+    def subscribe_to_device_commands(self):
+        """Subscribe to the device commands from Azure IoT Hub
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
+        """
+        return self.subscribe_topics(topics=[("devices/picocell_x509_device/messages/devicebound/#", 1)])
+
+    def retrieve_device_twin_status(self):
+        """It sends a request to the MQTT server for retriving the "desired" and
+        "reported" status of the device twin. You need to call read_messages() after
+        this method.
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
+        """
+        self.subscribe_topics(topics=["$iothub/twin/res/#", 1])
+        return self.publish_message("", topic="$iothub/twin/GET/?$rid=1")
