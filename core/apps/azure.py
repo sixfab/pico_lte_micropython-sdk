@@ -357,7 +357,7 @@ class Azure:
         dict
             Result that includes "status" and "response" keys
         """
-        return self.subscribe_topics(topics=[("devices/picocell_x509_device/messages/devicebound/#", 1)])
+        return self.subscribe_topics(topics=[(f"devices/{self.device_id}/messages/devicebound/#", 1)])
 
     def retrieve_device_twin_status(self):
         """It sends a request to the MQTT server for retriving the "desired" and
