@@ -120,7 +120,7 @@ In our case, we're going to use a JSON such as the one in below.
 }
 ```
 
-Please check that you have a `config.json`, the example `publish_message.py` script to send data to server, and the certificates on the Picocell's file system.
+Please check that you have a `config.json`, the example `mqtt_publish.py` script to send data to server, and the certificates on the Picocell's file system.
 
 ![](./assets/test_step_1.png)
 
