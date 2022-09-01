@@ -94,7 +94,7 @@ Create `config.json` file on the root path of the Picocell.
 }
 ```
 
-### For Azure IoT Hub app module:
+### For Azure IoT Hub app module
 ```config.json
 {
     "azure": {
