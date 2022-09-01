@@ -6,7 +6,7 @@ Create `config.json` file on the root path of the Picocell.
 ## Configurable Parameters and their related methods
 > These are used as default value while their related methods called and didn't pass an argument to these.
 
-### For http module
+### For HTTP module
 
 ```config.json
 {
@@ -18,7 +18,7 @@ Create `config.json` file on the root path of the Picocell.
 }
 ```
 
-### For mqtt module
+### For MQTT module
 ```config.json
 {
     "mqtts":{
@@ -34,7 +34,7 @@ Create `config.json` file on the root path of the Picocell.
 }
 ```
 
- ### For AWS app module
+ ### For Amazon Web Services app module
 ```config.json
 {
     "aws":{
@@ -66,26 +66,6 @@ Create `config.json` file on the root path of the Picocell.
 }
 ```
 
- ### For GCloud app module
-```config.json
-{
-    "gcloud":{
-        "project_id": "[YOUR_GCLOUDIOT_PROJECT_ID]",
-        "region": "[YOUR_GCLOUDIOT_REGION]",
-        "registry_id": "[YOUR_GCLOUDIOT_REGISTRY_ID]",
-        "device_id": "[YOUR_GCLOUDIOT_DEVICE_ID]",
-        "jwt": "[YOUR_JSON_WEB_TOKEN_FOR_DEVICE]",
-        "mqtts": {
-            "pub_topic": [YOUR_MQTT_TOPIC],
-            "sub_topics": [
-                "[YOUR_MQTT_TOPIC/1]",
-                "[YOUR_MQTT_TOPIC/2]"
-            ] 
-        }
-    }
-}
-```
-
 ### For Slack app module
 
 ```config.json
@@ -110,6 +90,16 @@ Create `config.json` file on the root path of the Picocell.
             ],
             "pub_topic": "[YOUR_MQTT_TOPIC]"
         }
+    }
+}
+```
+
+### For Azure IoT Hub app module:
+```config.json
+{
+    "azure": {
+        "hub_name": "[YOUR_IOT_HUB_NAME]",
+        "device_id": "[YOUR_DEVICE_ID]"
     }
 }
 ```
