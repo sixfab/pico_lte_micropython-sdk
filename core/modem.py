@@ -24,6 +24,7 @@ from core.apps.aws import AWS
 from core.apps.slack import Slack
 from core.apps.telegram import Telegram
 from core.apps.thingspeak import ThingSpeak
+from core.apps.azure import Azure
 
 class Modem:
     """
@@ -54,6 +55,7 @@ class Modem:
         self.telegram = Telegram(self.base, self.network, self.http)
         self.thingspeak = ThingSpeak(self.base, self.network, self.mqtt)
         self.slack = Slack(self.base, self.network, self.http)
+        self.azure = Azure(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
 
         # power up modem
         if self.base.power_status() != 0:
