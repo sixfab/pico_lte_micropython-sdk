@@ -140,7 +140,7 @@ Before running the code, you should go to your IoT Hub dashboard. Select **Devic
 
 Press the run button, and return to look to **Message to Device** panel, send a message and look to the console output.
 
-![](/mnt/Data/Sixfab-Staj/Reports/Tutorials/Azure IoT Hub Subscribe with MQTT/assets/test_step_3.png)
+![](./assets/test_step_3.png)
 
 It should be something similar to this log:
 
