@@ -1,115 +1,51 @@
-# Picocell Micropython SDK
+<p align="center">
+  <img src="https://community.sixfab.com/uploads/default/original/1X/583bd28f0c2b4967aa4c275f8d388f536bc9da3d.png" height="60">
+  <h1 align="center">picocell SDK for MicroPython</h1>
+</p>
+<p align="center">
+an embedded framework to make easier cellular connections
+</p>
+<!--
+-->
 
-# Configuration
-Create `config.json` file on the root path of the Picocell.
+<div align="center">
 
-## Configurable Parameters and their related methods
-> These are used as default value while their related methods called and didn't pass an argument to these.
+![version: v0.2.0](https://img.shields.io/badge/version-v0.2.0-blue?style=flat-square) ![](https://img.shields.io/badge/license-MIT-critical?style=flat-square) ![applications: 5 services](https://img.shields.io/badge/applications-5%20services-success?style=flat-square) ![Stars count in GitHub](https://img.shields.io/github/stars/sixfab/picocell_python-sdk?style=flat-square)
 
-### For http module
+</div>
 
-```config.json
-{
-    "https":{
-        "server":"[HTTP_SERVER]",
-        "username":"[YOUR_HTTP_USERNAME]",
-        "password":"[YOUR_HTTP_PASSWORD]"
-    },
-}
-```
+## Description
+picocell SDK is a framework that you can use in your embedded systems projects and **takes care of cellular communication** processes for you. It provides a built-in application support for popular back-end services such as Amazon Web Services, Azure, ThingSpeak, Slack, and Telegram. 
 
-### For mqtt module
-```config.json
-{
-    "mqtts":{
-        "host":"[YOUR_MQTT_HOST]",
-        "port":"[YOUR_MQTT_PORT]",
-        "pub_topic":"[YOUR_MQTT_PUB_TOPIC]",
-        "sub_topics":[
-            ["[YOUR_MQTT_TOPIC/1]",[QOS]],
-            ["[YOUR_MQTT_TOPIC/2]",[QOS]]
-        ],
-        "username":"[YOUR_MQTT_USERNAME]",
-        "password":"[YOUR_MQTT_PASSWORD]"
-}
-```
+* Less than 40 lines when making a connection to built-in application.
+* Support for SSL/TLS certification and their secure storage.
+* Easy-to-use GPS, HTTPS and MQTTS interfaces.
+* Ultra low power mode to better battery life.
+* Chance to create your own application module with state machines.
 
- ### For AWS app module
-```config.json
-{
-    "aws":{
-        "mqtts":{
-            "host":"[YOUR_AWSIOT_ENDPOINT]",
-            "port":"[YOUR_AWSIOT_MQTT_PORT]",
-            "pub_topic":"[YOUR_MQTT_TOPIC]",
-            "sub_topics":[
-                "[YOUR_MQTT_TOPIC/1]",
-                "[YOUR_MQTT_TOPIC/2]"
-            ]
-        },
+## Installation
+1. Go to **Releases** section on the sidebar of this repository and download the most recent version to your computer (or download it using [this link](/sixfab/picocell_python-sdk/releases/latest/download/picocell.uf2)).
+2. After downloading is finished, plug-in the _picocell_ to your computer, and drag-and-drop the UF2 file into the _picocell_'s file system. Since the MicroPython is included in the released UF2 file, there will be no additional step to install MicroPython seperatly.
+3. Your picocell device will be removed and re-inserted to your computer. That's all, it is ready to use!
 
-        "https":{
-            "endpoint":"[YOUR_AWS_IOT_ENDPOINT]"
-            "topic":"[YOUR_DEVICE_TOPIC]"
-        }
-    }
-}
-```
+## Usage
+Using the framework is pretty straight forward. A `main.py` file is needed to run in a MicroPython environment, therefore, please create a `main.py` script in your picocell's file system. Import the framework with `from core.modem import Modem` line, and code your embedded project!
 
- ### For Telegram app module
-```config.json
-{
-    "telegram": {
-        "token": "[YOUR_BOT_TOKEN_ID]",
-        "chat_id": "[YOUR_GROUP_CHAT_ID]"
-        }
-}
-```
+**Note**: It is a must to have a tool to upload your `main.py` file or any example from our repository to your picocell device. [Thonny IDE](https://thonny.org/) is very common tool that has a easy GUI to perform this kind of operations. For more compact and smaller size tool, we can recommend [Adafruit's Ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy) to you.
 
- ### For GCloud app module
-```config.json
-{
-    "gcloud":{
-        "project_id": "[YOUR_GCLOUDIOT_PROJECT_ID]",
-        "region": "[YOUR_GCLOUDIOT_REGION]",
-        "registry_id": "[YOUR_GCLOUDIOT_REGISTRY_ID]",
-        "device_id": "[YOUR_GCLOUDIOT_DEVICE_ID]",
-        "jwt": "[YOUR_JSON_WEB_TOKEN_FOR_DEVICE]",
-        "mqtts": {
-            "pub_topic": [YOUR_MQTT_TOPIC],
-            "sub_topics": [
-                "[YOUR_MQTT_TOPIC/1]",
-                "[YOUR_MQTT_TOPIC/2]"
-            ] 
-        }
-    }
-}
-```
+For further reference about installing or usage, please refer to our documentation page. Also, Sixfab Community Portal is available for your questions and recommendations.
 
-### For Slack app module
+<p align="center">
+  <a aria-label="Documentation on Sixfab.com" href="https://docs.sixfab.com/" target="_blank">
+    <img alt="" src="https://img.shields.io/badge/Documentation-blue.svg?style=for-the-badge">
+  </a>
+  <a aria-label="Community on Sixfab.com" href="https://community.sixfab.com/" target="_blank">
+    <img alt="" src="https://img.shields.io/badge/Community-blue.svg?style=for-the-badge">
+  </a>
+</p>
 
-```config.json
-{
-    "slack":{
-        "webhook_url": "[INCOMING_WEBHOOK_URL]"
-    }
-}
-```
+## Contributing
+All contributions are welcome. You can find the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-### For ThingSpeak app module
-```config.json
-{
-    "thingspeak": {
-        "channel_id": "[YOUR_CHANNEL_ID]",
-        "mqtts": {
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "username": "[DEVICE_MQTT_USERNAME]",
-            "password": "[DEVICE_MQTT_PASSWORD]",
-            "sub_topics": [
-                ["[YOUR_MQTT_TOPIC]", [QOS]]
-            ],
-            "pub_topic": "[YOUR_MQTT_TOPIC]"
-        }
-    }
-}
-```
+## License
+Licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
