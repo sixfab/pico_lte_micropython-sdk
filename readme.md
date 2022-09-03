@@ -20,7 +20,7 @@ picocell SDK is a framework that you can use in your embedded systems projects a
 * Less than 40 lines when making a connection to a built-in application.
 * Support for SSL/TLS certification and their secure storage.
 * Easy-to-use GPS, HTTPS and MQTTS interfaces.
-* Ultra-low power mode to better battery life.
+* Ultra-low power mode for better battery life.
 * Chance to create your own application module with state machines.
 
 ## Installation
