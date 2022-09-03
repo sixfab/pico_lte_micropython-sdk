@@ -169,7 +169,7 @@ Some use-cases can be implemented by using modules when there is no spesific app
 The most important feature that we've developed in picocell SDK is the ability to create new applications for your specific services. Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) guidelines. You need to follow standarts that we used to create an application configuration parameters.
 
  This is the general structure of a `config.json` file:
- ```json
+ ```
  {
     "your_own_app": {
         [application_specific_attributes],
