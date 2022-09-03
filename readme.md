@@ -44,6 +44,13 @@ For further reference about installing or usage, please refer to our documentati
   </a>
 </p>
 
+## Configuration Files
+You can use a configuration file to increase maintainability of your embedded code. This file is named as `config.json` and stores necessary connection parameters which are designed for you to easily connect to the applications. You can find example files for each application and module in [CONFIGURATIONS.md](./CONFIGURATIONS.md) page.
+
+This file has to be in the root directory of the picocell device's file system.
+
+
+
 ## Contributing
 All contributions are welcome. You can find the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
