@@ -82,7 +82,7 @@ class Network:
             Result that includes "status" and "response" keys
         """
         desired_reponses = ["+CREG: 0,1", "+CREG: 0,5"]
-        return self.atcom.retry_at_comm("AT+CREG?", desired_reponses, retry_count=20, interval=1)
+        return self.atcom.send_at_comm("AT+CREG?", desired_reponses)
 
     def get_operator_information(self):
         """
@@ -211,7 +211,7 @@ class Network:
         step_sim_ready = Step(
             function=self.base.check_sim_ready,
             name="check_sim_ready",
-            success="get_apn",
+            success="check_apn",
             fail="failure",
         )
 
@@ -225,7 +225,7 @@ class Network:
         step_set_apn = Step(
             function=self.set_apn,
             name="set_apn",
-            success="get_apn",
+            success="check_apn",
             fail="failure",
         )
 

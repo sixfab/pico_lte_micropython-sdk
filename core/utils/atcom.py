@@ -211,33 +211,3 @@ class ATCom:
         if urc:
             return self.get_urc_response(desired, fault, timeout)
         return self.get_response(desired, fault, timeout)
-
-    def retry_at_comm(self, command, desired=None, timeout=5, retry_count=3, interval=1):
-        """
-        Function for retrying AT command to modem and getting modem response
-
-        Parameters
-        ----------
-        command: str
-            AT command to send
-        desired: str or list, default: None
-            desired response from modem
-        timeout: int
-            timeout for getting response
-        retry_count: int
-            number of retries
-        interval: int
-            interval between retries
-
-        Returns
-        -------
-        dict
-            Result that includes "status" and "response" keys
-        """
-        for _ in range(retry_count):
-            result = self.send_at_comm(command, desired, timeout)
-            if result["status"] == Status.SUCCESS:
-                return result
-            else:
-                time.sleep(interval)
-        return result
