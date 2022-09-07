@@ -211,7 +211,7 @@ class Network:
         step_sim_ready = Step(
             function=self.base.check_sim_ready,
             name="check_sim_ready",
-            success="get_apn",
+            success="check_apn",
             fail="failure",
         )
 
@@ -225,7 +225,7 @@ class Network:
         step_set_apn = Step(
             function=self.set_apn,
             name="set_apn",
-            success="get_apn",
+            success="check_apn",
             fail="failure",
         )
 
