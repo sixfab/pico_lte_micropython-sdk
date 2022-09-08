@@ -66,22 +66,15 @@ class Telegram:
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
-            success="pdp_deactivate",
+            success="pdp_ready",
             fail="failure",
         )
 
-        step_pdp_deactivate = Step(
-            function=self.network.deactivate_pdp_context,
-            name="pdp_deactivate",
-            success="pdp_activate",
-            fail="failure",
-        )
-
-        step_pdp_activate= Step(
-            function=self.network.activate_pdp_context,
-            name="pdp_activate",
+        step_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="pdp_ready",
             success="http_ssl_configuration",
-            fail="failure"
+            fail="failure",
         )
 
         step_http_ssl_configuration = Step(
@@ -124,8 +117,7 @@ class Telegram:
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
         sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_deactivate)
-        sm.add_step(step_pdp_activate)
+        sm.add_step(step_pdp_ready)
         sm.add_step(step_http_ssl_configuration)
         sm.add_step(step_set_server_url)
         sm.add_step(step_get_request)

@@ -96,27 +96,13 @@ class ThingSpeak:
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
-            success="configure_tcp_ip_context",
+            success="get_pdp_ready",
             fail="failure",
         )
 
-        step_tcpip_context = Step(
-            function=self.network.configure_tcp_ip_context,
-            name="configure_tcp_ip_context",
-            success="pdp_deactivate",
-            fail="failure"
-        )
-
-        step_pdp_deactivate = Step(
-            function=self.network.deactivate_pdp_context,
-            name="pdp_deactivate",
-            success="pdp_activate",
-            fail="failure",
-        )
-
-        step_pdp_activate= Step(
-            function=self.network.activate_pdp_context,
-            name="pdp_activate",
+        step_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_pdp_ready",
             success="open_mqtt_connection",
             fail="failure",
         )
@@ -160,9 +146,7 @@ class ThingSpeak:
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
         sm.add_step(step_network_reg)
-        sm.add_step(step_tcpip_context)
-        sm.add_step(step_pdp_deactivate)
-        sm.add_step(step_pdp_activate)
+        sm.add_step(step_pdp_ready)
         sm.add_step(step_open_mqtt_connection)
         sm.add_step(step_connect_mqtt_broker)
         sm.add_step(step_publish_message)
@@ -231,27 +215,13 @@ class ThingSpeak:
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
-            success="configure_tcp_ip_context",
+            success="get_pdp_ready",
             fail="failure",
         )
 
-        step_tcpip_context = Step(
-            function=self.network.configure_tcp_ip_context,
-            name="configure_tcp_ip_context",
-            success="pdp_deactivate",
-            fail="failure"
-        )
-
-        step_pdp_deactivate = Step(
-            function=self.network.deactivate_pdp_context,
-            name="pdp_deactivate",
-            success="pdp_activate",
-            fail="failure",
-        )
-
-        step_pdp_activate= Step(
-            function=self.network.activate_pdp_context,
-            name="pdp_activate",
+        step_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_pdp_ready",
             success="open_mqtt_connection",
             fail="failure",
         )
@@ -293,9 +263,7 @@ class ThingSpeak:
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
         sm.add_step(step_network_reg)
-        sm.add_step(step_tcpip_context)
-        sm.add_step(step_pdp_deactivate)
-        sm.add_step(step_pdp_activate)
+        sm.add_step(step_pdp_ready)
         sm.add_step(step_open_mqtt_connection)
         sm.add_step(step_connect_mqtt_broker)
         sm.add_step(step_subscribe_topics)
