@@ -73,7 +73,9 @@ class ThingSpeak:
             topic = get_parameter(["thingspeak", "mqtts", "pub_topic"],  \
                 "channels/" + str(self.channel_id) + "/publish")
 
-        payload = ThingSpeak.create_message(payload)
+        # Create message from dictionary if needed.
+        if type(payload) == dict:
+            payload = ThingSpeak.create_message(payload)
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
