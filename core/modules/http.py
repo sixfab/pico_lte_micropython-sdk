@@ -175,19 +175,18 @@ class HTTP:
             Result that includes "status" and "response" keys
         """
 
-        if username:
+        if username is None:
             username = get_parameter(["https", "username"])
 
-        if password:
+        if password is None:
             password = get_parameter(["https", "password"])
 
         if username and password:
             command = f'AT+QHTTPCFG="auth","{username}:{password}"'
             return self.atcom.send_at_comm(command)
-        return {
-            "response": "Missing arguments : username and password",
-            "status": Status.ERROR
-            }
+        
+        return {"response": "Missing arguments: username and password",
+                "status": Status.ERROR}
 
     def set_custom_header(self, header=None):
         """
