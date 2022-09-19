@@ -74,7 +74,7 @@ class ThingSpeak:
                 "channels/" + str(self.channel_id) + "/publish")
 
         # Create message from dictionary if needed.
-        if type(payload) == dict:
+        if isinstance(payload, dict):
             payload = ThingSpeak.create_message(payload)
 
         # Check if client is connected to the broker
