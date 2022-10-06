@@ -5,16 +5,25 @@ Module for managing processes on modem step by step.
 from core.temp import config, debug
 from core.utils.status import Status
 
+
 class Step:
     """Data class for storing step data"""
 
     is_ok = False
     final_step = False
+
     def __init__(
-        self, name, function, success, fail,
-            function_params=None, interval=0, retry=0,
-            final_step=False, cachable=False
-        ):
+        self,
+        name,
+        function,
+        success,
+        fail,
+        function_params=None,
+        interval=0,
+        retry=0,
+        final_step=False,
+        cachable=False,
+    ):
         self.function = function
         self.name = name
         self.success = success
@@ -24,6 +33,7 @@ class Step:
         self.function_params = function_params
         self.final_step = final_step
         self.cachable = cachable
+
 
 class StateManager:
     """Class for managing states"""
@@ -44,20 +54,34 @@ class StateManager:
 
         self.organizer_step = Step(
             function=self.organizer,
-            name="organizer", success="organizer", fail="organizer",
-            function_params=None, interval=0, retry=0
+            name="organizer",
+            success="organizer",
+            fail="organizer",
+            function_params=None,
+            interval=0,
+            retry=0,
         )
 
         self.success_step = Step(
             function=self.success,
-            name="success", success="success", fail="success",
-            function_params=None, interval=0, retry=0, final_step=True
+            name="success",
+            success="success",
+            fail="success",
+            function_params=None,
+            interval=0,
+            retry=0,
+            final_step=True,
         )
 
         self.failure_step = Step(
             function=self.failure,
-            name="failure", success="failure", fail="failure",
-            function_params=None, interval=0, retry=0, final_step=True
+            name="failure",
+            success="failure",
+            fail="failure",
+            function_params=None,
+            interval=0,
+            retry=0,
+            final_step=True,
         )
 
         self.current = self.organizer_step
@@ -89,16 +113,20 @@ class StateManager:
             self.current = self.first_step
 
             cached_step = self.cache.get_state(self.function_name)
-            if cached_step: # if cached step is not None
+            if cached_step:  # if cached step is not None
                 self.current = self.get_step(cached_step)
 
         else:
-            if self.current.is_ok: # step succieded
-                if self.current.cachable: # Assign new cache if step cachable
+            if self.current.is_ok:  # step succieded
+                if self.current.cachable:  # Assign new cache if step cachable
                     self.cache.set_state(self.function_name, self.current.name)
 
                 self.current.is_ok = False
-                self.current = self.get_step(self.current.success)
+
+                if self.current.final_step:
+                    self.current = self.get_step("success")
+                else:
+                    self.current = self.get_step(self.current.success)
             else:
                 if self.retry_counter >= self.current.retry:
                     # step failed and retry counter is exceeded
@@ -112,21 +140,21 @@ class StateManager:
                     # step failed and retry counter is not exceeded, retrying...
                     self.current = self.get_step(self.current.name)
                     self.counter_tick()
-        return {"status" : Status.SUCCESS}
+        return {"status": Status.SUCCESS}
 
     def success(self):
         """Success step function"""
         return {
             "status": Status.SUCCESS,
             "response": self.cache.get_last_response(),
-            }
+        }
 
     def failure(self):
         """Fail step function"""
         return {
             "status": Status.ERROR,
             "response": self.cache.get_last_response(),
-            }
+        }
 
     def execute_organizer_step(self):
         """Executes organizer step"""
@@ -152,12 +180,14 @@ class StateManager:
         return result
 
     def run(self, begin=None, end=None):
-        """Runs state manager"""
-        result={}
+        """Runs state manager."""
+        result = {}
+
         if begin:
             self.current = self.get_step(begin)
+        else:
+            self.execute_organizer_step()
 
-        self.execute_organizer_step()
         step_result = self.execute_current_step()
 
         if end:
