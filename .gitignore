@@ -11,6 +11,8 @@ config.json
 machine.py
 neopixel.py
 ubinascii.py
+micropython.py
+pyb.py
 
 ### PYTHON
 # Byte-compiled / optimized / DLL files
