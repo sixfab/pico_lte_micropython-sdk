@@ -150,6 +150,9 @@ class TestManager:
         assert predefined_state_manager.retry_counter == 0
 
     def test_success(self, mocker, predefined_state_manager):
+        """Test the succes() method if it returns a success step
+        with cache's last response.
+        """
         mocker.patch(
             "core.temp.StateCache.get_last_response",
             return_value="last_response_mocked",
@@ -159,6 +162,9 @@ class TestManager:
         assert returned_value.get("response") == "last_response_mocked"
 
     def test_failure(self, mocker, predefined_state_manager):
+        """Test the failure() method if it returns a success step
+        with cache's last response.
+        """
         mocker.patch(
             "core.temp.StateCache.get_last_response",
             return_value="last_response_mocked",
@@ -170,7 +176,7 @@ class TestManager:
     def test_organizer_with_current_step_is_organizer_and_cache_none(
         self, mocker, predefined_state_manager
     ):
-        """It tests the organizer() method with current step as organizer,
+        """Tests the organizer() method with current step as organizer,
         and cached step is not available.
         """
         mocker.patch(
@@ -187,6 +193,8 @@ class TestManager:
     def test_organizer_with_current_step_is_organizer_and_cache_exists(
         self, mocker, predefined_state_manager
     ):
+        """Tests the organizer() method with current step as organizer
+        and cache exists."""
         mocker.patch(
             "core.temp.StateCache.get_state",
             return_value="ThirdStep",
@@ -200,6 +208,9 @@ class TestManager:
         assert predefined_state_manager.current.name == "ThirdStep"
 
     def test_organizer_with_current_step_is_ok(self, predefined_state_manager):
+        """Tests the organizer() method with current step' is_ok attribute
+        is True with both cached and non-cached probabilities.
+        """
         # Get FirstStep as current step.
         predefined_state_manager.current.is_ok = True
         predefined_state_manager.organizer()
@@ -219,6 +230,9 @@ class TestManager:
     def test_organizer_without_current_is_ok_and_retry_current(
         self, predefined_state_manager
     ):
+        """Tests the organizer() method's behaviour on the steps
+        with given retry attribute.
+        """
         # Get SecondStep as current step.
         predefined_state_manager.organizer()
         predefined_state_manager.current.is_ok = True
@@ -243,6 +257,7 @@ class TestManager:
         assert True
 
     def test_execute_current_step(self, predefined_state_manager):
+        """Tests the execute_current_step() method."""
         # Go to first step.
         predefined_state_manager.organizer()
         result = predefined_state_manager.execute_current_step()
@@ -251,6 +266,7 @@ class TestManager:
         assert predefined_state_manager.current.is_ok == True
 
     def test_run_with_default_parameters(self, predefined_state_manager):
+        """Tests the run() method without begin and end parameters."""
         # On first step.
         result = predefined_state_manager.run()
         assert result.get("status") == Status.ONGOING
@@ -266,6 +282,7 @@ class TestManager:
 
     @pytest.mark.parametrize("state_name", ["SecondStep", "FourthStep"])
     def test_run_with_begin(self, state_name, predefined_state_manager):
+        """Tests the run() method with given begin parameter."""
         predefined_state_manager.run(begin=state_name)
         assert predefined_state_manager.current.name == state_name
 
@@ -282,6 +299,7 @@ class TestManager:
     def test_run_with_end(
         self, state_name, expected_response, predefined_state_manager
     ):
+        """Tests the run() method with given end parameter."""
         while True:
             result = predefined_state_manager.run(end=state_name)
             if result.get("status") == Status.SUCCESS:
