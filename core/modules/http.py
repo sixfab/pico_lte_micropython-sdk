@@ -238,7 +238,7 @@ class HTTP:
             return result
         return {"response": "Missing arguments : url", "status": Status.ERROR}
 
-    def get(self, data="", header_mode=0, input_timeout=5, timeout=60):
+    def get(self, data="", header_mode=0, input_timeout=5, timeout=60, desired_response=None, fault_response=None):
         """
         Function for sending HTTP GET request
 
@@ -254,31 +254,55 @@ class HTTP:
             Input timeout in seconds
         timeout : int, default: 60
             Timeout in seconds
+        desired_response : list, default: HTTP 2XX codes
+            The response messages waited to be successful.
+        fault_response : list, default: CME Error codes
+            The response message waited to understand error.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
+        if desired_response is None:
+            desired_response = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"]
+
+        if fault_response is None:
+            fault_response = [str(error_code) for error_code in range(701, 731, 1)]
+
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
             if header_mode == 1:
                 # Send a GET request to the modem.
                 command = f'AT+QHTTPGET={timeout},{len(data)},{input_timeout}'
-                result =  self.atcom.send_at_comm(command, "CONNECT", urc=True, timeout=60)
+                result =  self.atcom.send_at_comm(command, desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=60)
                 if result["status"] == Status.SUCCESS:
                     # Send the request header.
-                    return self.atcom.send_at_comm(data, line_end=False)
+                    return self.atcom.send_at_comm(
+                        data,
+                        desired=[f"+QHTTPGET: 0,{desired}," for desired in desired_response],
+                        fault=[f"+QHTTPPOST: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                        urc=True,
+                        line_end=False,
+                        timeout=timeout,
+                    )
             else:
                 # Send a GET request without header.
                 command = f'AT+QHTTPGET={timeout}'
-                return self.atcom.send_at_comm(command)
+                return self.atcom.send_at_comm(
+                    command,
+                    desired=[f"+QHTTPGET: 0,{desired}," for desired in desired_response],
+                    fault=[f"+QHTTPPOST: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                    urc=True,
+                    line_end=False,
+                    timeout=timeout,
+                )
 
         # Return the result of request header if there is no SUCCESS.
         return result
 
-    def post(self, data, header_mode=0, input_timeout=5, timeout=60):
+    def post(self, data, header_mode=0, input_timeout=5, timeout=60, desired_response=None, fault_response=None):
         """
         Function for sending HTTP POST request
 
@@ -294,21 +318,38 @@ class HTTP:
             Input timeout in seconds.
         timeout : int, default: 60
             Timeout in seconds.
+        desired_response : list, default: HTTP 2XX codes
+            The response messages waited to be successful.
+        fault_response : list, default: CME Error codes
+            The response message waited to understand error.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
+        if desired_response is None:
+            desired_response = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"]
+
+        if fault_response is None:
+            fault_response = [str(error_code) for error_code in range(701, 731, 1)]
+
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
             # Send a POST request to the modem.
             command = f'AT+QHTTPPOST={len(data)},{input_timeout},{timeout}'
-            result =  self.atcom.send_at_comm(command, "CONNECT", urc=True, timeout=timeout)
+            result =  self.atcom.send_at_comm(command, desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=timeout)
             if result["status"] == Status.SUCCESS:
                 # Send the request (header and) body.
-                result = self.atcom.send_at_comm(data, line_end=False)
+                result = self.atcom.send_at_comm(
+                    data,
+                    desired=[f"+QHTTPPOST: 0,{desired}," for desired in desired_response],
+                    fault=[f"+QHTTPPOST: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                    urc=True,
+                    line_end=False,
+                    timeout=timeout
+                )
         return result
 
     def post_from_file(self, file_path, header_mode=0, timeout=60):
@@ -325,6 +366,10 @@ class HTTP:
             * 1 --> The file in a file system will be the HTTP(S) POST header and body.
         timeout : int, default: 60
             Timeout in seconds.
+        desired_response : list, default: HTTP 2XX codes
+            The response messages waited to be successful.
+        fault_response : list, default: CME Error codes
+            The response message waited to understand error.
 
         Returns
         -------
@@ -337,7 +382,7 @@ class HTTP:
         command = f'QHTTPPOSTFILE={file_path},{timeout}'
         return self.atcom.send_at_comm(command)
 
-    def put(self, data, header_mode=0, input_timeout=5, timeout=60):
+    def put(self, data, header_mode=0, input_timeout=5, timeout=60, desired_response=None, fault_response=None):
         """
         Function for sending HTTP PUT request
 
@@ -353,21 +398,38 @@ class HTTP:
             Input timeout in seconds.
         timeout : int, default: 60
             Timeout in seconds.
+        desired_response : list, default: HTTP 2XX codes
+            The response messages waited to be successful.
+        fault_response : list, default: CME Error codes
+            The response message waited to understand error.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
+        if desired_response is None:
+            desired_response = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"]
+
+        if fault_response is None:
+            fault_response = [str(error_code) for error_code in range(701, 731, 1)]
+        
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
             # Send a PUT request to the modem.
             command = f'AT+QHTTPPUT={len(data)},{input_timeout},{timeout}'
-            result = self.atcom.send_at_comm(command, "CONNECT", urc=True)
+            result = self.atcom.send_at_comm(command, desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=timeout)
             if result["status"] == Status.SUCCESS:
                 # Send the request (header and) body.
-                result = self.atcom.send_at_comm(data, line_end=False)
+                result = self.atcom.send_at_comm(
+                    data,
+                    desired=[f"+QHTTPPUT: 0,{desired}," for desired in desired_response],
+                    fault=[f"+QHTTPPUT: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                    urc=True,
+                    line_end=False,
+                    timeout=timeout
+                )
         return result
 
     def put_from_file(self, file_path, file_type=0, header_mode=0, timeout=60):
@@ -404,15 +466,19 @@ class HTTP:
         command = f'AT+QHTTPPUTFILE={file_path},{timeout},{file_type}'
         return self.atcom.send_at_comm(command)
 
-    def read_response(self, desired_response=None, fault_response=None, timeout=60):
+    def read_response(self, desired_response=None, fault_response=None, timeout=5):
         """
         Function for retrieving the HTTP(S) response from an HTTP(S) server via the UART/USB port,
         after HTTP(S) GET/POST/PUT requests are sent.
 
         Parameters
         ----------
-        timeout : int, default: 60
+        timeout : int, default: 5
             Timeout in seconds.
+        desired_response : list, default: "+QHTTPREAD: 0"
+            The response messages waited to be successful.
+        fault_response : list, default: CME error codes
+            The response message waited to understand error.
 
         Returns
         -------
@@ -420,20 +486,27 @@ class HTTP:
             Result that includes "status" and "response" keys
         """
         if desired_response is None:
-             desired_response = [
-                 "200", "201", "202", "203", "204", "205", "206", "207", "208", "226"
-                 ]
-
+            desired_response = "+QHTTPREAD: 0"
+        
         if fault_response is None:
-             fault_response = [
-                 "400", "401", "402", "403", "404", "500", "501", "502", "503","504",
-                 "505", "506", "507", "508", "509", "510", "511"
-                 ]
+            fault_response = [f"+QHTTPREAD: {str(error_code)}" for error_code in range(701, 731, 1)]
 
+        # Send a READ request to the modem.
         command = f'AT+QHTTPREAD={timeout}'
         result = self.atcom.send_at_comm(
-            command, desired_response, fault_response, urc=True, timeout=timeout
-            )
+            command,
+            desired=desired_response,
+            fault=fault_response,
+            urc=True,
+            timeout=timeout
+        )
+        
+        if result["status"] == Status.SUCCESS:
+            connect_index = result["response"].index("CONNECT")
+            ok_index = result["response"].index("OK")
+            if connect_index != -1 and ok_index != -1:
+                result["response"] = result["response"][(connect_index + 1):ok_index]
+
         return result
 
     def read_response_to_file(self, file_path, timeout=60):
