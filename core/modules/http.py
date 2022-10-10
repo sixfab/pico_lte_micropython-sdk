@@ -495,11 +495,13 @@ class HTTP:
         )
         
         if result["status"] == Status.SUCCESS:
-            connect_index = result["response"].index("CONNECT")
-            ok_index = result["response"].index("OK")
-            if connect_index != -1 and ok_index != -1:
+            try:
+                connect_index = result["response"].index("CONNECT")
+                ok_index = result["response"].index("OK")
+            except ValueError:
+                pass
+            else:
                 result["response"] = result["response"][(connect_index + 1):ok_index]
-
         return result
 
     def read_response_to_file(self, file_path, timeout=60):
