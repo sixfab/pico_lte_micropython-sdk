@@ -51,6 +51,7 @@ HTTP Server Response Codes
 
 from core.utils.status import Status
 from core.utils.helpers import get_parameter
+from core.temp import debug
 
 class HTTP:
     """
@@ -281,8 +282,8 @@ class HTTP:
                     # Send the request header.
                     return self.atcom.send_at_comm(
                         data,
-                        desired=[f"+QHTTPGET: 0,{desired}," for desired in desired_response],
-                        fault=[f"+QHTTPPOST: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                        desired=[f"+QHTTPGET: 0,{desired}" for desired in desired_response],
+                        fault=[f"+QHTTPGET: {fault}" for fault in fault_response] + ["+CME ERROR:"],
                         urc=True,
                         line_end=False,
                         timeout=timeout,
@@ -290,14 +291,7 @@ class HTTP:
             else:
                 # Send a GET request without header.
                 command = f'AT+QHTTPGET={timeout}'
-                return self.atcom.send_at_comm(
-                    command,
-                    desired=[f"+QHTTPGET: 0,{desired}," for desired in desired_response],
-                    fault=[f"+QHTTPPOST: {fault}," for fault in fault_response] + ["+CME ERROR:"],
-                    urc=True,
-                    line_end=False,
-                    timeout=timeout,
-                )
+                return self.atcom.send_at_comm(command)
 
         # Return the result of request header if there is no SUCCESS.
         return result
@@ -344,8 +338,8 @@ class HTTP:
                 # Send the request (header and) body.
                 result = self.atcom.send_at_comm(
                     data,
-                    desired=[f"+QHTTPPOST: 0,{desired}," for desired in desired_response],
-                    fault=[f"+QHTTPPOST: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                    desired=[f"+QHTTPPOST: 0,{desired}" for desired in desired_response],
+                    fault=[f"+QHTTPPOST: {fault}" for fault in fault_response] + ["+CME ERROR:"],
                     urc=True,
                     line_end=False,
                     timeout=timeout
@@ -424,8 +418,8 @@ class HTTP:
                 # Send the request (header and) body.
                 result = self.atcom.send_at_comm(
                     data,
-                    desired=[f"+QHTTPPUT: 0,{desired}," for desired in desired_response],
-                    fault=[f"+QHTTPPUT: {fault}," for fault in fault_response] + ["+CME ERROR:"],
+                    desired=[f"+QHTTPPUT: 0,{desired}" for desired in desired_response],
+                    fault=[f"+QHTTPPUT: {fault}" for fault in fault_response] + ["+CME ERROR:"],
                     urc=True,
                     line_end=False,
                     timeout=timeout
@@ -502,11 +496,11 @@ class HTTP:
         )
         
         if result["status"] == Status.SUCCESS:
-            connect_index = result["response"].index("CONNECT")
-            ok_index = result["response"].index("OK")
-            if connect_index != -1 and ok_index != -1:
-                result["response"] = result["response"][(connect_index + 1):ok_index]
-
+            try:
+                result["response"].remove("CONNECT")
+            except ValueError:
+                debug.warning("\"CONNECT\" message couldn't have found in http.read_response() method.")
+                
         return result
 
     def read_response_to_file(self, file_path, timeout=60):
