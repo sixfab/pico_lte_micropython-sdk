@@ -2,7 +2,6 @@
 Test module for the utils.helpers module.
 """
 
-import os
 import json
 import pytest
 
@@ -56,20 +55,15 @@ class TestHelpers:
             },
         }
 
-    def test_read_json_file_path_exists(self, dict_to_make_json):
+    def test_read_json_file_path_exists(self, tmp_path, dict_to_make_json):
         """It tests read_json_file() with given corret path.
         @TODO: It does not removes the file created. Solve it.
         """
         json_string = json.dumps(dict_to_make_json)
-        with open("test.json", "w") as file_to_save_json:
+        with open(f"{tmp_path}/test.json", "w") as file_to_save_json:
             file_to_save_json.write(json_string)
 
-        data_returned = read_json_file("test.json")
-
-        try:
-            os.remove("test.json")
-        except:
-            pass
+        data_returned = read_json_file(f"{tmp_path}/test.json")
 
         assert data_returned == dict_to_make_json
 
@@ -78,9 +72,9 @@ class TestHelpers:
         data_returned = read_json_file("not_in_there.json")
         assert data_returned is None
 
-    def test_write_json_file(self, dict_to_make_json):
+    def test_write_json_file(self, tmp_path, dict_to_make_json):
         """It tests write_json_file()."""
-        assert write_json_file("test.json", dict_to_make_json) in [
+        assert write_json_file(f"{tmp_path}/test.json", dict_to_make_json) in [
             dict_to_make_json,
             None,
         ]
@@ -190,50 +184,40 @@ class TestHelpers:
         assert simplify(15) == 15
         assert simplify(None) is None
 
-    def test_read_file_with_text_file(self):
+    def test_read_file_with_text_file(self, tmp_path):
         """It tests the read_file() function with text-file input."""
-        with open("test_text_file", "wt") as file_to_test:
-            file_to_test.write("test_document")
+        with open(f"{tmp_path}/test_text_file", "wt") as file_to_test:
+            file_to_test.write(f"test_document")
 
-        test_read = read_file("test_text_file")
-
-        try:
-            os.remove("test_text_file")
-        except:
-            pass
-
+        test_read = read_file(f"{tmp_path}/test_text_file")
         assert test_read in [None, "test_document"]
 
-    def test_read_file_with_binary_file(self, data_to_test_binary):
+    def test_read_file_with_binary_file(self, tmp_path, data_to_test_binary):
         """It tests the read_file() function with binary-file input."""
-        with open("test_binary_file", "wb") as file_to_test:
+        with open(f"{tmp_path}/test_binary_file", "wb") as file_to_test:
             file_to_test.write(data_to_test_binary)
 
-        test_read = read_file("test_binary_file", file_type="b")
-
-        try:
-            os.remove("test_binary_file")
-        except:
-            pass
-
+        test_read = read_file(f"{tmp_path}/test_binary_file", file_type="b")
         assert test_read == data_to_test_binary
 
-    def test_write_file_with_text_file(self):
+    def test_write_file_with_text_file(self, tmp_path):
         """It tests the write_file() function with text-file input."""
         data_to_test = "This is an example."
-        test_write = write_file("test_text_file", data_to_test)
+        test_write = write_file(f"{tmp_path}/test_text_file", data_to_test)
 
-        with open("test_text_file", "rt") as file_to_test:
+        with open(f"{tmp_path}/test_text_file", "rt") as file_to_test:
             data_got_from_file = file_to_test.read()
 
         assert test_write in [data_to_test, None]
         assert data_got_from_file in [data_to_test, None]
 
-    def test_write_file_with_binary_file(self, data_to_test_binary):
+    def test_write_file_with_binary_file(self, tmp_path, data_to_test_binary):
         """It tests the write_file() function with binary-file input."""
-        test_write = write_file("test_binary_file", data_to_test_binary, file_type="b")
+        test_write = write_file(
+            f"{tmp_path}/test_binary_file", data_to_test_binary, file_type="b"
+        )
 
-        with open("test_binary_file", "rb") as file_to_test:
+        with open(f"{tmp_path}/test_binary_file", "rb") as file_to_test:
             data_got_from_file = file_to_test.read()
 
         assert test_write in [data_to_test_binary, None]
@@ -264,24 +248,20 @@ class TestHelpers:
         assert result_with_default == "TestDefault"
 
     def test_get_parameter_included_info(self, mocker, prepared_config):
-        mocker.patch.dict(
-            "core.temp.config",
-            values=prepared_config,
-            clear=True,
-        )
+        """It tests get_parameter() function in a case that config file has asked"""
+
+        mocker.patch.dict("core.temp.config", prepared_config)
 
         assert get_parameter(["app_service", "mqtts", "host"]) == "test_app_mqtts_host"
+
         assert (
             get_parameter(["app_service", "mqtts", "host"], default="something_else")
             == "test_app_mqtts_host"
         )
+
+        assert get_parameter(["https", "endpoint"]) == "test_global_http_endpoint"
+
         assert (
-            get_parameter(["app_service", "https", "endpoint"])
-            == "test_global_http_endpoint"
-        )
-        assert (
-            get_parameter(
-                ["app_service", "https", "endpoint"], default="something_else"
-            )
+            get_parameter(["https", "endpoint"], default="something_else")
             == "test_global_http_endpoint"
         )
