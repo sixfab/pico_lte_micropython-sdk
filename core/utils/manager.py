@@ -185,6 +185,7 @@ class StateManager:
 
         if begin:
             self.current = self.get_step(begin)
+            begin = None  # to run above line only once at the beginning
         else:
             self.execute_organizer_step()
 
