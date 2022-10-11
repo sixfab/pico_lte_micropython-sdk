@@ -1,11 +1,19 @@
-import pytest
-import json
+"""
+Test module for the utils.helpers module.
+"""
+
 import os
+import json
+import pytest
 
 from core.utils.helpers import *
 
 
 class TestHelpers:
+    """
+    Test class for the utils.helpers module.
+    """
+
     @pytest.fixture
     def dict_to_make_json(self):
         """A PyTest fixture to have examplary dictionary data."""
@@ -95,7 +103,7 @@ class TestHelpers:
         example_result = {"status": Status.SUCCESS, "response": []}
         result = get_desired_data(example_result, prefix="+CME")
 
-        assert result["value"] == None
+        assert result["value"] is None
         assert result["status"] == example_result["status"]
         assert result["response"] == example_result["response"]
 
@@ -110,7 +118,7 @@ class TestHelpers:
         }
         result = get_desired_data(example_result, prefix="+DATA: ")
 
-        assert result["value"] == None
+        assert result["value"] is None
         assert result["status"] == example_result["status"]
         assert result["response"] == example_result["response"]
 
@@ -123,7 +131,7 @@ class TestHelpers:
         """
         result = get_desired_data(example_result, prefix="+ERROR:", separator=" ")
 
-        assert result["value"] == None
+        assert result["value"] is None
         assert result["status"] == example_result["status"]
         assert result["response"] == example_result["response"]
 
@@ -180,7 +188,7 @@ class TestHelpers:
         )
         assert simplify("A test 'quote' with 'one'.") == "A test quote with one."
         assert simplify(15) == 15
-        assert simplify(None) == None
+        assert simplify(None) is None
 
     def test_read_file_with_text_file(self):
         """It tests the read_file() function with text-file input."""
@@ -234,7 +242,7 @@ class TestHelpers:
     def test_get_parameter_without_config_and_default(self, mocker):
         """It tests get_parameter() function without predefined config and default values."""
         mocker.patch("core.temp.config", return_value={})
-        assert get_parameter("some_path") == None
+        assert get_parameter("some_path") is None
 
     def test_get_parameter_no_config_with_default(self, mocker):
         """It tests get_parameter() function and using default values without predefined config."""
@@ -252,11 +260,9 @@ class TestHelpers:
             ["not", "included", "path_name"], default="TestDefault"
         )
 
-        assert result_without_default == None
+        assert result_without_default is None
         assert result_with_default == "TestDefault"
 
-
-"""
     def test_get_parameter_included_info(self, mocker, prepared_config):
         mocker.patch.dict(
             "core.temp.config",
@@ -279,4 +285,3 @@ class TestHelpers:
             )
             == "test_global_http_endpoint"
         )
-"""
