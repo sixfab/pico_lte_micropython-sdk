@@ -51,6 +51,7 @@ HTTP Server Response Codes
 
 from core.utils.status import Status
 from core.utils.helpers import get_parameter
+from core.temp import debug
 
 class HTTP:
     """
@@ -496,12 +497,10 @@ class HTTP:
         
         if result["status"] == Status.SUCCESS:
             try:
-                connect_index = result["response"].index("CONNECT")
-                ok_index = result["response"].index("OK")
+                result["response"].remove("CONNECT")
             except ValueError:
-                pass
-            else:
-                result["response"] = result["response"][(connect_index + 1):ok_index]
+                debug.warning("\"CONNECT\" message couldn't have found in http.read_response() method.")
+                
         return result
 
     def read_response_to_file(self, file_path, timeout=60):
