@@ -4,7 +4,7 @@ Test module for the utils.status module.
 
 from core.utils.status import Status
 
-class TestHelpers:
+class TestStatus:
     """
     Test class for the utils.status module.
     """
