@@ -1,3 +1,7 @@
+"""
+Test Module for the utils.manager module.
+"""
+
 import pytest
 
 from core.utils.manager import Step, StateManager
@@ -6,10 +10,13 @@ from core.temp import config
 
 
 def example_function(function_code):
+    """Example function to be used in the tests."""
     return {"status": Status.SUCCESS, "response": function_code}
 
 
 class TestStep:
+    """Test class for the Step class."""
+
     def test_initial_parameters(self):
         """Test if the default parameters are configured correctly."""
         with pytest.raises(TypeError):
@@ -33,6 +40,8 @@ class TestStep:
 
 
 class TestManager:
+    """Test class for the StateManager class."""
+
     @pytest.fixture
     def predefined_state_manager(self):
         """This fixture returns a StateManager instance which has three steps already."""
@@ -121,10 +130,9 @@ class TestManager:
             fail="failure",
         )
         predefined_state_manager.add_step(step_example)
-        """
-        with pytest.raises(Exception):
-            predefined_state_manager.add_step(step_example)
-        """
+        # with pytest.raises(Exception):
+        #     predefined_state_manager.add_step(step_example)
+        assert True  # Do not test this for now. This is not supported yet.
 
     def test_get_step_ordinary_input(self, predefined_state_manager):
         """Test an ordinary use-case for the get_step() method."""
