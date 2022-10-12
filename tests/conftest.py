@@ -17,6 +17,9 @@ class UART:
     def __init__(self, *args, **kwargs):
         pass
 
+    def write(self):
+        pass
+
 
 class Pin:
 
