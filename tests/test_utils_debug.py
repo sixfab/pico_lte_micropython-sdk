@@ -67,13 +67,13 @@ class TestDebug:
         assert debug_instance.debug_channel == DebugChannel.UART
         assert debug_instance.debug_level == DebugLevel.CRITICAL
 
-    def test_set_channel(self, exemplary_debug_instance):
+    @pytest.mark.parametrize(
+        "desired_channel", [DebugChannel.UART, DebugChannel.USBC, -55, 0, 95]
+    )
+    def test_set_channel(self, exemplary_debug_instance, desired_channel):
         """This method tests set_channel() method."""
-        exemplary_debug_instance.set_channel(DebugChannel.UART)
-        assert exemplary_debug_instance.debug_channel == DebugChannel.UART
-
-        exemplary_debug_instance.set_channel(DebugChannel.USBC)
-        assert exemplary_debug_instance.debug_channel == DebugChannel.USBC
+        exemplary_debug_instance.set_channel(desired_channel)
+        assert exemplary_debug_instance.debug_channel == desired_channel
 
     @pytest.mark.parametrize(
         "debug_level_wanted",
