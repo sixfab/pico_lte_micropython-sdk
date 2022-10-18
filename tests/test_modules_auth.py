@@ -14,9 +14,10 @@ class TestAuth:
     """Test class for Auth module."""
 
     @pytest.fixture
-    def atcom(self):
-        """It returns an ATCom instance."""
-        return ATCom()
+    def auth(self):
+        """It returns an Auth instance."""
+        atcom = ATCom()
+        return Auth(atcom)
 
     @staticmethod
     def prepare_mocked_functions(
@@ -53,14 +54,12 @@ class TestAuth:
             return_value=mocked_response_get_file_list,
         )
 
-    def test_constructor_method(self, atcom):
+    def test_constructor_method(self, auth):
         """This method tests the constructor method of the Auth class."""
-        auth_instance = Auth(atcom)
+        assert isinstance(auth.atcom, ATCom)
+        assert isinstance(auth.file, File)
 
-        assert isinstance(auth_instance.atcom, ATCom)
-        assert isinstance(auth_instance.file, File)
-
-    def test_load_certificates_ordinary_case(self, mocker, atcom):
+    def test_load_certificates_ordinary_case(self, mocker, auth):
         """This method tests the load_certificates() method with
         expected and ordinary usage.
         """
@@ -73,13 +72,12 @@ class TestAuth:
         # Assign mock functions.
         TestAuth.prepare_mocked_functions(mocker, mocked_data)
 
-        auth_instance = Auth(atcom)
-        result = auth_instance.load_certificates()
+        result = auth.load_certificates()
 
         assert result["status"] == Status.SUCCESS
         assert result["response"] == "Certificates found in modem."
 
-    def test_load_certificates_wrong_certificate_names(self, mocker, atcom):
+    def test_load_certificates_wrong_certificate_names(self, mocker, auth):
         """This method tests the load_certificates() method without
         proper names.
         """
@@ -92,13 +90,12 @@ class TestAuth:
         # Assign mock functions.
         TestAuth.prepare_mocked_functions(mocker, mocked_data)
 
-        auth_instance = Auth(atcom)
-        result = auth_instance.load_certificates()
+        result = auth.load_certificates()
 
         assert result["status"] == Status.ERROR
         assert result["response"] == "Certificates couldn't find in modem!"
 
-    def test_load_certificates_file_throws_exception(self, mocker, atcom):
+    def test_load_certificates_file_throws_exception(self, mocker, auth):
         """This method tests the load_certificates() method, and file methods
         throws exception.
         """
@@ -114,13 +111,12 @@ class TestAuth:
             simulation_data=mocked_data,
             side_effect_delete_file_from_modem=OSError("Example Exception"),
         )
-        auth_instance = Auth(atcom)
-        result = auth_instance.load_certificates()
+        result = auth.load_certificates()
 
         assert result["status"] == Status.ERROR
         assert result["response"] == "Example Exception"
 
-    def test_load_certificates_with_already_certificate_inside(self, mocker, atcom):
+    def test_load_certificates_with_already_certificate_inside(self, mocker, auth):
         """This method tests if the load_certificates() method cannot find new
         certificates in cert/ directory, and gets the old ones from modem file system.
         """
@@ -135,13 +131,12 @@ class TestAuth:
             mocker, simulation_data=mocked_data, get_file_list_status=True
         )
 
-        auth_instance = Auth(atcom)
-        result = auth_instance.load_certificates()
+        result = auth.load_certificates()
 
         assert result["status"] == Status.SUCCESS
         assert result["response"] == "Certificates found in modem."
 
-    def test_load_certificates_with_error_on_get_file_list(self, mocker, atcom):
+    def test_load_certificates_with_error_on_get_file_list(self, mocker, auth):
         """This method tests load_certificates() method when it is not the first_try
         and there is an error at connection with modem.
         """
@@ -155,15 +150,14 @@ class TestAuth:
             mocker, simulation_data=mocked_data, get_file_list_status=False
         )
 
-        auth_instance = Auth(atcom)
-        result = auth_instance.load_certificates()
+        result = auth.load_certificates()
 
         assert result["status"] == Status.ERROR
         assert (
             result["response"] == "Error occured while getting certificates from modem!"
         )
 
-    def test_load_certificates_with_error_on_os_remove(self, mocker, atcom):
+    def test_load_certificates_with_error_on_os_remove(self, mocker, auth):
         """This method tests load_certificates() method when it is the first try,
         but the os_remove() method raises exception.
         """
@@ -180,8 +174,7 @@ class TestAuth:
             side_effect_os_remove=OSError("Example Exception"),
         )
 
-        auth_instance = Auth(atcom)
-        result = auth_instance.load_certificates()
+        result = auth.load_certificates()
 
         assert result["status"] == Status.ERROR
         assert result["response"] == "Example Exception"
