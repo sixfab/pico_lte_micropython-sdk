@@ -29,6 +29,9 @@ class Pin:
     def __init__(self, *args, **kwargs):
         pass
 
+    def value(self, *args, **kwargs):
+        pass
+
 
 class I2C:
     def __init__(self, *args, **kwargs):
