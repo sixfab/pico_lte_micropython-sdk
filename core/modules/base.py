@@ -77,17 +77,6 @@ class Base:
         """
         return self.atcom.send_at_comm("AT")
 
-    def turn_off_at_echo(self):
-        """
-        Function for turning off AT echo
-
-        Returns
-        -------
-        dict
-            Result that includes "status" and "response" keys
-        """
-        return self.atcom.send_at_comm("ATE0")
-
     def wait_until_modem_ready_to_communicate(self, timeout=30):
         """
         Function for waiting until modem is ready to communicate
@@ -102,16 +91,20 @@ class Base:
         dict
             Result that includes "status" and "response" keys
         """
+        result_timeout = {
+            "status": Status.TIMEOUT,
+            "response": "timeout"
+        }
+
         start_time = time.time()
         while time.time() - start_time < timeout:
-            result = self.atcom.send_at_comm("AT")
+            result = self.check_communication()
             debug.debug("COM:", result)
             if result["status"] == Status.SUCCESS:
                 return result
             time.sleep(1)
-        result["status"] = Status.TIMEOUT
-        result["response"] = ""
-        return result
+
+        return result_timeout
 
     def set_echo_off(self):
         """
