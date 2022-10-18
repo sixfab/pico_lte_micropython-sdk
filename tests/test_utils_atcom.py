@@ -61,23 +61,23 @@ class TestATCom:
 
     def test_send_at_comm_once_default_parameters(self, mocker, atcom):
         """Test if the send_at_comm_once() method sends message to UART channel."""
-        mocker.patch("machine.UART.write")
+        mocking = mocker.patch("machine.UART.write")
 
         message = "Example command to send"
         atcom.send_at_comm_once("Example command to send")
 
         encoded_message = (message + "\r").encode()
-        UART.write.assert_called_once_with(encoded_message)
+        mocking.assert_called_once_with(encoded_message)
 
     def test_send_at_comm_once_line_end_false(self, mocker, atcom):
         """Test the send_at_comm_once() method with line_end=True"""
-        mocker.patch("machine.UART.write")
+        mocking = mocker.patch("machine.UART.write")
 
         message = "Example command to send"
         atcom.send_at_comm_once("Example command to send", line_end=False)
 
         encoded_message = message.encode()
-        UART.write.assert_called_once_with(encoded_message)
+        mocking.assert_called_once_with(encoded_message)
 
     def test_get_response_default_parameters(self, mocker, atcom, example_response):
         """Test the get_response() method with default parameters."""
