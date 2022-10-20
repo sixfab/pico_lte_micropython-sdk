@@ -71,9 +71,6 @@ def pytest_sessionstart(session):
 @pytest.hookimpl()
 def pytest_sessionfinish(session):
     print("Test enviroment cleaning...")
-    try:
-        os.remove("machine.py")
-        os.remove("neopixel.py")
-        os.remove("ubinascii.py")
-    except:
-        pass
+    os.remove("machine.py")
+    os.remove("neopixel.py")
+    os.remove("ubinascii.py")
