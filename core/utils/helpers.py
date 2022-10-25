@@ -3,7 +3,6 @@ Module for storing helper functions
 """
 
 import json
-from copy import deepcopy
 from core.temp import config
 from core.utils.status import Status
 
@@ -34,9 +33,28 @@ def write_json_file(file_path, data):
         return data
 
 
+def deep_copy_of_dictionary(dict_instance):
+    """Create a deepcopy of the dictionary given.
+
+    Parameters
+    ----------
+    dict_instance : dict
+        It is the dictionary to be copied.
+    """
+    if isinstance(dict_instance, dict):
+        dictionary_to_return = {}
+
+        for key, value in dict_instance.items():
+            dictionary_to_return[key] = value
+
+        return dictionary_to_return
+    else:
+        return None
+
 def get_desired_data(result, prefix, separator=",", data_index=0):
     """Function for getting actual data from response"""
-    result_to_return = deepcopy(result)
+    result_to_return = deep_copy_of_dictionary(result)
+
     valuable_lines = None
 
     if result.get("status") != Status.SUCCESS:
