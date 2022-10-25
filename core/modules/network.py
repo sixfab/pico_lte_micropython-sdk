@@ -46,7 +46,7 @@ class Network:
         """
         command = "AT+CGDCONT?"
         result = self.atcom.send_at_comm(command)
-        return get_desired_data(result, prefix="+CGDCONT: 2,", data_index=1)
+        return get_desired_data(result, prefix="+CGDCONT: ", data_index=2)
 
     def set_apn(self, cid=1, pdp_type="IPV4V6", apn="super"):
         """
