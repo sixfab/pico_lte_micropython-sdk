@@ -41,10 +41,14 @@ class UART:
 
 class Pin:
 
-    OUT = None
-    IN = None
+    OUT = 0
+    IN = 1
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, pin_id=None, pin_dir=None, *args, **kwargs):
+        self.pin_num = pin_id
+        self.pin_dir = pin_dir
+    
+    def value(*args, **kwargs):
         pass
 
     def value(self, *args, **kwargs):
@@ -53,6 +57,9 @@ class Pin:
 
 class I2C:
     def __init__(self, *args, **kwargs):
+        pass
+
+    def scan(self, *args, **kwargs):
         pass
 """
 
