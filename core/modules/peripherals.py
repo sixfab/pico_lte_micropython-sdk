@@ -2,7 +2,7 @@
 Module for incuding periheral hardware functions of picocell module.
 """
 
-from machine import Pin, I2C
+from machine import Pin, I2C, ADC
 from neopixel import NeoPixel
 
 class Periph:
@@ -60,9 +60,10 @@ class Periph:
         voltage : float
             Battery voltage
         """
-        raw = self.battery_voltage_pin.value()
-        calc = raw * (3.3 / 1024)
-        return calc
+        adc_module = ADC(self.battery_voltage_pin)
+        raw_16_bit = adc_module.read_u16()
+        value_in_volts = (raw_16_bit / 65535) * 3.3
+        return value_in_volts
 
     def get_charge_status(self):
         """
