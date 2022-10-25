@@ -79,6 +79,20 @@ class TestHelpers:
             None,
         ]
 
+    @pytest.mark.parametrize("dict_example", [
+        {"status": Status.UNKNOWN, "response": ["That", "is", "an", "example."]},
+        {"multilevel": {"a": 1, "b": 4.6, "c": 0x15}, "try": "Example"},
+        {"object": None},
+        {}
+    ])
+    def test_deep_copy_of_dictionary(self, dict_example):
+        """This method tests if the function creates a deepcopy of the
+        dictionary by looking its memory location and comparing it.
+        """
+        new_dict = deep_copy_of_dictionary(dict_example)
+        assert new_dict == dict_example
+        assert new_dict is not dict_example
+
     def test_get_desired_data_not_success(self):
         """It tests get_desired_data() function with non-successful response
         from Modem. It should return None in "value" attribute.
