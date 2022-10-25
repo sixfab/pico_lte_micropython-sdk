@@ -98,6 +98,28 @@ class Network:
         result = self.atcom.send_at_comm(command)
         return get_desired_data(result, prefix="+COPS: ", data_index=2)
 
+    def get_access_technology(self):
+        """Function for getting access technology. The access technology name
+        is saved into value key of returned dictionary instance.
+
+        Returns
+        -------
+        dict
+            Result that includes "status", "response" and "value" keys.
+        """
+        command = "AT+COPS?"
+        result = self.atcom.send_at_comm(command)
+        result_with_data = get_desired_data(result, prefix="+COPS: ", data_index=3)
+
+        if result_with_data["value"] == "0":
+            result_with_data["value"] = "GSM"
+        elif result_with_data["value"] == "8":
+            result_with_data["value"] = "LTE CAT M1"
+        elif result_with_data["value"] == "9":
+            result_with_data["value"] = "LTE CAT NB1"
+
+        return result_with_data
+
     def configure_tcp_ip_context(
         self, context_id=1, context_type=1, apn="super", username="", password="", auth=0
         ):
