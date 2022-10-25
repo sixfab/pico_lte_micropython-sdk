@@ -61,6 +61,10 @@ class I2C:
 
     def scan(self, *args, **kwargs):
         pass
+
+class ADC:
+    def __init__(self, *args, **kwargs):
+        pass
 """
 
 MOCK_NEOPIXEL_PY = """
