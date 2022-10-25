@@ -82,7 +82,8 @@ class Network:
             Result that includes "status" and "response" keys
         """
         desired_reponses = ["+CREG: 0,1", "+CREG: 0,5"]
-        return self.atcom.send_at_comm("AT+CREG?", desired_reponses)
+        fault_responses = "+CREG: 0,2"
+        return self.atcom.send_at_comm("AT+CREG?", desired=desired_reponses, fault=fault_responses)
 
     def get_operator_information(self):
         """
