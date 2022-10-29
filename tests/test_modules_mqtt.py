@@ -10,7 +10,6 @@ from core.utils.status import Status
 from core.temp import config
 
 
-
 def default_response_types():
     """This method returns default and mostly-used responses for ATCom messages."""
     return [
@@ -185,12 +184,14 @@ class TestMQTT:
         )
 
         mocking.assert_called_once_with(
-            f'AT+QMTCFG="will",{params[2]},{params[3]},{params[4]},'+\
-            f'{params[5]},"{params[0]}","{params[1]}"'
+            f'AT+QMTCFG="will",{params[2]},{params[3]},{params[4]},'
+            + f'{params[5]},"{params[0]}","{params[1]}"'
         )
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_message_recieve_mode_config_default(self, mocker, mqtt, mocked_response):
+    def test_set_message_recieve_mode_config_default(
+        self, mocker, mqtt, mocked_response
+    ):
         """This method tests set_message_recieve_mode_config() with its default parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
         result = mqtt.set_message_recieve_mode_config()
@@ -202,7 +203,9 @@ class TestMQTT:
     def test_set_message_recieve_mode_config_parameters(self, mocker, mqtt, params):
         """This method tests set_message_recieve_mode_config() with given arbitrary parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, None)
-        mqtt.set_message_recieve_mode_config(cid=params[0], message_recieve_mode=params[1])
+        mqtt.set_message_recieve_mode_config(
+            cid=params[0], message_recieve_mode=params[1]
+        )
 
         mocking.assert_called_once_with(
             f'AT+QMTCFG="message_recieve_mode",{params[0]},{params[1]}'
@@ -255,11 +258,21 @@ class TestMQTT:
 
         mocking.assert_any_call('AT+QMTOPEN=0,"https://sixfab.com",1111')
 
-    def test_open_connection_without_success_atcom(self, mocker, mqtt):
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {"status": Status.ERROR, "response": ["+QMTOPEN: 0,5"]},
+            {"status": Status.ERROR, "response": ["+QMTOPEN: 0,4"]},
+            {"status": Status.ERROR, "response": ["+QMTOPEN: 0,3"]},
+            {"status": Status.ERROR, "response": ["+QMTOPEN: 0,2"]},
+            {"status": Status.ERROR, "response": ["+QMTOPEN: 0,1"]},
+            default_response_types()[2],
+        ],
+    )
+    def test_open_connection_without_success_atcom(self, mocker, mqtt, mocked_response):
         """This method tests open_connect() when there is no success
         answer from ATCom.send_at_comm().
         """
-        mocked_response = default_response_types()[2]
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
         result = mqtt.open_connection(host="https://sixfab.com")
 
@@ -267,7 +280,28 @@ class TestMQTT:
         assert result["status"] == mocked_response["status"]
         assert result["response"] == mocked_response["response"]
 
-    @pytest.mark.parametrize("mocked_response", default_response_types())
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {
+                "status": Status.SUCCESS,
+                "response": [
+                    "AT+QMTOPEN?\r",
+                    '+QMTOPEN: 0,"mqtt.thingspeak.com",1883',
+                    "OK",
+                ],
+            },
+            {
+                "status": Status.SUCCESS,
+                "response": ["OK", "+QMTOPEN: 0,0"],
+            },
+            {
+                "status": Status.ERROR,
+                "response": ["APP RDY", "+QMTOPEN: 0,3"],
+            },
+            default_response_types()[1:2],
+        ],
+    )
     def test_has_opened_connection_default(self, mocker, mqtt, mocked_response):
         """This method tests has_opened_connection() with its default parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
@@ -321,3 +355,332 @@ class TestMQTT:
         result = mqtt.close_connection()
 
         assert result == mocked_response
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {
+                "status": Status.ERROR,
+                "response": ['AT+QMTCONN=0,"Picocell"\r', "ERROR"],
+            },
+            {"status": Status.SUCCESS, "response": ['AT+QMTCONN=0,"Picocell"\r', "OK"]},
+            {
+                "status": Status.ERROR,
+                "response": ['AT+QMTCONN=0,"Picocell"\r', "OK", "+QMTSTAT: 0,3"],
+            },
+            default_response_types()[1],
+            default_response_types()[2],
+        ],
+    )
+    def test_connect_broker_when_username_and_pass_is_none_without_config(
+        self, mocker, mqtt, mocked_response
+    ):
+        """This method tests connect_broker() without parameters, and without
+        pre-defined config file which includes username and password."""
+        # Mock config again not the be mixed with old test injections.
+        config["params"] = {}
+        mocker.patch(
+            "core.utils.atcom.ATCom.get_urc_response",
+        )
+        mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        mqtt.connect_broker()
+
+        mocking.assert_called_once_with('AT+QMTCONN=0,"Picocell"')
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {
+                "status": Status.ERROR,
+                "response": ['AT+QMTCONN=0,"Picocell","john","doe123"\r', "ERROR"],
+            },
+            {
+                "status": Status.SUCCESS,
+                "response": ['AT+QMTCONN=0,"Picocell","john","doe123"\r', "OK"],
+            },
+            {
+                "status": Status.ERROR,
+                "response": [
+                    'AT+QMTCONN=0,"Picocell","john","doe123"\r',
+                    "OK",
+                    "+QMTSTAT: 0,4",
+                ],
+            },
+            {
+                "status": Status.ERROR,
+                "response": ["OK", "+QMTCONN: 0,0,4"],
+            },
+            default_response_types()[1],
+            default_response_types()[2],
+        ],
+    )
+    def test_connect_broker_when_username_and_pass_is_none_with_config(
+        self, mocker, mqtt, mocked_response
+    ):
+        """This method tests connect_broker() without parameters, and with
+        pre-defined config file which includes username and password."""
+        config["params"] = {"mqtts": {"username": "john", "password": "doe123"}}
+        urc_response_patch = "core.utils.atcom.ATCom.get_urc_response"
+        mocker.patch(urc_response_patch, return_value=mocked_response)
+        mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
+        result = mqtt.connect_broker()
+
+        mocking.assert_called_once_with('AT+QMTCONN=0,"Picocell","john","doe123"')
+        assert result == mocked_response
+
+    def test_connect_broker_when_send_at_comm_return_error(self, mocker, mqtt):
+        """This method tests connect_broker() when the send_at_comm() returns
+        an error response.
+        """
+        mocked_response = {"status": Status.ERROR, "response": ["some", "error"]}
+        TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.connect_broker()
+
+        assert result == mocked_response
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {"status": Status.SUCCESS, "response": ["+QMTCONN: 0,3", "OK"]},
+            {"status": Status.ERROR, "response": ["+QMTCONN: 0,2", "OK"]},
+            {"status": Status.ERROR, "response": ["+QMTCONN: 0,4", "OK"]},
+            default_response_types()[1],
+        ],
+    )
+    def test_is_connected_to_broker(self, mocker, mqtt, mocked_response):
+        """This method tests is_connected_to_broker() if it calls the
+        right AT commands.
+        """
+        mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.is_connected_to_broker()
+
+        mocking.assert_called_once_with("AT+QMTCONN?", "+QMTCONN: 0,3")
+        assert result == mocked_response
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {"status": Status.SUCCESS, "response": ["OK", "+QMTDISC: 0,0"]},
+            {"status": Status.ERROR, "response": ["OK", "+QMTDISC: 0,-1"]},
+            {
+                "status": Status.ERROR,
+                "response": ["OK", "+QMTDISC: 0,-1", "+CME ERROR: X"],
+            },
+            default_response_types()[1],
+        ],
+    )
+    def test_disconnect_broker_default(self, mocker, mqtt, mocked_response):
+        """This method tests disconnect_broker() if it calls the
+        right AT commands in default parameters.
+        """
+        mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.is_connected_to_broker()
+
+        mocking.assert_called_once_with("AT+QMTCONN?", "+QMTCONN: 0,3")
+        assert result == mocked_response
+
+    @pytest.mark.parametrize("cid", range(0, 5))
+    def test_disconnect_broker_parameters(self, mocker, mqtt, cid):
+        """This method tests disconnect_broker() if it calls the
+        right AT commands in default parameters.
+        """
+        mocked_response = {
+            "status": Status.SUCCESS,
+            "response": ["OK", "+QMTDISC: 0,0"],
+        }
+        mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        mqtt.is_connected_to_broker(cid)
+
+        mocking.assert_called_once_with("AT+QMTCONN?", f"+QMTCONN: {cid},3")
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {"status": Status.SUCCESS, "response": ["OK", "+QMTSUB: 0,1,0,0,1,2"]},
+            {"status": Status.ERROR, "response": ["OK", "+QMTSUB: 0,1,2"]},
+            {
+                "status": Status.ERROR,
+                "response": ["OK", "+QMTSUB: 0,1,2", "+CME ERROR: X"],
+            },
+        ],
+    )
+    def test_subscribe_topics_parameter(self, mocker, mqtt, mocked_response):
+        """This method tests subscribe_topics() with parameter installation."""
+        get_urc_response_patch = "core.utils.atcom.ATCom.get_urc_response"
+        mocker.patch(get_urc_response_patch, return_value=mocked_response)
+        mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
+        topics_list = [("topic1", 0), ("topic2", 1), ("topic2", 2)]
+        result = mqtt.subscribe_topics(topics=topics_list)
+
+        command = 'AT+QMTSUB=0,1,"topic1",0,"topic2",1,"topic2",2'
+        mocking.assert_called_once_with(command)
+        assert result == mocked_response
+
+    def test_subscribe_topics_default_without_config(self, mqtt):
+        """This method tests subscribe_topics() with its default parameters
+        without config file.
+        """
+        # Mock config again not the be mixed with old test injections.
+        config["params"] = {}
+        result = mqtt.subscribe_topics()
+
+        assert result["status"] == Status.ERROR
+        assert result["response"] == "Missing parameter : topics"
+
+    def test_unsubscribe_topic_without_parameter(self, mqtt):
+        """This method tests unsubscribe_topic() without any parameter."""
+        with pytest.raises(TypeError):
+            mqtt.unsubscribe_topic()
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {
+                "status": Status.SUCCESS,
+                "response": ['AT+QMTUNS=0,1,"an_example_topic"\r', "OK"],
+            },
+            {
+                "status": Status.SUCCESS,
+                "response": ["+QMTUNS: 0,1,0", 'AT+QMTUNS=0,1,"xxx"\r', "OK"],
+            },
+            default_response_types()[1],
+        ],
+    )
+    def test_unsubsribe_topic_ordinary(self, mocker, mqtt, mocked_response):
+        """This method tests unsubscribe_topic() ordinary usage."""
+        mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.unsubscribe_topic("an_example_topic")
+
+        mocking.assert_called_once_with('AT+QMTUNS=0,1,"an_example_topic"')
+        assert result == mocked_response
+
+    @pytest.mark.parametrize(
+        "params", [("topic1", 2, 3), ("topic2", 0, 1), ("topic3", 5, 65353)]
+    )
+    def test_unscribe_topic_parameters(self, mocker, mqtt, params):
+        """This method tests unsubscribe_topic() if it's parameters are working."""
+        mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
+        mqtt.unsubscribe_topic(params[0], cid=params[1], message_id=params[2])
+
+        mocking.assert_called_once_with(
+            f'AT+QMTUNS={params[1]},{params[2]},"{params[0]}"'
+        )
+
+    def test_publish_message_without_payload(self, mqtt):
+        """This method tests publish_message() without giving payload."""
+        with pytest.raises(TypeError):
+            mqtt.publish_message()
+
+    def test_publish_message_without_topic(self, mqtt):
+        """This method tests publish_message() without predefined config
+        or topic parameter.
+        """
+        config["params"] = {}
+        result = mqtt.publish_message("test")
+
+        assert result["status"] == Status.ERROR
+        assert result["response"] == "Missing parameter"
+
+    def test_publish_message_everything_success(self, mocker, mqtt):
+        """This method tests publish_message() when both send_at_comm()
+        functions returns successfull responses.
+        """
+        send_at_comm_once_patch = "core.utils.atcom.ATCom.send_at_comm_once"
+        mocker.patch(send_at_comm_once_patch)
+        response_sequence = [
+            {"status": Status.SUCCESS, "response": ["OK", ">"]},
+            {"status": Status.SUCCESS, "response": ["OK", "+QMTPUB: 0,0,0"]},
+        ]
+        mocking = TestMQTT.mock_send_at_comm(mocker, response_sequence, True)
+        result = mqtt.publish_message("test", topic="topic1")
+
+        mocking.assert_any_call('AT+QMTPUB=0,1,1,0,"topic1"', ">", urc=True)
+        mocking.assert_any_call("\x1A")
+        assert result == response_sequence[-1]
+
+    def test_publish_message_failed_status_on_first(self, mocker, mqtt):
+        """This method tests publish_message() when the first send_at_comm()
+        function returns error."""
+        mocked_response = {"status": Status.ERROR, "response": "error"}
+        TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.publish_message("test", topic="topic1")
+
+        assert result == mocked_response
+
+    def test_read_message_failed(self, mocker, mqtt):
+        """This method tests read_messages() failed with mocked
+        ATCom responses.
+        """
+        mocked_response = default_response_types()[1]
+        TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.read_messages()
+
+        assert result["status"] == mocked_response["status"]
+        assert result["response"] == mocked_response["response"]
+        assert result["messages"] == []
+
+    @pytest.mark.parametrize(
+        "mocked_response",
+        [
+            {
+                "status": Status.SUCCESS,
+                "response": [
+                    '+QMTRECV: 0,51,"channel","message"',
+                    "+QMTRECV: 0,0,0,0,0,0",
+                    "OK",
+                ],
+            },
+            {
+                "status": Status.SUCCESS,
+                "response": [
+                    '+QMTRECV: 0,101,"channel","message1"',
+                    '+QMTRECV: 0,151,"channel","message2"',
+                    "+QMTRECV: 0,0,0,0,0,0",
+                    "OK",
+                ],
+            },
+            {
+                "status": Status.SUCCESS,
+                "response": ["+QMTRECV: 0,0,0,0,0,0", "OK"],
+                "messages": [],
+            },
+            default_response_types()[1],
+        ],
+    )
+    def test_read_message_success(self, mocker, mqtt, mocked_response):
+        """This method tests read_messages() with succeed
+        ATCom responses.
+        """
+        mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
+        result = mqtt.read_messages()
+
+        mocking.assert_called_once_with("AT+QMTRECV?", "+QMTRECV:")
+        assert result["status"] == mocked_response["status"]
+        assert result["response"] == mocked_response["response"]
+        assert isinstance(result["messages"], list)
+
+    @pytest.mark.parametrize(
+        "message, expected",
+        [
+            (
+                [
+                    '+QMTRECV: 0,101,"channel1","message1"',
+                    '+QMTRECV: 0,151,"channel2","message2"',
+                    "+QMTRECV: 0,0,0,0,0,0",
+                    "OK",
+                ],
+                [
+                    {"message_id": 101, "topic": "channel1", "message": "message1"},
+                    {"message_id": 151, "topic": "channel2", "message": "message2"},
+                ],
+            ),
+            (
+                ['+QMTRECV: 0,51,"channel","message"', "+QMTRECV: 0,0,0,0,0,0", "OK"],
+                [{"message_id": 51, "topic": "channel", "message": "message"}],
+            ),
+            ("timeout", []),
+        ],
+    )
+    def test_extract_messages(self, mqtt, message, expected):
+        """This method tests extract_messages()."""
+        assert mqtt.extract_messages(message, "+QMTRECV: 0") == expected
