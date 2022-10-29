@@ -189,8 +189,8 @@ class MQTT:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},\
-                        {will_retain},"{will_topic}","{will_message}"'
+        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},' +\
+            f'{will_retain},"{will_topic}","{will_message}"'
         return self.atcom.send_at_comm(command)
 
     def set_message_recieve_mode_config(self, cid=0, message_recieve_mode=0):
@@ -221,7 +221,7 @@ class MQTT:
         Parameters
         ----------
         host : str, default: None
-            Server address. It could be an IP address or a domain name.
+            Server address. It could be an IP address or a domain name (without "mqtt://").
         port : int, default: None
             Port number of the server (range 0:65535)
         cid : int, default: 0
@@ -244,6 +244,7 @@ class MQTT:
 
             desired_response = f"+QMTOPEN: {cid},0"
             fault_responses = [
+                f"+QMTOPEN: {cid},-1",
                 f"+QMTOPEN: {cid},1",
                 f"+QMTOPEN: {cid},2",
                 f"+QMTOPEN: {cid},3",
@@ -254,7 +255,7 @@ class MQTT:
             if result["status"] == Status.SUCCESS:
                 result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
             return result
-        return {"status": Status.ERROR, "response": "Missing parameters"}
+        return {"status": Status.ERROR, "response": "Missing parameters : host"}
 
     def has_opened_connection(self, cid=0):
         """
@@ -331,7 +332,8 @@ class MQTT:
 
         if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCONN: {cid},0,0"
-            result = self.atcom.get_urc_response(desired_response, timeout=60)
+            fault_responses = [f"QMTSTAT: 0,{err_code}" for err_code in range(1, 8)]
+            result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
         return result
 
     def is_connected_to_broker(self, cid=0):
@@ -406,7 +408,7 @@ class MQTT:
                 desired_response = f"+QMTSUB: {cid},{message_id},0"
                 result = self.atcom.get_urc_response(desired_response, timeout=60)
             return result
-        return {"response": "Missing parameter : topic", "status": Status.ERROR}
+        return {"response": "Missing parameter : topics", "status": Status.ERROR}
 
     def unsubscribe_topic(self, topic, cid=0, message_id=1):
         """
@@ -515,10 +517,14 @@ class MQTT:
             The prefix string for each meaningful message.
 
         Returns:
-            array: List of messages.
+            array: List of messages as a dictionary items.
+            Each dictionary includes "message_id", "topic",
+            and "message" attributes.
         """
         messages = []
+        messages_dict = []
 
+        # Extract the messages.
         for message in whole_message:
             start_pos = message.find(prefix)
 
@@ -528,4 +534,21 @@ class MQTT:
                 else:
                     messages.append(message[start_pos+len(prefix):])
 
-        return messages
+        # Clean and construct a dictionary.
+        for message in messages:
+            # Remove starting commas.
+            if message[0] == ",":
+                message = message[1:]
+            splitted_message = message.split(",")
+            # Note that, we delete starting and trailing " marks.
+            topic_inside = splitted_message[1][1:-1]
+            message_inside = splitted_message[2][1:-1]
+
+            # Append the details of the message as a dict item.
+            messages_dict.append({
+                "message_id": int(splitted_message[0]),
+                "topic": topic_inside,
+                "message": message_inside
+            })
+
+        return messages_dict
