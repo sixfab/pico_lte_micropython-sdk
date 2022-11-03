@@ -315,7 +315,7 @@ class Network:
         step_activate_pdp = Step(
             function=self.activate_pdp_context,
             name="activate_pdp_context",
-            success="success",
+            success="check_pdp_context_status",
             fail="failure",
         )
 
