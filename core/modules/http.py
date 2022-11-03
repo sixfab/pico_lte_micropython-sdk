@@ -119,7 +119,7 @@ class HTTP:
         command = f'AT+QHTTPCFG="responseheader",{status}'
         return self.atcom.send_at_comm(command)
 
-    def set_ssl_context_id(self, id=1):
+    def set_ssl_context_id(self, cid=1):
         """
         Function for setting modem HTTP SSL context id
 
@@ -133,7 +133,7 @@ class HTTP:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QHTTPCFG="sslctxid",{id}'
+        command = f'AT+QHTTPCFG="sslctxid",{cid}'
         return self.atcom.send_at_comm(command)
 
     def set_content_type(self, content_type=0):
@@ -185,7 +185,7 @@ class HTTP:
         if username and password:
             command = f'AT+QHTTPCFG="auth","{username}:{password}"'
             return self.atcom.send_at_comm(command)
-        
+
         return {"response": "Missing arguments: username and password",
                 "status": Status.ERROR}
 
@@ -266,7 +266,10 @@ class HTTP:
             Result that includes "status" and "response" keys
         """
         if desired_response is None:
-            desired_response = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"]
+            desired_response = [
+                "200", "201", "202", "203", "204", 
+                "205", "206", "207", "208", "226"
+            ]
 
         if fault_response is None:
             fault_response = [str(error_code) for error_code in range(701, 731, 1)]
@@ -323,7 +326,10 @@ class HTTP:
             Result that includes "status" and "response" keys
         """
         if desired_response is None:
-            desired_response = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"]
+            desired_response = [
+                "200", "201", "202", "203", "204", 
+                "205", "206", "207", "208", "226"
+            ]
 
         if fault_response is None:
             fault_response = [str(error_code) for error_code in range(701, 731, 1)]
@@ -373,7 +379,7 @@ class HTTP:
         if header_mode == 1:
             return {"response": "Not implemented yet!", "status": Status.ERROR}
 
-        command = f'QHTTPPOSTFILE={file_path},{timeout}'
+        command = f'AT+QHTTPPOSTFILE={file_path},{timeout}'
         return self.atcom.send_at_comm(command)
 
     def put(self, data, header_mode=0, input_timeout=5, timeout=60, desired_response=None, fault_response=None):
@@ -403,11 +409,14 @@ class HTTP:
             Result that includes "status" and "response" keys
         """
         if desired_response is None:
-            desired_response = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"]
+            desired_response = [
+                "200", "201", "202", "203", "204", 
+                "205", "206", "207", "208", "226"
+            ]
 
         if fault_response is None:
             fault_response = [str(error_code) for error_code in range(701, 731, 1)]
-        
+
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
@@ -481,7 +490,7 @@ class HTTP:
         """
         if desired_response is None:
             desired_response = "+QHTTPREAD: 0"
-        
+
         if fault_response is None:
             fault_response = [f"+QHTTPREAD: {str(error_code)}" for error_code in range(701, 731, 1)]
 
@@ -494,13 +503,13 @@ class HTTP:
             urc=True,
             timeout=timeout
         )
-        
+
         if result["status"] == Status.SUCCESS:
             try:
                 result["response"].remove("CONNECT")
             except ValueError:
                 debug.warning("\"CONNECT\" message couldn't have found in http.read_response() method.")
-                
+
         return result
 
     def read_response_to_file(self, file_path, timeout=60):
