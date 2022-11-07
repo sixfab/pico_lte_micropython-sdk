@@ -189,8 +189,8 @@ class MQTT:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},\
-                        {will_retain},"{will_topic}","{will_message}"'
+        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},'\
+                  f'{will_retain},"{will_topic}","{will_message}"'
         return self.atcom.send_at_comm(command)
 
     def set_message_recieve_mode_config(self, cid=0, message_recieve_mode=0):
@@ -254,7 +254,7 @@ class MQTT:
             if result["status"] == Status.SUCCESS:
                 result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
             return result
-        return {"status": Status.ERROR, "response": "Missing parameters"}
+        return {"status": Status.ERROR, "response": "Missing parameters : host"}
 
     def has_opened_connection(self, cid=0):
         """
