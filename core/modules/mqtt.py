@@ -10,7 +10,8 @@ class MQTT:
     """
     Class for including functions of MQTT related operations of picocell module.
     """
-    CTRL_Z = '\x1A'
+
+    CTRL_Z = "\x1A"
 
     def __init__(self, atcom):
         """
@@ -154,7 +155,7 @@ class MQTT:
 
     def set_will_config(
         self, will_topic, will_message, cid=0, will_flag=0, will_qos=0, will_retain=0
-        ):
+    ):
         """
         Function for setting modem MQTT will configuration
 
@@ -190,8 +191,10 @@ class MQTT:
             Result that includes "status" and "response" keys
         """
 
-        command = f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},'\
-                  f'{will_retain},"{will_topic}","{will_message}"'
+        command = (
+            f'AT+QMTCFG="will",{cid},{will_flag},{will_qos},'
+            + f'{will_retain},"{will_topic}","{will_message}"'
+        )
         return self.atcom.send_at_comm(command)
 
     def set_message_recieve_mode_config(self, cid=0, message_recieve_mode=0):
@@ -234,10 +237,10 @@ class MQTT:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["mqtts","host"])
+            host = get_parameter(["mqtts", "host"])
 
         if port is None:
-            port = get_parameter(["mqtts","port"], 8883) # default port is 8883
+            port = get_parameter(["mqtts", "port"], 8883)  # default port is 8883
 
         if host and port:
             command = f'AT+QMTOPEN={cid},"{host}",{port}'
@@ -251,10 +254,12 @@ class MQTT:
                 f"+QMTOPEN: {cid},3",
                 f"+QMTOPEN: {cid},4",
                 f"+QMTOPEN: {cid},5",
-                ]
+            ]
 
             if result["status"] == Status.SUCCESS:
-                result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
+                result = self.atcom.get_urc_response(
+                    desired_response, fault_responses, timeout=60
+                )
             return result
         return {"status": Status.ERROR, "response": "Missing parameters : host"}
 
@@ -290,15 +295,17 @@ class MQTT:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QMTCLOSE={cid}'
-        result =  self.atcom.send_at_comm(command)
+        command = f"AT+QMTCLOSE={cid}"
+        result = self.atcom.send_at_comm(command)
 
         if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCLOSE: {cid},0"
             result = self.atcom.get_urc_response(desired_response, timeout=60)
         return result
 
-    def connect_broker(self, client_id_string="Picocell", username=None, password=None, cid=0):
+    def connect_broker(
+        self, client_id_string="Picocell", username=None, password=None, cid=0
+    ):
         """
         Function for connecting to MQTT broker. This function is used when a client requests a
         connection to the MQTT server. When a TCP/IP socket connection is established between
@@ -321,8 +328,8 @@ class MQTT:
             Result that includes "status" and "response" keys
         """
         if username is None and password is None:
-            username = get_parameter(["mqtts","username"])
-            password = get_parameter(["mqtts","password"])
+            username = get_parameter(["mqtts", "username"])
+            password = get_parameter(["mqtts", "password"])
 
         if username and password:
             command = f'AT+QMTCONN={cid},"{client_id_string}","{username}","{password}"'
@@ -334,7 +341,9 @@ class MQTT:
         if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCONN: {cid},0,0"
             fault_responses = [f"QMTSTAT: 0,{err_code}" for err_code in range(1, 8)]
-            result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
+            result = self.atcom.get_urc_response(
+                desired_response, fault_responses, timeout=60
+            )
         return result
 
     def is_connected_to_broker(self, cid=0):
@@ -369,7 +378,7 @@ class MQTT:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QMTDISC={cid}'
+        command = f"AT+QMTDISC={cid}"
         return self.atcom.send_at_comm(command)
 
     def subscribe_topics(self, topics=None, cid=0, message_id=1):
@@ -398,10 +407,10 @@ class MQTT:
             Result that includes "status" and "response" keys
         """
         if topics is None:
-            topics = get_parameter(["mqtts","sub_topics"])
+            topics = get_parameter(["mqtts", "sub_topics"])
 
         if topics:
-            prefix = f'AT+QMTSUB={cid},{message_id},'
+            prefix = f"AT+QMTSUB={cid},{message_id},"
             command = prefix + ",".join(f'"{topic}",{qos}' for topic, qos in topics)
             result = self.atcom.send_at_comm(command)
 
@@ -433,7 +442,9 @@ class MQTT:
         command = f'AT+QMTUNS={cid},{message_id},"{topic}"'
         return self.atcom.send_at_comm(command)
 
-    def publish_message(self, payload, topic=None, qos=1, retain=0, message_id=1, cid=0):
+    def publish_message(
+        self, payload, topic=None, qos=1, retain=0, message_id=1, cid=0
+    ):
         """
         Function for publishing MQTT message. This function is used when a client requests
         a message to be published. This method uses data mode of the modem to send the message.
@@ -468,15 +479,17 @@ class MQTT:
             Result that includes "status" and "response" keys
         """
         if topic is None:
-            topic = get_parameter(["mqtts","pub_topic"])
+            topic = get_parameter(["mqtts", "pub_topic"])
 
         if payload and topic:
             command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
             result = self.atcom.send_at_comm(command, ">", urc=True)
 
             if result["status"] == Status.SUCCESS:
-                self.atcom.send_at_comm_once(payload, line_end=False) # Send message
-                result = self.atcom.send_at_comm(self.CTRL_Z) # Send end char --> CTRL+Z
+                self.atcom.send_at_comm_once(payload, line_end=False)  # Send message
+                result = self.atcom.send_at_comm(
+                    self.CTRL_Z
+                )  # Send end char --> CTRL+Z
             return result
         return {"response": "Missing parameter", "status": Status.ERROR}
 
@@ -495,7 +508,7 @@ class MQTT:
             Result that includes "status" and "response" keys
         """
         messages = []
-        result = self.atcom.send_at_comm("AT+QMTRECV?","+QMTRECV:")
+        result = self.atcom.send_at_comm("AT+QMTRECV?", "+QMTRECV:")
 
         if result["status"] == Status.SUCCESS:
             prefix = f"+QMTRECV: {cid},"
@@ -533,7 +546,7 @@ class MQTT:
                 if "0,0,0,0,0,0" in message[start_pos:]:
                     pass
                 else:
-                    messages.append(message[start_pos+len(prefix):])
+                    messages.append(message[start_pos + len(prefix) :])
 
         # Clean and construct a dictionary.
         for message in messages:
@@ -546,10 +559,12 @@ class MQTT:
             message_inside = splitted_message[2][1:-1]
 
             # Append the details of the message as a dict item.
-            messages_dict.append({
-                "message_id": int(splitted_message[0]),
-                "topic": topic_inside,
-                "message": message_inside
-            })
+            messages_dict.append(
+                {
+                    "message_id": int(splitted_message[0]),
+                    "topic": topic_inside,
+                    "message": message_inside,
+                }
+            )
 
         return messages_dict
