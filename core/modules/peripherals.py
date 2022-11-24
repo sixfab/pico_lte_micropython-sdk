@@ -11,7 +11,7 @@ class Periph:
     """
     battery_voltage_pin = Pin(29, Pin.IN)
     battery_charge_status_pin = Pin(25, Pin.IN)
-    user_button_pin = Pin(26, Pin.IN)
+    user_button_pin = Pin(2, Pin.IN)
     neopixel_pin = Pin(10, Pin.OUT)
 
     qwiic_sda_pin = Pin(6)
