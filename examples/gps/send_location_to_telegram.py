@@ -23,7 +23,7 @@ from core.modem import Modem
 from core.temp import debug
 from core.utils.status import Status
 
-PERIOD = 30 # seconds
+PERIOD = 30  # seconds
 fix = False
 
 modem = Modem()
@@ -50,7 +50,7 @@ while True:
 
             fix = True
             break
-        time.sleep(2) # 45*2 = 90 seconds timeout for GPS fix.
+        time.sleep(2)  # 45*2 = 90 seconds timeout for GPS fix.
 
     if fix:
         # Go to WWAN prior mode and turn on GPS.
@@ -65,4 +65,4 @@ while True:
             debug.info("Message sent successfully.")
             fix = False
 
-    time.sleep(PERIOD) # [PERIOD] seconds between each request.
+    time.sleep(PERIOD)  # [PERIOD] seconds between each request.

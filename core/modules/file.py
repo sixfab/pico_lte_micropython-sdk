@@ -4,11 +4,13 @@ Module for including file functions of picocell module.
 
 from core.utils.status import Status
 
+
 class File:
     """
     Class for inculding functions of file operations of picocell module.
     """
-    CTRL_Z = '\x1A'
+
+    CTRL_Z = "\x1A"
 
     def __init__(self, atcom):
         """
@@ -71,6 +73,6 @@ class File:
         result = self.atcom.send_at_comm(command, "CONNECT", urc=True)
 
         if result["status"] == Status.SUCCESS:
-            self.atcom.send_at_comm_once(file) # send ca cert
-            return self.atcom.send_at_comm(self.CTRL_Z) # send end char -> CTRL_Z
+            self.atcom.send_at_comm_once(file)  # send ca cert
+            return self.atcom.send_at_comm(self.CTRL_Z)  # send end char -> CTRL_Z
         return result

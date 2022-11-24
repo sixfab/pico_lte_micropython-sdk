@@ -31,9 +31,7 @@ class TestGPS:
     @staticmethod
     def mock_send_at_comm(mocker, responses_to_return):
         """This is a wrapper function to repeated long mocker.patch() statements."""
-        return mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=responses_to_return
-        )
+        return mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=responses_to_return)
 
     def test_constructor(self, gps):
         """This method tests the __init__ constructor."""
@@ -70,8 +68,7 @@ class TestGPS:
 
     @pytest.mark.parametrize(
         "mocked_response",
-        [{"status": Status.SUCCESS, "response": ["+CME ERROR: 504"]}]
-        + default_response_types(),
+        [{"status": Status.SUCCESS, "response": ["+CME ERROR: 504"]}] + default_response_types(),
     )
     def test_turn_on_default_parameters(self, mocker, gps, mocked_response):
         """This method tests the turn_on() with predefined parameters."""
@@ -93,9 +90,7 @@ class TestGPS:
         mocking = TestGPS.mock_send_at_comm(mocker, mocked_response)
         result = gps.turn_on(mode, accuracy, fix_count, fix_rate)
 
-        mocking.assert_called_once_with(
-            f"AT+QGPS={mode},{accuracy},{fix_count},{fix_rate}"
-        )
+        mocking.assert_called_once_with(f"AT+QGPS={mode},{accuracy},{fix_count},{fix_rate}")
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())

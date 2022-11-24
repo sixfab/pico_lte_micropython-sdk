@@ -51,6 +51,7 @@ def deep_copy_of_dictionary(dict_instance):
     else:
         return None
 
+
 def get_desired_data(result, prefix, separator=",", data_index=0):
     """Function for getting actual data from response"""
     result_to_return = deep_copy_of_dictionary(result)

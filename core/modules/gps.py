@@ -5,10 +5,12 @@ Module for including functions of location service of picocell module.
 from core.utils.helpers import get_desired_data
 from core.utils.status import Status
 
+
 class GPS:
     """
     Class for inculding functions of location service of picocell module.
     """
+
     def __init__(self, atcom):
         """
         Initialization of the class.
@@ -72,7 +74,7 @@ class GPS:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QGPS={mode},{accuracy},{fix_count},{fix_rate}'
+        command = f"AT+QGPS={mode},{accuracy},{fix_count},{fix_rate}"
         return self.atcom.send_at_comm(command)
 
     def turn_off(self):
@@ -104,5 +106,5 @@ class GPS:
         result = self.atcom.send_at_comm(command, desired)
 
         if result["status"] == Status.SUCCESS:
-            return get_desired_data(result, desired, data_index=[1,2])
+            return get_desired_data(result, desired, data_index=[1, 2])
         return result

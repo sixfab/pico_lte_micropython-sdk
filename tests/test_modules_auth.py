@@ -36,9 +36,7 @@ class TestAuth:
             "response": simulation_data["file_name"],
         }
 
-        mocker.patch(
-            "core.modules.auth.read_file", side_effect=simulation_data["file_inside"]
-        )
+        mocker.patch("core.modules.auth.read_file", side_effect=simulation_data["file_inside"])
         mocker.patch(
             "core.modules.file.File.delete_file_from_modem",
             return_value=None,
@@ -153,9 +151,7 @@ class TestAuth:
         result = auth.load_certificates()
 
         assert result["status"] == Status.ERROR
-        assert (
-            result["response"] == "Error occured while getting certificates from modem!"
-        )
+        assert result["response"] == "Error occured while getting certificates from modem!"
 
     def test_load_certificates_with_error_on_os_remove(self, mocker, auth):
         """This method tests load_certificates() method when it is the first try,

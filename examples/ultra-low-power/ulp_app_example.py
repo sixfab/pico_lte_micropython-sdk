@@ -20,11 +20,11 @@ DELAY = 0.2
 modem = Modem()
 
 # ULP setup
-modem.ulp.enable() # enable ultra low power mode
-modem.ulp.set_deep_sleep_period(5) # set sleep period
+modem.ulp.enable()  # enable ultra low power mode
+modem.ulp.set_deep_sleep_period(5)  # set sleep period
 
 # Do ULP check every reboot
-modem.peripherals.adjust_neopixel(255, 0, 0) # indicator led
+modem.peripherals.adjust_neopixel(255, 0, 0)  # indicator led
 time.sleep(1)
 modem.ulp.check()
 time.sleep(1)
@@ -48,4 +48,4 @@ def job():
 
 while True:
     job()
-    modem.ulp.deep_sleep() # go to sleep
+    modem.ulp.deep_sleep()  # go to sleep

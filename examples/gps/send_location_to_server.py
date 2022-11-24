@@ -28,7 +28,7 @@ fix = False
 modem = Modem()
 
 debug.info("GPS Example")
-modem.peripherals.adjust_neopixel(255,0,0)
+modem.peripherals.adjust_neopixel(255, 0, 0)
 
 while True:
     # First go to GNSS prior mode and turn on GPS.
@@ -50,7 +50,7 @@ while True:
 
             fix = True
             break
-        time.sleep(2) # 45*2 = 90 seconds timeout for GPS fix.
+        time.sleep(2)  # 45*2 = 90 seconds timeout for GPS fix.
 
     if fix:
         # Go to WWAN prior mode and turn on GPS.
@@ -70,4 +70,4 @@ while True:
             debug.info("Message sent successfully.")
             fix = False
 
-    time.sleep(30) # 30 seconds between each request.
+    time.sleep(30)  # 30 seconds between each request.

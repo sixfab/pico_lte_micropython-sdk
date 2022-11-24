@@ -14,6 +14,7 @@ class Telegram:
     Telegram App module for Picocell lets you to create
     connections to your Telegram bot easily.
     """
+
     cache = config["cache"]
 
     def __init__(self, base, network, http):
@@ -60,8 +61,9 @@ class Telegram:
         if chat_id is None:
             chat_id = get_parameter(["telegram", "chat_id"])
 
-        publish_url = f'https://{host}{bot_token}/' +\
-                    f'sendMessage?chat_id={chat_id}&text={payload}'
+        publish_url = (
+            f"https://{host}{bot_token}/" + f"sendMessage?chat_id={chat_id}&text={payload}"
+        )
 
         step_network_reg = Step(
             function=self.network.register_network,
@@ -91,7 +93,7 @@ class Telegram:
             success="get_request",
             fail="failure",
             function_params={"url": publish_url},
-            interval=2
+            interval=2,
         )
 
         step_get_request = Step(
@@ -100,7 +102,7 @@ class Telegram:
             success="read_response",
             fail="failure",
             cachable=True,
-            interval=5
+            interval=5,
         )
 
         step_read_response = Step(
@@ -108,7 +110,7 @@ class Telegram:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={'desired_response': '"ok":true'}
+            function_params={"desired_response": '"ok":true'},
         )
 
         # Add cache if it is not already existed

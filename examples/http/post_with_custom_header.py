@@ -42,21 +42,23 @@ else:
     debug.error("Missing argument: server")
 
 # The messages that will be sent.
-DATA_TO_POST = {'message': 'Picocell HTTP POST Example with Custom Header'}
+DATA_TO_POST = {"message": "Picocell HTTP POST Example with Custom Header"}
 payload = json.dumps(DATA_TO_POST)
 
 # Custom header
-HEADER = "\n".join([
-    f"POST /{query} HTTP/1.1",
-    f"Host: {host}",
-    "Custom-Header-Name: Custom-Data",
-    "Content-Type: application/json",
-    f"Content-Length: {len(payload)+1}",
-    "\n\n"
-])
+HEADER = "\n".join(
+    [
+        f"POST /{query} HTTP/1.1",
+        f"Host: {host}",
+        "Custom-Header-Name: Custom-Data",
+        "Content-Type: application/json",
+        f"Content-Length: {len(payload)+1}",
+        "\n\n",
+    ]
+)
 
 debug.info("Sending a POST request with custom header...")
-result = modem.http.post(data=HEADER+payload, header_mode=1)
+result = modem.http.post(data=HEADER + payload, header_mode=1)
 debug.info("Result:", result)
 
 time.sleep(5)

@@ -15,6 +15,7 @@ class Slack:
     """
     Class for including Slack API functions.
     """
+
     cache = config["cache"]
 
     def __init__(self, base, network, http):
@@ -27,7 +28,7 @@ class Slack:
 
     def send_message(self, message, webhook_url=None):
         """
-        Function for sending message to Slack channel by using 
+        Function for sending message to Slack channel by using
         incoming webhook feature of Slack.
 
         Parameters
@@ -47,7 +48,7 @@ class Slack:
         payload = json.dumps(payload_json)
 
         if webhook_url is None:
-            webhook_url = get_parameter(["slack","webhook_url"])
+            webhook_url = get_parameter(["slack", "webhook_url"])
 
         if not webhook_url:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
@@ -97,7 +98,7 @@ class Slack:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response":"ok"},
+            function_params={"desired_response": "ok"},
         )
 
         # Add cache if it is not already existed

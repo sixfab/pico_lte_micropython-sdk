@@ -8,10 +8,12 @@ from core.utils.helpers import get_desired_data
 from core.utils.manager import StateManager, Step
 from core.utils.status import Status
 
+
 class Network:
     """
     Class for inculding functions of network operations of picocell module.
     """
+
     cache = config["cache"]
 
     def __init__(self, atcom, base):
@@ -122,7 +124,7 @@ class Network:
 
     def configure_tcp_ip_context(
         self, context_id=1, context_type=1, apn="super", username="", password="", auth=0
-        ):
+    ):
         """
         Function for configuring TCP/IP context
 
@@ -155,7 +157,6 @@ class Network:
         command = f'AT+QICSGP={context_id},{context_type},"{apn}","{username}","{password}",{auth}'
         return self.atcom.send_at_comm(command)
 
-
     def check_pdp_context_status(self, context_id=1):
         """
         Function for checking PDP context status
@@ -187,7 +188,7 @@ class Network:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QIACT={context_id}'
+        command = f"AT+QIACT={context_id}"
         return self.atcom.send_at_comm(command)
 
     def deactivate_pdp_context(self, context_id=1):
@@ -204,7 +205,7 @@ class Network:
         dict
             Result that includes "status" and "response" keys
         """
-        command = f'AT+QIDEACT={context_id}'
+        command = f"AT+QIDEACT={context_id}"
         return self.atcom.send_at_comm(command)
 
     def register_network(self):
@@ -228,7 +229,7 @@ class Network:
             function=self.base.check_communication,
             name="check_atcom",
             success="check_sim_ready",
-            fail="failure"
+            fail="failure",
         )
 
         step_sim_ready = Step(
@@ -258,13 +259,13 @@ class Network:
             success="success",
             fail="failure",
             interval=5,
-            retry=60, # 60 times = 5 minute
+            retry=60,  # 60 times = 5 minute
         )
 
         # Add cache if it is not already existed
         function_name = "register_network"
 
-        sm = StateManager(first_step = step_network_precheck, function_name=function_name)
+        sm = StateManager(first_step=step_network_precheck, function_name=function_name)
         sm.add_step(step_network_precheck)
         sm.add_step(step_atcom)
         sm.add_step(step_sim_ready)
@@ -329,7 +330,7 @@ class Network:
         # Add cache if it is not already existed
         function_name = "get_pdp_ready"
 
-        sm = StateManager(first_step = step_precheck_pdp, function_name=function_name)
+        sm = StateManager(first_step=step_precheck_pdp, function_name=function_name)
         sm.add_step(step_precheck_pdp)
         sm.add_step(step_configure_pdp)
         sm.add_step(step_deactivate_pdp)

@@ -1,4 +1,6 @@
 """Data class for status."""
+
+
 class Status:
     SUCCESS = 0
     ERROR = 1

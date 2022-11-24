@@ -24,11 +24,7 @@ from core.temp import debug
 
 modem = Modem()
 
-payload = {
-    "field1": 30,
-    "field2": 40,
-    "status": "PICOCELL_THINGSPEAK_EXAMPLE"
-    }
+payload = {"field1": 30, "field2": 40, "status": "PICOCELL_THINGSPEAK_EXAMPLE"}
 
 debug.info("Publishing data to ThingSpeak...")
 result = modem.thingspeak.publish_message(payload)

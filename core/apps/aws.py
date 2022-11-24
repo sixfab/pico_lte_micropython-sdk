@@ -9,10 +9,12 @@ from core.utils.manager import StateManager, Step
 from core.utils.status import Status
 from core.utils.helpers import get_parameter
 
+
 class AWS:
     """
     Class for including functions of AWS IoT operations of picocell module.
     """
+
     cache = config["cache"]
 
     def __init__(self, base, auth, network, ssl, mqtt, http):
@@ -52,13 +54,13 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["aws","mqtts","host"])
+            host = get_parameter(["aws", "mqtts", "host"])
 
         if port is None:
-            port = get_parameter(["aws","mqtts","port"], 8883)
+            port = get_parameter(["aws", "mqtts", "port"], 8883)
 
         if topic is None:
-            topic = get_parameter(["aws","mqtts","pub_topic"])
+            topic = get_parameter(["aws", "mqtts", "pub_topic"])
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -110,8 +112,8 @@ class AWS:
             name="ssl_configuration",
             success="set_mqtt_version",
             fail="failure",
-            cachable=True
-            )
+            cachable=True,
+        )
 
         step_set_mqtt_version = Step(
             function=self.mqtt.set_version_config,
@@ -132,14 +134,14 @@ class AWS:
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
-            function_params={"host":host, "port":port}
+            function_params={"host": host, "port": port},
         )
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="publish_message",
-            fail="failure"
+            fail="failure",
         )
 
         step_publish_message = Step(
@@ -147,7 +149,7 @@ class AWS:
             name="publish_message",
             success="success",
             fail="failure",
-            function_params={"payload":payload, "topic":topic},
+            function_params={"payload": payload, "topic": topic},
             cachable=True,
         )
 
@@ -193,13 +195,13 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if topics is None:
-            topics = get_parameter(["aws","mqtts","sub_topics"])
+            topics = get_parameter(["aws", "mqtts", "sub_topics"])
 
         if host is None:
-            host = get_parameter(["aws","mqtts","host"])
+            host = get_parameter(["aws", "mqtts", "host"])
 
         if port is None:
-            port = get_parameter(["aws","mqtts","port"], 8883)
+            port = get_parameter(["aws", "mqtts", "port"], 8883)
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -254,7 +256,7 @@ class AWS:
             name="ssl_configuration",
             success="set_mqtt_version",
             fail="failure",
-            )
+        )
 
         step_set_mqtt_version = Step(
             function=self.mqtt.set_version_config,
@@ -275,14 +277,14 @@ class AWS:
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
-            function_params={"host": host, "port":port}
+            function_params={"host": host, "port": port},
         )
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="subscribe_topics",
-            fail="failure"
+            fail="failure",
         )
 
         step_subscribe_topics = Step(
@@ -290,7 +292,7 @@ class AWS:
             name="subscribe_topics",
             success="success",
             fail="failure",
-            function_params={"topics":topics},
+            function_params={"topics": topics},
             cachable=True,
         )
 
@@ -344,8 +346,8 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if url is None:
-            endpoint = get_parameter(["aws","https","endpoint"])
-            topic = get_parameter(["aws","https","topic"])
+            endpoint = get_parameter(["aws", "https", "endpoint"])
+            topic = get_parameter(["aws", "https", "topic"])
 
             if endpoint and topic:
                 url = f"https://{endpoint}:8443/topics/{topic}?qos=1"
@@ -408,7 +410,7 @@ class AWS:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response":'"message":"OK"'},
+            function_params={"desired_response": '"message":"OK"'},
         )
 
         # Add cache if it is not already existed

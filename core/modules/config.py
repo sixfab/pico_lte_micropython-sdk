@@ -5,6 +5,7 @@ Module for including extended configuration function of picocell module.
 from core.temp import config
 from core.utils.helpers import read_json_file
 
+
 class Config:
     """
     Class for including extended configuration functions.

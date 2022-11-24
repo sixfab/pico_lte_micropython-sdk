@@ -54,9 +54,7 @@ class TestPeriph:
         """No need since its a third-party library."""
         assert True
 
-    @pytest.mark.parametrize(
-        "pin_value, expected_voltage", [(65535, 3.3), (32767, 1.64), (0, 0)]
-    )
+    @pytest.mark.parametrize("pin_value, expected_voltage", [(65535, 3.3), (32767, 1.64), (0, 0)])
     def test_get_battery_voltage(self, mocker, periph, pin_value, expected_voltage):
         """This method tests the get_battery_voltage() method with predefined
         analogue pre-defined values.

@@ -27,6 +27,7 @@ from core.apps.thingspeak import ThingSpeak
 from core.apps.azure import Azure
 from core.apps.scriptr import Scriptr
 
+
 class Modem:
     """
     Modem class that contains all functions for working with cellular modem

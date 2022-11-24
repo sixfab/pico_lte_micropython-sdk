@@ -11,9 +11,10 @@ from core.utils.helpers import read_json_file, write_json_file
 from core.utils.status import Status
 
 
-CONST_TIMER = 1 # minutes
-DEFAULT_PERIOD = 60 # minutes
+CONST_TIMER = 1  # minutes
+DEFAULT_PERIOD = 60  # minutes
 ULP_FILE_PATH = "ulp.json"
+
 
 class ULP:
     """
@@ -49,7 +50,7 @@ class ULP:
             write_json_file(ULP_FILE_PATH, config["ulp"])
         except Exception as error:
             debug.error("save_ulp_config", error)
-            return {"response" : str(error), "status" : Status.ERROR}
+            return {"response": str(error), "status": Status.ERROR}
 
     def enable(self):
         """
@@ -109,7 +110,7 @@ class ULP:
         count = config["ulp"].get("timer_count")
         desired_count = config["ulp"].get("desired_timer_count")
 
-        if count < desired_count - 1 :
+        if count < desired_count - 1:
             self.increase_counter()
             self.deep_sleep()
         else:

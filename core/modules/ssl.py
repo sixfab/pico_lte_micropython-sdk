@@ -7,10 +7,12 @@ import time
 from core.utils.manager import StateManager, Step
 from core.utils.status import Status
 
+
 class SSL:
     """
     Class for including functions of ssl operations of picocell module.
     """
+
     def __init__(self, atcom):
         """
         Initialization of the class.
@@ -125,7 +127,7 @@ class SSL:
         command = f'AT+QSSLCFG="sslversion",{ssl_context_id},{ssl_version}'
         return self.atcom.send_at_comm(command)
 
-    def set_cipher_suite(self,ssl_context_id=2, cipher_suite="0xFFFF"):
+    def set_cipher_suite(self, ssl_context_id=2, cipher_suite="0xFFFF"):
         """
         Function for setting modem SSL cipher suite
 
@@ -262,7 +264,7 @@ class SSL:
             fail="failure",
         )
 
-        sm = StateManager(first_step = step_set_ca)
+        sm = StateManager(first_step=step_set_ca)
         sm.add_step(step_set_ca)
         sm.add_step(step_set_client_cert)
         sm.add_step(step_set_client_key)

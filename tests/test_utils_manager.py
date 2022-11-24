@@ -230,14 +230,9 @@ class TestManager:
 
         assert response.get("status") == Status.SUCCESS
         assert predefined_state_manager.current.name == "SecondStep"
-        assert (
-            config["cache"].states[predefined_state_manager.function_name]
-            == "FirstStep"
-        )
+        assert config["cache"].states[predefined_state_manager.function_name] == "FirstStep"
 
-    def test_organizer_without_current_is_ok_and_retry_current(
-        self, predefined_state_manager
-    ):
+    def test_organizer_without_current_is_ok_and_retry_current(self, predefined_state_manager):
         """Tests the organizer() method's behaviour on the steps
         with given retry attribute.
         """
@@ -301,12 +296,8 @@ class TestManager:
 
         assert result.get("response") == 5
 
-    @pytest.mark.parametrize(
-        "state_name, expected_response", [("ThirdStep", 3), ("SecondStep", 2)]
-    )
-    def test_run_with_end(
-        self, state_name, expected_response, predefined_state_manager
-    ):
+    @pytest.mark.parametrize("state_name, expected_response", [("ThirdStep", 3), ("SecondStep", 2)])
+    def test_run_with_end(self, state_name, expected_response, predefined_state_manager):
         """Tests the run() method with given end parameter."""
         while True:
             result = predefined_state_manager.run(end=state_name)

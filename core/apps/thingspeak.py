@@ -13,6 +13,7 @@ class ThingSpeak:
     """
     Class for including functions of ThingSpeak operations for Picocell module.
     """
+
     cache = config["cache"]
 
     def __init__(self, base, network, mqtt, channel_id=None):
@@ -30,11 +31,20 @@ class ThingSpeak:
         self.base = base
         self.network = network
         self.mqtt = mqtt
-        self.channel_id = get_parameter(["thingspeak", "channel_id"]) \
-            if (channel_id is None) else channel_id
+        self.channel_id = (
+            get_parameter(["thingspeak", "channel_id"]) if (channel_id is None) else channel_id
+        )
 
-    def publish_message(self, payload, host=None, port=None, topic=None,
-                        client_id=None, username=None, password=None):
+    def publish_message(
+        self,
+        payload,
+        host=None,
+        port=None,
+        topic=None,
+        client_id=None,
+        username=None,
+        password=None,
+    ):
         """
         Function for publishing a message to ThingSpeak.
 
@@ -70,8 +80,10 @@ class ThingSpeak:
             password = get_parameter(["thingspeak", "mqtts", "password"])
 
         if topic is None:
-            topic = get_parameter(["thingspeak", "mqtts", "pub_topic"],  \
-                "channels/" + str(self.channel_id) + "/publish")
+            topic = get_parameter(
+                ["thingspeak", "mqtts", "pub_topic"],
+                "channels/" + str(self.channel_id) + "/publish",
+            )
 
         # Create message from dictionary if needed.
         if isinstance(payload, dict):
@@ -115,7 +127,7 @@ class ThingSpeak:
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
-            interval=1
+            interval=1,
         )
 
         step_connect_mqtt_broker = Step(
@@ -123,9 +135,11 @@ class ThingSpeak:
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
-            function_params={"client_id_string": client_id,
-                            "username": username,
-                            "password": password}
+            function_params={
+                "client_id_string": client_id,
+                "username": username,
+                "password": password,
+            },
         )
 
         step_publish_message = Step(
@@ -133,11 +147,9 @@ class ThingSpeak:
             name="publish_message",
             success="success",
             fail="failure",
-            function_params={"payload": payload,
-                            "topic": topic,
-                            "qos": 1},
+            function_params={"payload": payload, "topic": topic, "qos": 1},
             retry=3,
-            interval=1
+            interval=1,
         )
 
         # Add cache if it is not already existed
@@ -162,8 +174,9 @@ class ThingSpeak:
                 return result
             time.sleep(result["interval"])
 
-    def subscribe_topics(self, host=None, port=None, topics=None,
-                        client_id=None, username=None, password=None):
+    def subscribe_topics(
+        self, host=None, port=None, topics=None, client_id=None, username=None, password=None
+    ):
         """
         Function for subscribing to topics of ThingSpeak.
 
@@ -193,8 +206,10 @@ class ThingSpeak:
             password = get_parameter(["thingspeak", "mqtts", "password"])
 
         if topics is None:
-            topics = get_parameter(["thingspeak", "mqtts", "sub_topics"],  \
-                ("channels/" + str(self.channel_id) + "/subscribe/fields/+", 0))
+            topics = get_parameter(
+                ["thingspeak", "mqtts", "sub_topics"],
+                ("channels/" + str(self.channel_id) + "/subscribe/fields/+", 0),
+            )
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -234,7 +249,7 @@ class ThingSpeak:
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
-            interval=1
+            interval=1,
         )
 
         step_connect_mqtt_broker = Step(
@@ -242,9 +257,11 @@ class ThingSpeak:
             name="connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
-            function_params={"client_id_string": client_id,
-                            "username": username,
-                            "password": password}
+            function_params={
+                "client_id_string": client_id,
+                "username": username,
+                "password": password,
+            },
         )
 
         step_subscribe_topics = Step(
@@ -254,7 +271,7 @@ class ThingSpeak:
             fail="failure",
             function_params={"topics": topics},
             retry=3,
-            interval=1
+            interval=1,
         )
 
         # Add cache if it is not already existed

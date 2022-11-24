@@ -298,7 +298,7 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, response_sequence, True)
         result = http.get()
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         assert result == response_sequence[-1]
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
@@ -309,7 +309,7 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, mocked_response)
         result = http.get()
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         assert result == mocked_response
 
     def test_get_with_custom_header(self, mocker, http):
@@ -322,13 +322,9 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, response_sequence, True)
         result = http.get(header_mode=1)
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",1")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",1')
         mocking.assert_any_call(
-            "AT+QHTTPGET=60,0,5",
-            desired="CONNECT",
-            fault="+CME ERROR:",
-            urc=True,
-            timeout=60
+            "AT+QHTTPGET=60,0,5", desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=60
         )
         assert mocking.call_count == 3
         assert result == response_sequence[-1]
@@ -344,22 +340,21 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, response_sequence, True)
         result = http.get(header_mode=1)
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",1")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",1')
         mocking.assert_any_call(
-            "AT+QHTTPGET=60,0,5",
-            desired="CONNECT",
-            fault="+CME ERROR:",
-            urc=True,
-            timeout=60
+            "AT+QHTTPGET=60,0,5", desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=60
         )
         assert mocking.call_count == 2
         assert result == response_sequence[-1]
 
-    @pytest.mark.parametrize("params", [
-        ("something", 3, 20, "200", "703"),
-        ("otherwise", 1, 10, ["222", "505"], "112"),
-        ("different", 7, 2, "XXX", ["YYY", "ZZZ"]),
-    ])
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ("something", 3, 20, "200", "703"),
+            ("otherwise", 1, 10, ["222", "505"], "112"),
+            ("different", 7, 2, "XXX", ["YYY", "ZZZ"]),
+        ],
+    )
     def test_get_all_parameters_custom_header(self, mocker, http, params):
         """This method tests get() if the parameters given are set correctly."""
         response_sequence = [
@@ -374,7 +369,7 @@ class TestHTTP:
             input_timeout=params[1],
             timeout=params[2],
             desired_response=params[3],
-            fault_response=params[4]
+            fault_response=params[4],
         )
 
         data_length = len(params[0])
@@ -383,7 +378,7 @@ class TestHTTP:
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=60
+            timeout=60,
         )
         mocking.assert_any_call(
             params[0],
@@ -407,13 +402,13 @@ class TestHTTP:
         data = "Example Data"
         result = http.post(data)
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         mocking.assert_any_call(
             f"AT+QHTTPPOST={len(data)},5,60",
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=60
+            timeout=60,
         )
         assert mocking.call_count == 3
         assert result == response_sequence[-1]
@@ -426,7 +421,7 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, mocked_response)
         result = http.post("Example Data")
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         assert result == mocked_response
 
     def test_post_error_at_connect(self, mocker, http):
@@ -439,22 +434,25 @@ class TestHTTP:
         data = "data with header"
         result = http.post(data, header_mode=1)
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",1")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",1')
         mocking.assert_any_call(
             f"AT+QHTTPPOST={len(data)},5,60",
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=60
+            timeout=60,
         )
         assert mocking.call_count == 2
         assert result == response_sequence[-1]
 
-    @pytest.mark.parametrize("params", [
-        ("something", 0, 3, 20, "200", "703"),
-        ("otherwise", 1, 1, 10, ["222", "505"], "112"),
-        ("different", 0, 7, 2, "XXX", ["YYY", "ZZZ"]),
-    ])
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ("something", 0, 3, 20, "200", "703"),
+            ("otherwise", 1, 1, 10, ["222", "505"], "112"),
+            ("different", 0, 7, 2, "XXX", ["YYY", "ZZZ"]),
+        ],
+    )
     def test_post_all_parameters(self, mocker, http, params):
         """This method tests post() if the parameters given are set correctly."""
         response_sequence = [
@@ -469,17 +467,17 @@ class TestHTTP:
             input_timeout=params[2],
             timeout=params[3],
             desired_response=params[4],
-            fault_response=params[5]
+            fault_response=params[5],
         )
 
-        mocking.assert_any_call(f"AT+QHTTPCFG=\"requestheader\",{params[1]}")
+        mocking.assert_any_call(f'AT+QHTTPCFG="requestheader",{params[1]}')
         data_length = len(params[0])
         mocking.assert_any_call(
             f"AT+QHTTPPOST={data_length},{params[2]},{params[3]}",
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=params[3]
+            timeout=params[3],
         )
         mocking.assert_any_call(
             params[0],
@@ -503,13 +501,13 @@ class TestHTTP:
         data = "Example Data"
         result = http.put(data)
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         mocking.assert_any_call(
             f"AT+QHTTPPUT={len(data)},5,60",
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=60
+            timeout=60,
         )
         assert mocking.call_count == 3
         assert result == response_sequence[-1]
@@ -522,7 +520,7 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, mocked_response)
         result = http.put("Example Data")
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         assert result == mocked_response
 
     def test_put_error_at_connect(self, mocker, http):
@@ -535,22 +533,25 @@ class TestHTTP:
         data = "data with header"
         result = http.put(data)
 
-        mocking.assert_any_call("AT+QHTTPCFG=\"requestheader\",0")
+        mocking.assert_any_call('AT+QHTTPCFG="requestheader",0')
         mocking.assert_any_call(
             f"AT+QHTTPPUT={len(data)},5,60",
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=60
+            timeout=60,
         )
         assert mocking.call_count == 2
         assert result == response_sequence[-1]
 
-    @pytest.mark.parametrize("params", [
-        ("something", 0, 3, 20, "200", "703"),
-        ("otherwise", 1, 1, 10, ["222", "505"], "112"),
-        ("different", 0, 7, 2, "XXX", ["YYY", "ZZZ"]),
-    ])
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ("something", 0, 3, 20, "200", "703"),
+            ("otherwise", 1, 1, 10, ["222", "505"], "112"),
+            ("different", 0, 7, 2, "XXX", ["YYY", "ZZZ"]),
+        ],
+    )
     def test_put_all_parameters(self, mocker, http, params):
         """This method tests post() if the parameters given are set correctly."""
         response_sequence = [
@@ -565,17 +566,17 @@ class TestHTTP:
             input_timeout=params[2],
             timeout=params[3],
             desired_response=params[4],
-            fault_response=params[5]
+            fault_response=params[5],
         )
 
-        mocking.assert_any_call(f"AT+QHTTPCFG=\"requestheader\",{params[1]}")
+        mocking.assert_any_call(f'AT+QHTTPCFG="requestheader",{params[1]}')
         data_length = len(params[0])
         mocking.assert_any_call(
             f"AT+QHTTPPUT={data_length},{params[2]},{params[3]}",
             desired="CONNECT",
             fault="+CME ERROR:",
             urc=True,
-            timeout=params[3]
+            timeout=params[3],
         )
         mocking.assert_any_call(
             params[0],
@@ -618,15 +619,18 @@ class TestHTTP:
         assert result["status"] == Status.ERROR
         assert result["response"] == "Not implemented yet!"
 
-    @pytest.mark.parametrize("response, expected", [
-        (["CONNECT", "answer", "OK", "+QHTTPREAD: 0"], ["answer", "OK", "+QHTTPREAD: 0"]),
-        (["CONNECT", "some", "OK", "+QHTTPREAD: 0"], ["some", "OK", "+QHTTPREAD: 0"]),
-        (["OK", "+QHTTPREAD: 0"], ["OK", "+QHTTPREAD: 0"]),
-    ])
+    @pytest.mark.parametrize(
+        "response, expected",
+        [
+            (["CONNECT", "answer", "OK", "+QHTTPREAD: 0"], ["answer", "OK", "+QHTTPREAD: 0"]),
+            (["CONNECT", "some", "OK", "+QHTTPREAD: 0"], ["some", "OK", "+QHTTPREAD: 0"]),
+            (["OK", "+QHTTPREAD: 0"], ["OK", "+QHTTPREAD: 0"]),
+        ],
+    )
     def test_read_response_default(self, mocker, http, response, expected):
         """This method tests the read_response() with its default parameters."""
         mocked_response = {"status": Status.SUCCESS, "response": response}
-        mocking = TestHTTP.mock_send_at_comm(mocker,  mocked_response)
+        mocking = TestHTTP.mock_send_at_comm(mocker, mocked_response)
         result = http.read_response()
 
         mocking.assert_called_once_with(
@@ -634,7 +638,7 @@ class TestHTTP:
             desired="+QHTTPREAD: 0",
             fault=[f"+QHTTPREAD: {str(error_code)}" for error_code in range(701, 731, 1)],
             urc=True,
-            timeout=5
+            timeout=5,
         )
         assert result["response"] == expected
 
@@ -644,5 +648,5 @@ class TestHTTP:
         mocking = TestHTTP.mock_send_at_comm(mocker, mocked_response)
         result = http.read_response_to_file("file.txt")
 
-        mocking.assert_called_once_with('AT+QHTTPREADFILE=file.txt,60')
+        mocking.assert_called_once_with("AT+QHTTPREADFILE=file.txt,60")
         assert result == mocked_response

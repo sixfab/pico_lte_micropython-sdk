@@ -79,12 +79,15 @@ class TestHelpers:
             None,
         ]
 
-    @pytest.mark.parametrize("dict_example", [
-        {"status": Status.UNKNOWN, "response": ["That", "is", "an", "example."]},
-        {"multilevel": {"a": 1, "b": 4.6, "c": 0x15}, "try": "Example"},
-        {"object": None},
-        {}
-    ])
+    @pytest.mark.parametrize(
+        "dict_example",
+        [
+            {"status": Status.UNKNOWN, "response": ["That", "is", "an", "example."]},
+            {"multilevel": {"a": 1, "b": 4.6, "c": 0x15}, "try": "Example"},
+            {"object": None},
+            {},
+        ],
+    )
     def test_deep_copy_of_dictionary(self, dict_example):
         """This method tests if the function creates a deepcopy of the
         dictionary by looking its memory location and comparing it.
@@ -130,9 +133,7 @@ class TestHelpers:
         assert result["status"] == example_result["status"]
         assert result["response"] == example_result["response"]
 
-    def test_get_desired_data_success_response_includes_ok_with_wrong_prefix(
-        self, example_result
-    ):
+    def test_get_desired_data_success_response_includes_ok_with_wrong_prefix(self, example_result):
         """It tests get_desired_data() function with successful and
         finished response but without having prefix from Modem. It
         should return None in "value" attribute.
@@ -190,10 +191,7 @@ class TestHelpers:
 
     def test_simplify(self):
         """It tests the simplify() function."""
-        assert (
-            simplify('A test quote " with lots of "."')
-            == "A test quote  with lots of ."
-        )
+        assert simplify('A test quote " with lots of "."') == "A test quote  with lots of ."
         assert simplify("A test 'quote' with 'one'.") == "A test quote with one."
         assert simplify(15) == 15
         assert simplify(None) is None
@@ -227,9 +225,7 @@ class TestHelpers:
 
     def test_write_file_with_binary_file(self, tmp_path, data_to_test_binary):
         """It tests the write_file() function with binary-file input."""
-        test_write = write_file(
-            f"{tmp_path}/test_binary_file", data_to_test_binary, file_type="b"
-        )
+        test_write = write_file(f"{tmp_path}/test_binary_file", data_to_test_binary, file_type="b")
 
         with open(f"{tmp_path}/test_binary_file", "rb") as file_to_test:
             data_got_from_file = file_to_test.read()
@@ -254,9 +250,7 @@ class TestHelpers:
         mocker.patch("core.temp.config", prepared_config)
 
         result_without_default = get_parameter(["not", "included", "path_name"])
-        result_with_default = get_parameter(
-            ["not", "included", "path_name"], default="TestDefault"
-        )
+        result_with_default = get_parameter(["not", "included", "path_name"], default="TestDefault")
 
         assert result_without_default is None
         assert result_with_default == "TestDefault"
