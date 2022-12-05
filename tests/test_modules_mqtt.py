@@ -89,13 +89,9 @@ class TestMQTT:
     def test_set_ssl_mode_config_parameters(self, mocker, mqtt, params):
         """This method tests set_ssl_mode_config() with given arbitrary parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, None)
-        mqtt.set_ssl_mode_config(
-            cid=params[0], ssl_mode=params[1], ssl_ctx_index=params[2]
-        )
+        mqtt.set_ssl_mode_config(cid=params[0], ssl_mode=params[1], ssl_ctx_index=params[2])
 
-        mocking.assert_called_once_with(
-            f'AT+QMTCFG="SSL",{params[0]},{params[1]},{params[2]}'
-        )
+        mocking.assert_called_once_with(f'AT+QMTCFG="SSL",{params[0]},{params[1]},{params[2]}')
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
     def test_set_keep_alive_time_config_default(self, mocker, mqtt, mocked_response):
@@ -112,9 +108,7 @@ class TestMQTT:
         mocking = TestMQTT.mock_send_at_comm(mocker, None)
         mqtt.set_keep_alive_time_config(cid=params[0], keep_alive_time=params[1])
 
-        mocking.assert_called_once_with(
-            f'AT+QMTCFG="keepalive",{params[0]},{params[1]}'
-        )
+        mocking.assert_called_once_with(f'AT+QMTCFG="keepalive",{params[0]},{params[1]}')
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
     def test_set_clean_session_config_default(self, mocker, mqtt, mocked_response):
@@ -131,9 +125,7 @@ class TestMQTT:
         mocking = TestMQTT.mock_send_at_comm(mocker, None)
         mqtt.set_clean_session_config(cid=params[0], clean_session=params[1])
 
-        mocking.assert_called_once_with(
-            f'AT+QMTCFG="clean_session",{params[0]},{params[1]}'
-        )
+        mocking.assert_called_once_with(f'AT+QMTCFG="clean_session",{params[0]},{params[1]}')
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
     def test_set_timeout_config_default(self, mocker, mqtt, mocked_response):
@@ -168,9 +160,7 @@ class TestMQTT:
         mocking.assert_called_once_with('AT+QMTCFG="will",0,0,0,0,"example","message"')
         assert result == mocked_response
 
-    @pytest.mark.parametrize(
-        "params", [("will", "msg", 0, 1, 2, 1), ("try", "xyz", 1, 0, 1, 0)]
-    )
+    @pytest.mark.parametrize("params", [("will", "msg", 0, 1, 2, 1), ("try", "xyz", 1, 0, 1, 0)])
     def test_set_will_config_parameters(self, mocker, mqtt, params):
         """This method tests set_will_config() with given arbitrary parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, None)
@@ -189,9 +179,7 @@ class TestMQTT:
         )
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_message_recieve_mode_config_default(
-        self, mocker, mqtt, mocked_response
-    ):
+    def test_set_message_recieve_mode_config_default(self, mocker, mqtt, mocked_response):
         """This method tests set_message_recieve_mode_config() with its default parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
         result = mqtt.set_message_recieve_mode_config()
@@ -203,13 +191,9 @@ class TestMQTT:
     def test_set_message_recieve_mode_config_parameters(self, mocker, mqtt, params):
         """This method tests set_message_recieve_mode_config() with given arbitrary parameters."""
         mocking = TestMQTT.mock_send_at_comm(mocker, None)
-        mqtt.set_message_recieve_mode_config(
-            cid=params[0], message_recieve_mode=params[1]
-        )
+        mqtt.set_message_recieve_mode_config(cid=params[0], message_recieve_mode=params[1])
 
-        mocking.assert_called_once_with(
-            f'AT+QMTCFG="message_recieve_mode",{params[0]},{params[1]}'
-        )
+        mocking.assert_called_once_with(f'AT+QMTCFG="message_recieve_mode",{params[0]},{params[1]}')
 
     def test_open_connection_all_none(self, mocker, mqtt):
         """This method tests open_connect() when there is no given parameter,
@@ -554,17 +538,13 @@ class TestMQTT:
         mocking.assert_called_once_with('AT+QMTUNS=0,1,"an_example_topic"')
         assert result == mocked_response
 
-    @pytest.mark.parametrize(
-        "params", [("topic1", 2, 3), ("topic2", 0, 1), ("topic3", 5, 65353)]
-    )
+    @pytest.mark.parametrize("params", [("topic1", 2, 3), ("topic2", 0, 1), ("topic3", 5, 65353)])
     def test_unscribe_topic_parameters(self, mocker, mqtt, params):
         """This method tests unsubscribe_topic() if it's parameters are working."""
         mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
         mqtt.unsubscribe_topic(params[0], cid=params[1], message_id=params[2])
 
-        mocking.assert_called_once_with(
-            f'AT+QMTUNS={params[1]},{params[2]},"{params[0]}"'
-        )
+        mocking.assert_called_once_with(f'AT+QMTUNS={params[1]},{params[2]},"{params[0]}"')
 
     def test_publish_message_without_payload(self, mqtt):
         """This method tests publish_message() without giving payload."""

@@ -58,18 +58,14 @@ class TestDebug:
         """This method creates Debug instance with different parameters
         then its defaults and tests them.
         """
-        debug_instance = Debug(
-            enabled=False, channel=DebugChannel.UART, level=DebugLevel.CRITICAL
-        )
+        debug_instance = Debug(enabled=False, channel=DebugChannel.UART, level=DebugLevel.CRITICAL)
 
         assert isinstance(debug_instance.uart1, UART)
         assert debug_instance.debug_enabled is False
         assert debug_instance.debug_channel == DebugChannel.UART
         assert debug_instance.debug_level == DebugLevel.CRITICAL
 
-    @pytest.mark.parametrize(
-        "desired_channel", [DebugChannel.UART, DebugChannel.USBC, -55, 0, 95]
-    )
+    @pytest.mark.parametrize("desired_channel", [DebugChannel.UART, DebugChannel.USBC, -55, 0, 95])
     def test_set_channel(self, exemplary_debug_instance, desired_channel):
         """This method tests set_channel() method."""
         exemplary_debug_instance.set_channel(desired_channel)

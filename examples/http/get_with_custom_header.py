@@ -43,14 +43,16 @@ else:
 
 
 # Custom header
-HEADER = "\n".join([
-    f"GET {query} HTTP/1.1",
-    f"Host: {host}",
-    "Custom-Header-Name: Custom-Data",
-    "Content-Type: application/json",
-    "Content-Length: 0\n",
-    "\n\n"
-])
+HEADER = "\n".join(
+    [
+        f"GET {query} HTTP/1.1",
+        f"Host: {host}",
+        "Custom-Header-Name: Custom-Data",
+        "Content-Type: application/json",
+        "Content-Length: 0\n",
+        "\n\n",
+    ]
+)
 
 debug.info("Sending a GET request with custom header...")
 result = modem.http.get(HEADER, header_mode=1)

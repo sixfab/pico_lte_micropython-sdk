@@ -33,9 +33,7 @@ class TestNetwork:
     @staticmethod
     def mock_send_at_comm(mocker, response_to_return):
         """This is a wrapper function for repeated long mocker.patch() statements."""
-        return mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=response_to_return
-        )
+        return mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=response_to_return)
 
     def test_constructor(self, network):
         """This methods tests if the constructor correctly set the attributes."""
@@ -133,9 +131,7 @@ class TestNetwork:
             (['+COPS: 2,3,"example",0', "OK"], "example"),
         ],
     )
-    def test_get_operator_information_ordinary(
-        self, mocker, network, response, expected
-    ):
+    def test_get_operator_information_ordinary(self, mocker, network, response, expected):
         """This method tests get_operator_information() with possible mocked answers from ATCom."""
         mocked_response = {"status": Status.SUCCESS, "response": response}
         mocking = TestNetwork.mock_send_at_comm(mocker, mocked_response)
@@ -213,9 +209,7 @@ class TestNetwork:
             [1, 1, "", "", "", 3],
         ],
     )
-    def test_configure_tcp_ip_context_with_different_parameters(
-        self, mocker, network, parameters
-    ):
+    def test_configure_tcp_ip_context_with_different_parameters(self, mocker, network, parameters):
         """This method tests the configure_tcp_ip_context() with different parameters."""
         mocking = TestNetwork.mock_send_at_comm(mocker, default_response_types()[0])
 
@@ -389,9 +383,7 @@ class TestNetwork:
             {"status": Status.ERROR, "response": "check_network_registration 1"},
             {"status": Status.ERROR, "response": "check_atcom"},
         ]
-        mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
-        )
+        mocker.patch("core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses)
         result = network.register_network()
 
         # Test if called necessary functions.
@@ -435,10 +427,10 @@ class TestNetwork:
         result = network.get_pdp_ready()
 
         # Test if called necessary functions.
-        mocking.assert_any_call('AT+CGACT?', '+CGACT: 1,1')
+        mocking.assert_any_call("AT+CGACT?", "+CGACT: 1,1")
         mocking.assert_any_call('AT+QICSGP=1,1,"super","","",0')
-        mocking.assert_any_call('AT+QIDEACT=1')
-        mocking.assert_any_call('AT+QIACT=1')
+        mocking.assert_any_call("AT+QIDEACT=1")
+        mocking.assert_any_call("AT+QIACT=1")
         assert result["status"] == side_effect_responses[4]["status"]
         assert result["response"] == side_effect_responses[4]["response"]
 
@@ -454,9 +446,7 @@ class TestNetwork:
             {"status": Status.ERROR, "response": "check_pdp_context_status 1"},
             {"status": Status.ERROR, "response": "configure_pdp_context"},
         ]
-        mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
-        )
+        mocker.patch("core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses)
         result = network.get_pdp_ready()
 
         # Test if called necessary functions.

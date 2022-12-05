@@ -202,9 +202,7 @@ class TestATCom:
         assert result["status"] == Status.TIMEOUT
         assert result["response"] == "timeout"
 
-    def test_get_urc_response_with_desired_response(
-        self, mocker, atcom, example_urc_response
-    ):
+    def test_get_urc_response_with_desired_response(self, mocker, atcom, example_urc_response):
         """Test the get_urc_response() method with desired_responses parameter."""
         returns_any = [True for _ in range(len(example_urc_response) * 2)] + [False]
         mocker.patch("machine.UART.any", side_effect=returns_any)
@@ -218,9 +216,7 @@ class TestATCom:
         assert result["status"] == Status.SUCCESS
         assert result["response"] == ["OK", "CONNECT"]
 
-    def test_get_urc_response_with_fault_response(
-        self, mocker, atcom, example_urc_response
-    ):
+    def test_get_urc_response_with_fault_response(self, mocker, atcom, example_urc_response):
         """Test the get_urc_response() method with fault_responses parameter."""
         returns_any = [True for _ in range(len(example_urc_response) * 2)] + [False]
         mocker.patch("machine.UART.any", side_effect=returns_any)
@@ -244,9 +240,7 @@ class TestATCom:
 
         desired = "+QHTTPPOST: 200"
         fault = ["ERROR", "+CME ERROR"]
-        result = atcom.get_urc_response(
-            desired_responses=desired, fault_responses=fault
-        )
+        result = atcom.get_urc_response(desired_responses=desired, fault_responses=fault)
 
         assert result["status"] == Status.SUCCESS
         assert result["response"] == ["OK", "CONNECT", "+QHTTPPOST: 200"]
@@ -263,14 +257,10 @@ class TestATCom:
         """Test the send_at_comm() method."""
         mocker.patch("core.utils.atcom.ATCom.send_at_comm_once", return_value=None)
         mocker.patch("time.sleep", return_value=None)
-        mocker.patch(
-            "core.utils.atcom.ATCom.get_urc_response", return_value=return_dict
-        )
+        mocker.patch("core.utils.atcom.ATCom.get_urc_response", return_value=return_dict)
         mocker.patch("core.utils.atcom.ATCom.get_response", return_value=return_dict)
 
-        result_one = atcom.send_at_comm(
-            "example", desired="CONNECT", fault="ERROR", urc=True
-        )
+        result_one = atcom.send_at_comm("example", desired="CONNECT", fault="ERROR", urc=True)
         assert result_one["status"] == return_dict["status"]
 
         result_sec = atcom.send_at_comm("example", urc=False)

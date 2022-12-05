@@ -14,6 +14,7 @@ class Scriptr:
     """
     Class for including Scriptr.io functions.
     """
+
     cache = config["cache"]
 
     def __init__(self, base, network, http):
@@ -47,17 +48,27 @@ class Scriptr:
         """
 
         if query is None:
-            query = get_parameter(["scriptr","query"])
+            query = get_parameter(["scriptr", "query"])
 
         if authorization is None:
-            authorization = get_parameter(["scriptr","authorization"])
+            authorization = get_parameter(["scriptr", "authorization"])
 
-        header =    "POST " + query + " HTTP/1.1\n" + \
-                    "Host: " + "api.scriptrapps.io" + "\n" + \
-                    "Content-Type: application/json\n" + \
-                    "Content-Length: " + str(len(data) + 1) + "\n" + \
-                    "Authorization: Bearer " + authorization + "\n" + \
-                    "\n\n"
+        header = (
+            "POST "
+            + query
+            + " HTTP/1.1\n"
+            + "Host: "
+            + "api.scriptrapps.io"
+            + "\n"
+            + "Content-Type: application/json\n"
+            + "Content-Length: "
+            + str(len(data) + 1)
+            + "\n"
+            + "Authorization: Bearer "
+            + authorization
+            + "\n"
+            + "\n\n"
+        )
 
         step_network_reg = Step(
             function=self.network.register_network,
@@ -96,7 +107,7 @@ class Scriptr:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response":"ok"},
+            function_params={"desired_response": "ok"},
         )
 
         function_name = "scriptr_io.send_data"
@@ -108,7 +119,6 @@ class Scriptr:
         sm.add_step(step_post_request)
         time.sleep(4)
         sm.add_step(step_read_response)
-
 
         while True:
             result = sm.run()

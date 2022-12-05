@@ -39,9 +39,7 @@ class TestBase:
     @pytest.mark.parametrize("status_pin_value", [0, 1])
     def test_power_status_response(self, mocker, base, status_pin_value):
         """This method tests the power_status() method by mocking Pin value."""
-        mocking = mocker.patch(
-            "core.modules.base.Pin.value", return_value=status_pin_value
-        )
+        mocking = mocker.patch("core.modules.base.Pin.value", return_value=status_pin_value)
         result = base.power_status()
 
         assert mocking.call_count == 2
@@ -77,9 +75,7 @@ class TestBase:
     )
     def test_check_communication(self, mocker, base, mocked_result):
         """This method tests check_communication() with mocked ATCom."""
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
         result = base.check_communication()
 
         mocking.assert_called_once_with("AT")
@@ -119,9 +115,7 @@ class TestBase:
     )
     def test_set_echo_off(self, mocker, base, mocked_result):
         """This method tests the set_echo_off() with mocked ATCom."""
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.set_echo_off()
         mocking.assert_called_once_with("ATE0")
@@ -136,9 +130,7 @@ class TestBase:
     )
     def test_set_echo_on(self, mocker, base, mocked_result):
         """This method tests the set_echo_on() with mocked ATCom."""
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.set_echo_on()
         mocking.assert_called_once_with("ATE1")
@@ -153,9 +145,7 @@ class TestBase:
     )
     def test_check_sim_ready(self, mocker, base, mocked_result):
         """This method tests the check_sim_ready() with mocked ATCom."""
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.check_sim_ready()
         mocking.assert_called_once_with("AT+CPIN?", ["+CPIN: READY"])
@@ -170,9 +160,7 @@ class TestBase:
     )
     def test_enter_sim_pin_code(self, mocker, base, mocked_result):
         """This method tests the enter_sim_pin_code() with mocked ATCom."""
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.enter_sim_pin_code(1234)
         mocking.assert_called_once_with('AT+CPIN="1234"')
@@ -190,9 +178,7 @@ class TestBase:
     )
     def test_get_sim_iccid(self, mocker, base, mocked_result):
         """This method tests the get_sim_iccid() method with mocked ATCom."""
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.get_sim_iccid()
 
@@ -205,9 +191,7 @@ class TestBase:
     def test_config_network_scan_mode(self, mocker, base, scan_mode):
         """This method tests the config_network_scan_mode() method with mocked ATCom."""
         mocked_result = {"status": Status.SUCCESS, "response": ["OK"]}
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.config_network_scan_mode(scan_mode)
 
@@ -218,9 +202,7 @@ class TestBase:
     def test_config_network_scan_sequence(self, mocker, base, scan_sequence):
         """This method tests the config_network_scan_sequence() method with mocked ATCom."""
         mocked_result = {"status": Status.SUCCESS, "response": ["OK"]}
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.config_network_scan_sequence(scan_sequence)
 
@@ -231,9 +213,7 @@ class TestBase:
     def test_config_network_iot_operation_mode(self, mocker, base, iotopmode):
         """This method tests the config_network_iot_operation_mode() method with mocked ATCom."""
         mocked_result = {"status": Status.SUCCESS, "response": ["OK"]}
-        mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result
-        )
+        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_result)
 
         result = base.config_network_iot_operation_mode(iotopmode)
 

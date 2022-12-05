@@ -91,10 +91,7 @@ class Base:
         dict
             Result that includes "status" and "response" keys
         """
-        result_timeout = {
-            "status": Status.TIMEOUT,
-            "response": "timeout"
-        }
+        result_timeout = {"status": Status.TIMEOUT, "response": "timeout"}
 
         start_time = time.time()
         while time.time() - start_time < timeout:

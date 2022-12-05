@@ -5,6 +5,7 @@ for sharing data by different modules.
 
 from core.utils.debug import Debug
 
+
 class StateCache:
     """Data class for storing state data"""
 
@@ -30,6 +31,7 @@ class StateCache:
     def set_last_response(self, response):
         """Sets last response"""
         self.last_response = response
+
 
 config = {}
 cache = StateCache()

@@ -5,10 +5,12 @@ Module for incuding periheral hardware functions of picocell module.
 from machine import Pin, I2C, ADC
 from neopixel import NeoPixel
 
+
 class Periph:
     """
     Class for inculding periheral hardware functions of picocell module.
     """
+
     battery_voltage_pin = Pin(29, Pin.IN)
     battery_charge_status_pin = Pin(25, Pin.IN)
     user_button_pin = Pin(2, Pin.IN)

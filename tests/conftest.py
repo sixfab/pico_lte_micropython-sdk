@@ -4,8 +4,7 @@ import pytest
 
 
 def write_file(file_path, data, file_type="t"):
-    """This function creates a file with data.
-    """
+    """This function creates a file with data."""
     try:
         with open(file_path, "w" + file_type, encoding="utf-8") as file:
             file.write(data)
@@ -14,9 +13,9 @@ def write_file(file_path, data, file_type="t"):
     else:
         return data
 
+
 def remove_file(file_path):
-    """This function deletes a file in the file-system if exists.
-    """
+    """This function deletes a file in the file-system if exists."""
     try:
         os.remove(file_path)
     except OSError as error:
@@ -88,16 +87,14 @@ def prepare_test_enviroment():
 
 @pytest.hookimpl()
 def pytest_sessionstart(session):
-    """This method auto-runs each time tests are started.
-    """
+    """This method auto-runs each time tests are started."""
     print("Test enviroment preparing...")
     prepare_test_enviroment()
 
 
 @pytest.hookimpl()
 def pytest_sessionfinish(session):
-    """This method auto-runs each time tests are ended.
-    """
+    """This method auto-runs each time tests are ended."""
     print("Test enviroment cleaning...")
     remove_file("machine.py")
     remove_file("neopixel.py")
