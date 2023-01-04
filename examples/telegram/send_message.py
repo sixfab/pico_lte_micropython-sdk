@@ -15,7 +15,7 @@ config.json
 }
 """
 
-from core.modem import Modem
+from core.modules.modem import Modem
 from core.temp import debug
 
 modem = Modem()

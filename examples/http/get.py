@@ -18,7 +18,7 @@ config.json
 
 import time
 from core.utils.status import Status
-from core.modem import Modem
+from core.modules.modem import Modem
 from core.temp import debug
 
 modem = Modem()

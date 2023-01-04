@@ -12,7 +12,7 @@ with power of 5 mins.
 """
 
 import time
-from core.modem import Modem
+from core.modules.modem import Modem
 from core.temp import debug
 
 DELAY = 0.2

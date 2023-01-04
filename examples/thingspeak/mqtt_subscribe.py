@@ -23,7 +23,7 @@ config.json
 }
 """
 import time
-from core.modem import Modem
+from core.modules.modem import Modem
 from core.temp import debug
 from core.utils.status import Status
 

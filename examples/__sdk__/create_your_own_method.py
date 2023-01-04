@@ -24,7 +24,7 @@ import time
 
 from core.utils.status import Status
 from core.utils.manager import StateManager, Step
-from core.modem import Modem
+from core.modules.modem import Modem
 
 
 # First of all we need to create the function

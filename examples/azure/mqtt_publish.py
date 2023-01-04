@@ -25,7 +25,7 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 "device_id" is the only ones needed.
 """
 import json
-from core.modem import Modem
+from core.modules.modem import Modem
 from core.temp import debug
 
 modem = Modem()
