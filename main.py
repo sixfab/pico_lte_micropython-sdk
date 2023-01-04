@@ -2,10 +2,10 @@
 Main code file.
 """
 
-from core.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
 
 def main():

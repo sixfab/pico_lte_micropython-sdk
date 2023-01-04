@@ -19,14 +19,14 @@ config.json
 
 import time
 
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 from core.utils.status import Status
 
 PERIOD = 30  # seconds
 fix = False
 
-modem = Modem()
+crux = Crux()
 
 debug.info("GPS Example")
 
@@ -58,7 +58,7 @@ while True:
         modem.gps.turn_off()
 
         debug.info("Sending message to telegram channel...")
-        result = modem.telegram.send_message(loc_message)
+        result = crux.telegram.send_message(loc_message)
         debug.info(result)
 
         if result["status"] == Status.SUCCESS:

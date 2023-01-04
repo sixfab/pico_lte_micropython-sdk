@@ -15,11 +15,11 @@ config.json
 }
 """
 
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
 debug.info("Sending message to Telegram channel...")
-result = modem.telegram.send_message("Picocell Telegram Example")
+result = crux.telegram.send_message("Picocell Telegram Example")
 debug.info("Result:", result)

@@ -23,14 +23,14 @@ config.json
 }
 """
 import time
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 from core.utils.status import Status
 
-modem = Modem()
+crux = Crux()
 
 debug.info("Subscribing to topics...")
-result = modem.thingspeak.subscribe_topics()
+result = crux.thingspeak.subscribe_topics()
 debug.info("Result:", result)
 
 
@@ -39,6 +39,6 @@ if result.get("status") == Status.SUCCESS:
     # in each 5 seconds for 5 times
     debug.info("Reading messages from subscribed topics...")
     for _ in range(0, 5):
-        result = modem.thingspeak.read_messages()
+        result = crux.thingspeak.read_messages()
         debug.info(result.get("messages"))
         time.sleep(5)

@@ -18,25 +18,25 @@ config.json
 
 import time
 from core.utils.status import Status
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
-modem.network.register_network()
-modem.http.set_context_id()
-modem.network.get_pdp_ready()
-modem.http.set_server_url()
+crux.modem.network.register_network()
+crux.modem.http.set_context_id()
+crux.modem.network.get_pdp_ready()
+crux.modem.http.set_server_url()
 
 
 debug.info("Sending a GET request.")
 
-result = modem.http.get()
+result = crux.modem.http.get()
 debug.info(result)
 
 # Read the response after 5 seconds.
 time.sleep(5)
-result = modem.http.read_response()
+result = crux.modem.http.read_response()
 debug.info(result)
 if result["status"] == Status.SUCCESS:
     debug.info("Get request succeeded.")

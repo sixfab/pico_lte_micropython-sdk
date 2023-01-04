@@ -12,14 +12,14 @@ config.json
 }
 """
 import json
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
 payload_json = {"temp": "25"}
 payload = json.dumps(payload_json)
 
 debug.info("Sending data to Scriptr.io script...")
-result = modem.scriptr.send_data(payload)
+result = crux.scriptr.send_data(payload)
 debug.info("Result:", result)

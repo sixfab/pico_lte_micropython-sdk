@@ -24,7 +24,7 @@ import time
 
 from core.utils.status import Status
 from core.utils.manager import StateManager, Step
-from core.modules.modem import Modem
+from core.crux import Crux
 
 
 # First of all we need to create the function
@@ -32,7 +32,7 @@ def our_http_post_method(message):
     """Function for performing HTTP POST request to a server."""
 
     # create instance of Modem class
-    modem = Modem()
+    crux = Crux()
 
     # Creating step 1. In this case this step
     # will check the network registeration status

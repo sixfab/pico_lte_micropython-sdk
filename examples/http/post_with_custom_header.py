@@ -19,16 +19,16 @@ config.json
 import json
 import time
 from core.utils.status import Status
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 from core.utils.helpers import get_parameter
 
 # Prepare HTTP connection.
-modem = Modem()
-modem.network.register_network()
-modem.http.set_context_id()
-modem.network.get_pdp_ready()
-modem.http.set_server_url()
+crux = Crux()
+crux.modem.network.register_network()
+crux.modem.http.set_context_id()
+crux.modem.network.get_pdp_ready()
+crux.modem.http.set_server_url()
 
 # Get URL from the config.json.
 url = get_parameter(["https", "server"])
@@ -58,12 +58,12 @@ HEADER = "\n".join(
 )
 
 debug.info("Sending a POST request with custom header...")
-result = modem.http.post(data=HEADER + payload, header_mode=1)
+result = crux.modem.http.post(data=HEADER + payload, header_mode=1)
 debug.info("Result:", result)
 
 time.sleep(5)
 
-result = modem.http.read_response()
+result = crux.modem.http.read_response()
 debug.info(result)
 if result["status"] == Status.SUCCESS:
     debug.info("POST request succeeded.")

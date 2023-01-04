@@ -19,13 +19,13 @@ config.json
 
 import time
 
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 from core.utils.status import Status
 
 
 fix = False
-modem = Modem()
+crux = Crux()
 
 debug.info("GPS Example")
 modem.peripherals.adjust_neopixel(255, 0, 0)

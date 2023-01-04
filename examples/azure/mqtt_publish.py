@@ -25,14 +25,14 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 "device_id" is the only ones needed.
 """
 import json
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
 payload_json = {"App": "Azure MQTT Example"}
 
 debug.info("Publishing data to Azure IoT Hub...")
 payload = json.dumps(payload_json)
-result = modem.azure.publish_message(payload)
+result = crux.azure.publish_message(payload)
 debug.info("Result", result)

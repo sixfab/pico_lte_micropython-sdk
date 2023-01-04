@@ -18,14 +18,14 @@ config.json
 }
 """
 import json
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
 payload_json = {"state": {"reported": {"App": "AWS MQTT Example"}}}
 
 debug.info("Publishing data to AWS IoT...")
 payload = json.dumps(payload_json)
-result = modem.aws.publish_message(payload)
+result = crux.aws.publish_message(payload)
 debug.info("Result", result)

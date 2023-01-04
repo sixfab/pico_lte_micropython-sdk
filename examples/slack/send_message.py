@@ -15,11 +15,11 @@ config.json
 }
 """
 
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
-modem = Modem()
+crux = Crux()
 
 debug.info("Sending message to slack channel...")
-result = modem.slack.send_message("It is test message from Picocell!")
+result = crux.slack.send_message("It is test message from Picocell!")
 debug.info("Result:", result)

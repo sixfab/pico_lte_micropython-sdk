@@ -12,12 +12,12 @@ with power of 5 mins.
 """
 
 import time
-from core.modules.modem import Modem
+from core.crux import Crux
 from core.temp import debug
 
 DELAY = 0.2
 
-modem = Modem()
+crux = Crux()
 
 # ULP setup
 modem.ulp.enable()  # enable ultra low power mode
