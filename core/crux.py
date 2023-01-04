@@ -1,4 +1,7 @@
-"""This module contains the Crux class which represents the functionality of the Sixfab Crux board."""
+"""
+This module contains the Crux class which represents the functionality
+of a Sixfab Crux board.
+"""
 
 from core.modules.ulp import ULP
 from core.modules.peripherals import Periph
@@ -11,12 +14,15 @@ from core.apps.thingspeak import ThingSpeak
 from core.apps.azure import Azure
 from core.apps.scriptr import Scriptr
 
+
 class Crux:
-    """This class represents the functionality of the Sixfab Crux board."""
+    """This class represents the functionality of a Sixfab Crux board."""
+
     def __init__(self):
         self.ulp = ULP()
         self.peripherals = Periph()
         self.modem = Modem()
+        # TODO: Will be implemented in the future.
         self.wifi = None
 
         self.aws = AWS(self.modem, self.wifi)
