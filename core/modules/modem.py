@@ -8,7 +8,6 @@ from core.temp import config
 from core.utils.helpers import read_json_file
 from core.utils.atcom import ATCom
 
-from core.modules.ulp import ULP
 from core.modules.base import Base
 from core.modules.auth import Auth
 from core.modules.config import Config
@@ -16,16 +15,8 @@ from core.modules.file import File
 from core.modules.http import HTTP
 from core.modules.mqtt import MQTT
 from core.modules.network import Network
-from core.modules.peripherals import Periph
 from core.modules.ssl import SSL
 from core.modules.gps import GPS
-
-from core.apps.aws import AWS
-from core.apps.slack import Slack
-from core.apps.telegram import Telegram
-from core.apps.thingspeak import ThingSpeak
-from core.apps.azure import Azure
-from core.apps.scriptr import Scriptr
 
 
 class Modem:
@@ -39,8 +30,6 @@ class Modem:
         """
         config["params"] = read_json_file("config.json")
 
-        self.ulp = ULP()
-        self.peripherals = Periph()
         self.atcom = ATCom()
 
         self.base = Base(self.atcom)
@@ -52,13 +41,6 @@ class Modem:
         self.http = HTTP(self.atcom)
         self.mqtt = MQTT(self.atcom)
         self.gps = GPS(self.atcom)
-
-        self.aws = AWS(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
-        self.telegram = Telegram(self.base, self.network, self.http)
-        self.thingspeak = ThingSpeak(self.base, self.network, self.mqtt)
-        self.slack = Slack(self.base, self.network, self.http)
-        self.azure = Azure(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
-        self.scriptr = Scriptr(self.base, self.network, self.http)
 
         # power up modem
         if self.base.power_status() != 0:
