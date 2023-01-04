@@ -7,16 +7,16 @@ from core.temp import config
 
 from core.utils.helpers import read_json_file
 from core.utils.atcom import ATCom
-
-from core.modules.base import Base
-from core.modules.auth import Auth
 from core.modules.config import Config
-from core.modules.file import File
-from core.modules.http import HTTP
-from core.modules.mqtt import MQTT
-from core.modules.network import Network
-from core.modules.ssl import SSL
-from core.modules.gps import GPS
+
+from core.modules.cellular.base import Base
+from core.modules.cellular.auth import Auth
+from core.modules.cellular.file import File
+from core.modules.cellular.http import HTTP
+from core.modules.cellular.mqtt import MQTT
+from core.modules.cellular.network import Network
+from core.modules.cellular.ssl import SSL
+from core.modules.cellular.gps import GPS
 
 
 class Modem:
