@@ -3,7 +3,7 @@ Module for managing processes on modem step by step.
 """
 
 from core.temp import config, debug
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class Step:

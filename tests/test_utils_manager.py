@@ -5,7 +5,7 @@ Test Module for the utils.manager module.
 import pytest
 
 from core.utils.manager import Step, StateManager
-from core.utils.status import Status
+from core.utils.enums import Status
 from core.temp import config
 
 

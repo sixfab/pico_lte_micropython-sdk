@@ -22,7 +22,7 @@ config.json
 """
 import time
 
-from core.utils.status import Status
+from core.utils.enums import Status
 from core.utils.manager import StateManager, Step
 from core.crux import Crux
 

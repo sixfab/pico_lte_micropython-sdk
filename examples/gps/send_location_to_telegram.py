@@ -21,7 +21,7 @@ import time
 
 from core.crux import Crux
 from core.temp import debug
-from core.utils.status import Status
+from core.utils.enums import Status
 
 PERIOD = 30  # seconds
 fix = False

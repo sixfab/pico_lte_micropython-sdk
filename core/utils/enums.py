@@ -1,4 +1,4 @@
-"""Data class for status."""
+"""Enumarations for the Crux SDK"""
 
 
 class Status:
@@ -7,3 +7,7 @@ class Status:
     TIMEOUT = 2
     ONGOING = 3
     UNKNOWN = 99
+
+class Conection():
+    CELLULAR = 0
+    WIFI = 1

@@ -2,7 +2,7 @@
 Module for including functions of MQTT related operations of picocell module.
 """
 
-from core.utils.status import Status
+from core.utils.enums import Status
 from core.utils.helpers import get_parameter
 
 

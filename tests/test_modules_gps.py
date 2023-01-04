@@ -6,7 +6,7 @@ import pytest
 
 from core.modules.gps import GPS
 from core.utils.atcom import ATCom
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 def default_response_types():

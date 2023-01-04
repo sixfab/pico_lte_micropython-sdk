@@ -4,7 +4,7 @@ Module for storing helper functions
 
 import json
 from core.temp import config
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 def read_json_file(file_path):

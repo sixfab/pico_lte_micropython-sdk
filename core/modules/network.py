@@ -6,7 +6,7 @@ import time
 from core.temp import config
 from core.utils.helpers import get_desired_data
 from core.utils.manager import StateManager, Step
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class Network:

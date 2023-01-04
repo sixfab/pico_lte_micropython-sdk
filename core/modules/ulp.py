@@ -8,7 +8,7 @@ import os
 from machine import Pin
 from core.temp import config, debug
 from core.utils.helpers import read_json_file, write_json_file
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 CONST_TIMER = 1  # minutes

@@ -5,7 +5,7 @@ Module for including authentication functions of picocell module.
 import os
 
 from core.temp import debug
-from core.utils.status import Status
+from core.utils.enums import Status
 from core.utils.helpers import read_file
 from core.modules.file import File
 

@@ -5,7 +5,7 @@ Module for communicating with cellular modem over UART interface.
 import time
 from machine import UART, Pin
 from core.temp import debug
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class ATCom:

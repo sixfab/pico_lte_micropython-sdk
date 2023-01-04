@@ -6,7 +6,7 @@ import pytest
 
 from core.modules.file import File
 from core.utils.atcom import ATCom
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class TestFile:

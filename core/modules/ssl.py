@@ -5,7 +5,7 @@ Module for including functions of ssl operations of picocell module.
 import time
 
 from core.utils.manager import StateManager, Step
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class SSL:

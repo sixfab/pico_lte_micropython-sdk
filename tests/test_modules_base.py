@@ -7,7 +7,7 @@ from machine import Pin
 
 from core.modules.base import Base
 from core.utils.atcom import ATCom
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class TestBase:

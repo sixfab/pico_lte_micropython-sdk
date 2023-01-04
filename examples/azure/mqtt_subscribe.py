@@ -30,7 +30,7 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 import time
 from core.crux import Crux
 from core.temp import debug
-from core.utils.status import Status
+from core.utils.enums import Status
 
 crux = Crux()
 

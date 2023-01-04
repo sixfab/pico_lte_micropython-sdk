@@ -3,7 +3,7 @@ Module for including functions of location service of picocell module.
 """
 
 from core.utils.helpers import get_desired_data
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class GPS:

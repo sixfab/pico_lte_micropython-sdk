@@ -18,7 +18,7 @@ config.json
 
 import json
 import time
-from core.utils.status import Status
+from core.utils.enums import Status
 from core.crux import Crux
 from core.temp import debug
 from core.utils.helpers import get_parameter

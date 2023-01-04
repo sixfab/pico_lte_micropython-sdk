@@ -6,7 +6,7 @@ import pytest
 from machine import UART
 
 from core.utils.atcom import ATCom
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 class TestATCom:

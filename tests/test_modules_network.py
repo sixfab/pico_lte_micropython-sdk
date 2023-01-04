@@ -7,7 +7,7 @@ import pytest
 from core.modules.network import Network
 from core.modules.base import Base
 from core.utils.atcom import ATCom
-from core.utils.status import Status
+from core.utils.enums import Status
 
 
 def default_response_types():

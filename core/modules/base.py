@@ -7,7 +7,7 @@ import time
 
 from machine import Pin
 from core.temp import debug
-from core.utils.status import Status
+from core.utils.enums import Status
 from core.utils.helpers import get_desired_data
 
 
