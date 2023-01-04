@@ -118,6 +118,7 @@ class WiFiConnection:
             WiFiStatus.IDLE: "idle",
             WiFiStatus.CONNECTING: "Connecting to Wi-Fi network",
             WiFiStatus.WRONG_PASSWORD: "Wrong password",
+            WiFiStatus.NO_AP_FOUND: "No AP found",
             WiFiStatus.CONNECTION_FAILED: "Connection failed due to problems",
             WiFiStatus.GOT_IP: "Successfully got IP",
         }
