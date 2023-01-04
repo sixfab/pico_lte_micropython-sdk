@@ -20,13 +20,13 @@ DELAY = 0.2
 crux = Crux()
 
 # ULP setup
-modem.ulp.enable()  # enable ultra low power mode
-modem.ulp.set_deep_sleep_period(5)  # set sleep period
+crux.ulp.enable()  # enable ultra low power mode
+crux.ulp.set_deep_sleep_period(5)  # set sleep period
 
 # Do ULP check every reboot
-modem.peripherals.adjust_neopixel(255, 0, 0)  # indicator led
+crux.peripherals.adjust_neopixel(255, 0, 0)  # indicator led
 time.sleep(1)
-modem.ulp.check()
+crux.ulp.check()
 time.sleep(1)
 
 
@@ -36,16 +36,16 @@ def job():
     data to cloud service or mailing some data to someone etc.
     """
     debug.info("Doing the job...")
-    modem.peripherals.adjust_neopixel(255, 0, 0)
+    crux.peripherals.adjust_neopixel(255, 0, 0)
     time.sleep(DELAY)
-    modem.peripherals.adjust_neopixel(0, 255, 0)
+    crux.peripherals.adjust_neopixel(0, 255, 0)
     time.sleep(DELAY)
-    modem.peripherals.adjust_neopixel(0, 0, 255)
+    crux.peripherals.adjust_neopixel(0, 0, 255)
     time.sleep(DELAY)
-    modem.peripherals.adjust_neopixel(255, 255, 255)
+    crux.peripherals.adjust_neopixel(255, 255, 255)
     time.sleep(DELAY)
 
 
 while True:
     job()
-    modem.ulp.deep_sleep()  # go to sleep
+    crux.ulp.deep_sleep()  # go to sleep
