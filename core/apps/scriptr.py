@@ -17,7 +17,7 @@ class Scriptr:
 
     cache = config["cache"]
 
-    def __init__(self, base, network, http):
+    def __init__(self, modem, wifi):
         """Constructor of the class.
 
         Parameters
@@ -29,9 +29,8 @@ class Scriptr:
         http : HTTP
             Picocell HTTP class
         """
-        self.base = base
-        self.network = network
-        self.http = http
+        self.modem = modem
+        self.wifi = wifi
 
     def send_data(self, data, query=None, authorization=None):
         """
@@ -71,21 +70,21 @@ class Scriptr:
         )
 
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_pdp_ready",
             success="set_server_url",
             fail="failure",
         )
 
         step_set_server_url = Step(
-            function=self.http.set_server_url,
+            function=self.modem.http.set_server_url,
             name="set_server_url",
             success="post_request",
             fail="failure",
@@ -93,7 +92,7 @@ class Scriptr:
         )
 
         step_post_request = Step(
-            function=self.http.post,
+            function=self.modem.http.post,
             name="post_request",
             success="read_response",
             fail="failure",
@@ -103,7 +102,7 @@ class Scriptr:
         )
 
         step_read_response = Step(
-            function=self.http.read_response,
+            function=self.modem.http.read_response,
             name="read_response",
             success="success",
             fail="failure",

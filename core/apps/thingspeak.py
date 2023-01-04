@@ -16,7 +16,7 @@ class ThingSpeak:
 
     cache = config["cache"]
 
-    def __init__(self, base, network, mqtt, channel_id=None):
+    def __init__(self, modem, wifi, channel_id=None):
         """Constructor of the class.
 
         Parameters
@@ -28,9 +28,9 @@ class ThingSpeak:
         mqtt : MQTT
             Modem MQTT instance
         """
-        self.base = base
-        self.network = network
-        self.mqtt = mqtt
+        self.modem = modem
+        self.wifi = wifi
+
         self.channel_id = (
             get_parameter(["thingspeak", "channel_id"]) if (channel_id is None) else channel_id
         )
@@ -91,7 +91,7 @@ class ThingSpeak:
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
-            function=self.mqtt.is_connected_to_broker,
+            function=self.modem.mqtt.is_connected_to_broker,
             name="check_connected",
             success="publish_message",
             fail="check_opened",
@@ -99,7 +99,7 @@ class ThingSpeak:
 
         # Check if client connected to Google Cloud IoT
         step_check_mqtt_opened = Step(
-            function=self.mqtt.has_opened_connection,
+            function=self.modem.mqtt.has_opened_connection,
             name="check_opened",
             success="connect_mqtt_broker",
             fail="register_network",
@@ -108,21 +108,21 @@ class ThingSpeak:
         # If client is not connected to the broker and have no open connection with
         # ThingSpeak, begin the first step of the state machine.
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_pdp_ready",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
-            function=self.mqtt.open_connection,
+            function=self.modem.mqtt.open_connection,
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
@@ -131,7 +131,7 @@ class ThingSpeak:
         )
 
         step_connect_mqtt_broker = Step(
-            function=self.mqtt.connect_broker,
+            function=self.modem.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
@@ -143,7 +143,7 @@ class ThingSpeak:
         )
 
         step_publish_message = Step(
-            function=self.mqtt.publish_message,
+            function=self.modem.mqtt.publish_message,
             name="publish_message",
             success="success",
             fail="failure",
@@ -213,7 +213,7 @@ class ThingSpeak:
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
-            function=self.mqtt.is_connected_to_broker,
+            function=self.modem.mqtt.is_connected_to_broker,
             name="check_connected",
             success="subscribe_topics",
             fail="check_opened",
@@ -221,7 +221,7 @@ class ThingSpeak:
 
         # Check if client connected to Google Cloud IoT
         step_check_mqtt_opened = Step(
-            function=self.mqtt.has_opened_connection,
+            function=self.modem.mqtt.has_opened_connection,
             name="check_opened",
             success="connect_mqtt_broker",
             fail="register_network",
@@ -230,21 +230,21 @@ class ThingSpeak:
         # If client is not connected to the broker and have no open connection with
         # ThingSpeak, begin the first step of the state machine.
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_pdp_ready",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
-            function=self.mqtt.open_connection,
+            function=self.modem.mqtt.open_connection,
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
@@ -253,7 +253,7 @@ class ThingSpeak:
         )
 
         step_connect_mqtt_broker = Step(
-            function=self.mqtt.connect_broker,
+            function=self.modem.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
@@ -265,7 +265,7 @@ class ThingSpeak:
         )
 
         step_subscribe_topics = Step(
-            function=self.mqtt.subscribe_topics,
+            function=self.modem.mqtt.subscribe_topics,
             name="subscribe_topics",
             success="success",
             fail="failure",
@@ -300,7 +300,7 @@ class ThingSpeak:
         """
         Read messages from subscribed topics.
         """
-        return self.mqtt.read_messages()
+        return self.modem.mqtt.read_messages()
 
     @staticmethod
     def create_message(payload_dict):

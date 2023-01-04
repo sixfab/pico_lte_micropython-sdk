@@ -17,7 +17,7 @@ class Telegram:
 
     cache = config["cache"]
 
-    def __init__(self, base, network, http):
+    def __init__(self, modem, wifi):
         """Constructor of the class.
 
         Parameters
@@ -29,9 +29,8 @@ class Telegram:
         http : HTTP
             Picocell HTTP class
         """
-        self.base = base
-        self.network = network
-        self.http = http
+        self.modem = modem
+        self.wifi = wifi
 
     def send_message(self, payload, host=None, bot_token=None, chat_id=None):
         """This function sends a message to the bot.
@@ -66,21 +65,21 @@ class Telegram:
         )
 
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="pdp_ready",
             success="http_ssl_configuration",
             fail="failure",
         )
 
         step_http_ssl_configuration = Step(
-            function=self.http.set_ssl_context_id,
+            function=self.modem.http.set_ssl_context_id,
             name="http_ssl_configuration",
             success="set_server_url",
             fail="failure",
@@ -88,7 +87,7 @@ class Telegram:
         )
 
         step_set_server_url = Step(
-            function=self.http.set_server_url,
+            function=self.modem.http.set_server_url,
             name="set_server_url",
             success="get_request",
             fail="failure",
@@ -97,7 +96,7 @@ class Telegram:
         )
 
         step_get_request = Step(
-            function=self.http.get,
+            function=self.modem.http.get,
             name="get_request",
             success="read_response",
             fail="failure",
@@ -106,7 +105,7 @@ class Telegram:
         )
 
         step_read_response = Step(
-            function=self.http.read_response,
+            function=self.modem.http.read_response,
             name="read_response",
             success="success",
             fail="failure",

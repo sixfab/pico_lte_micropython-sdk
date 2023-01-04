@@ -17,7 +17,7 @@ class AWS:
 
     cache = config["cache"]
 
-    def __init__(self, base, auth, network, ssl, mqtt, http):
+    def __init__(self, modem, wifi):
         """
         Constructor of the class.
 
@@ -26,12 +26,8 @@ class AWS:
         cache : dict
             Cache of the class.
         """
-        self.base = base
-        self.auth = auth
-        self.network = network
-        self.ssl = ssl
-        self.mqtt = mqtt
-        self.http = http
+        self.modem = modem
+        self.wifi = wifi
 
     def publish_message(self, payload, host=None, port=None, topic=None):
         """
@@ -64,7 +60,7 @@ class AWS:
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
-            function=self.mqtt.is_connected_to_broker,
+            function=self.modem.mqtt.is_connected_to_broker,
             name="check_connected",
             success="publish_message",
             fail="check_opened",
@@ -72,7 +68,7 @@ class AWS:
 
         # Check if client connected to AWS IoT
         step_check_mqtt_opened = Step(
-            function=self.mqtt.has_opened_connection,
+            function=self.modem.mqtt.has_opened_connection,
             name="check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
@@ -81,34 +77,34 @@ class AWS:
         # If client is not connected to the broker and have no open connection with AWS IoT
         # Deactivate PDP and begin first step of the state machine
         step_deactivate_pdp_context = Step(
-            function=self.network.deactivate_pdp_context,
+            function=self.modem.network.deactivate_pdp_context,
             name="deactivate_pdp_context",
             success="load_certificates",
             fail="failure",
         )
 
         step_load_certificates = Step(
-            function=self.auth.load_certificates,
+            function=self.modem.auth.load_certificates,
             name="load_certificates",
             success="register_network",
             fail="failure",
         )
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_ready_pdp",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_ready_pdp",
             success="ssl_configuration",
             fail="failure",
         )
 
         step_ssl_configuration = Step(
-            function=self.ssl.configure_for_x509_certification,
+            function=self.modem.ssl.configure_for_x509_certification,
             name="ssl_configuration",
             success="set_mqtt_version",
             fail="failure",
@@ -116,21 +112,21 @@ class AWS:
         )
 
         step_set_mqtt_version = Step(
-            function=self.mqtt.set_version_config,
+            function=self.modem.mqtt.set_version_config,
             name="set_mqtt_version",
             success="set_mqtt_ssl_mode",
             fail="failure",
         )
 
         step_set_mqtt_ssl_mode = Step(
-            function=self.mqtt.set_ssl_mode_config,
+            function=self.modem.mqtt.set_ssl_mode_config,
             name="set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
-            function=self.mqtt.open_connection,
+            function=self.modem.mqtt.open_connection,
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
@@ -138,14 +134,14 @@ class AWS:
         )
 
         step_connect_mqtt_broker = Step(
-            function=self.mqtt.connect_broker,
+            function=self.modem.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
         )
 
         step_publish_message = Step(
-            function=self.mqtt.publish_message,
+            function=self.modem.mqtt.publish_message,
             name="publish_message",
             success="success",
             fail="failure",
@@ -205,7 +201,7 @@ class AWS:
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
-            function=self.mqtt.is_connected_to_broker,
+            function=self.modem.mqtt.is_connected_to_broker,
             name="check_connected",
             success="subscribe_topics",
             fail="check_opened",
@@ -214,7 +210,7 @@ class AWS:
 
         # Check if client connected to AWS IoT
         step_check_mqtt_opened = Step(
-            function=self.mqtt.has_opened_connection,
+            function=self.modem.mqtt.has_opened_connection,
             name="check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
@@ -224,56 +220,56 @@ class AWS:
         # If client is not connected to the broker and have no open connection with AWS IoT
         # Deactivate PDP and begin first step of the state machine
         step_deactivate_pdp_context = Step(
-            function=self.network.deactivate_pdp_context,
+            function=self.modem.network.deactivate_pdp_context,
             name="deactivate_pdp_context",
             success="load_certificates",
             fail="failure",
         )
 
         step_load_certificates = Step(
-            function=self.auth.load_certificates,
+            function=self.modem.auth.load_certificates,
             name="load_certificates",
             success="register_network",
             fail="failure",
         )
 
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_pdp_ready",
             success="ssl_configuration",
             fail="failure",
         )
 
         step_ssl_configuration = Step(
-            function=self.ssl.configure_for_x509_certification,
+            function=self.modem.ssl.configure_for_x509_certification,
             name="ssl_configuration",
             success="set_mqtt_version",
             fail="failure",
         )
 
         step_set_mqtt_version = Step(
-            function=self.mqtt.set_version_config,
+            function=self.modem.mqtt.set_version_config,
             name="set_mqtt_version",
             success="set_mqtt_ssl_mode",
             fail="failure",
         )
 
         step_set_mqtt_ssl_mode = Step(
-            function=self.mqtt.set_ssl_mode_config,
+            function=self.modem.mqtt.set_ssl_mode_config,
             name="set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
-            function=self.mqtt.open_connection,
+            function=self.modem.mqtt.open_connection,
             name="open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
@@ -281,14 +277,14 @@ class AWS:
         )
 
         step_connect_mqtt_broker = Step(
-            function=self.mqtt.connect_broker,
+            function=self.modem.mqtt.connect_broker,
             name="connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
         )
 
         step_subscribe_topics = Step(
-            function=self.mqtt.subscribe_topics,
+            function=self.modem.mqtt.subscribe_topics,
             name="subscribe_topics",
             success="success",
             fail="failure",
@@ -327,7 +323,7 @@ class AWS:
         """
         Read messages from subscribed topics.
         """
-        return self.mqtt.read_messages()
+        return self.modem.mqtt.read_messages()
 
     def post_message(self, payload, url=None):
         """
@@ -353,34 +349,34 @@ class AWS:
                 url = f"https://{endpoint}:8443/topics/{topic}?qos=1"
 
         step_load_certificates = Step(
-            function=self.auth.load_certificates,
+            function=self.modem.auth.load_certificates,
             name="load_certificates",
             success="register_network",
             fail="failure",
         )
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_pdp_ready",
             success="ssl_configuration",
             fail="failure",
         )
 
         step_ssl_configuration = Step(
-            function=self.ssl.configure_for_x509_certification,
+            function=self.modem.ssl.configure_for_x509_certification,
             name="ssl_configuration",
             success="http_ssl_configuration",
             fail="failure",
         )
 
         step_http_ssl_configuration = Step(
-            function=self.http.set_ssl_context_id,
+            function=self.modem.http.set_ssl_context_id,
             name="http_ssl_configuration",
             success="set_server_url",
             fail="failure",
@@ -388,7 +384,7 @@ class AWS:
         )
 
         step_set_server_url = Step(
-            function=self.http.set_server_url,
+            function=self.modem.http.set_server_url,
             name="set_server_url",
             success="post_request",
             fail="failure",
@@ -396,7 +392,7 @@ class AWS:
         )
 
         step_post_request = Step(
-            function=self.http.post,
+            function=self.modem.http.post,
             name="post_request",
             success="read_response",
             fail="failure",
@@ -406,7 +402,7 @@ class AWS:
         )
 
         step_read_response = Step(
-            function=self.http.read_response,
+            function=self.modem.http.read_response,
             name="read_response",
             success="success",
             fail="failure",

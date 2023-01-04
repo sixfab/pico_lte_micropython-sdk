@@ -18,13 +18,12 @@ class Slack:
 
     cache = config["cache"]
 
-    def __init__(self, base, network, http):
+    def __init__(self, modem, wifi):
         """
         Initialize Slack class.
         """
-        self.base = base
-        self.network = network
-        self.http = http
+        self.modem = modem
+        self.wifi = wifi
 
     def send_message(self, message, webhook_url=None):
         """
@@ -54,21 +53,21 @@ class Slack:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         step_network_reg = Step(
-            function=self.network.register_network,
+            function=self.modem.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
+            function=self.modem.network.get_pdp_ready,
             name="get_pdp_ready",
             success="set_server_url",
             fail="failure",
         )
 
         step_set_server_url = Step(
-            function=self.http.set_server_url,
+            function=self.modem.http.set_server_url,
             name="set_server_url",
             success="set_content_type",
             fail="failure",
@@ -76,7 +75,7 @@ class Slack:
         )
 
         step_set_content_type = Step(
-            function=self.http.set_content_type,
+            function=self.modem.http.set_content_type,
             name="set_content_type",
             success="post_request",
             fail="failure",
@@ -84,7 +83,7 @@ class Slack:
         )
 
         step_post_request = Step(
-            function=self.http.post,
+            function=self.modem.http.post,
             name="post_request",
             success="read_response",
             fail="failure",
@@ -94,7 +93,7 @@ class Slack:
         )
 
         step_read_response = Step(
-            function=self.http.read_response,
+            function=self.modem.http.read_response,
             name="read_response",
             success="success",
             fail="failure",
