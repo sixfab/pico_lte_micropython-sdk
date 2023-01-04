@@ -34,7 +34,6 @@ class WiFiConnection:
 
         # Internal attributes.
         self.__max_try_per_network = 50
-        self.__max_try_wifi_connection = 5
 
     def prepare_wlan(self):
         """This method is responsible for preparing WLAN."""
@@ -45,15 +44,15 @@ class WiFiConnection:
 
     def connect(self):
         """This method is a coordinator for connecting known networks."""
-        networks = self.scan_networks()
+        networks_found = self.scan_networks()
         debug.debug("Nearby WiFi network scan is completed.")
 
         # Check if there is any known network.
-        if not networks.get("value"):
+        if not networks_found.get("value"):
             debug.debug("No WiFi networks found nearby.")
             return self.get_status()
 
-        for network in networks.get("value"):
+        for network in networks_found.get("value"):
             if network["ssid"] in self.known_networks:
 
                 try_count = 0
@@ -63,20 +62,27 @@ class WiFiConnection:
                     result = self.connect_to_network(
                         network["ssid"], self.known_networks[network["ssid"]]
                     )
+
+                    # Return if status is successed.
                     if result.get("status") == Status.SUCCESS:
                         debug.debug("Connection established to WiFi network.")
                         return result
                     else:
                         try_count += 1
-                    
-                    time.sleep(0.5)
+
+                    if result["value"] == WiFiStatus.CONNECTING:
+                        debug.debug("Sleeping for 2 seconds.")
+                        time.sleep(2)
+                    else:
+                        debug.debug("Sleeping for 0.5 seconds.")
+                        time.sleep(0.5)
 
         return self.get_status()
 
     def connect_to_network(self, ssid, password):
         """This method is responsible for connecting to the WiFi network."""
         # Check if the board is already connected to the network.
-        if self.is_connected.get("value"):
+        if self.is_connected().get("value"):
             debug.debug("The board is already connected to the network.")
             return self.get_status()
 
@@ -114,22 +120,17 @@ class WiFiConnection:
         dict
             A descriptive message and enum value about the status of WiFi connection.
         """
-        messages = {
-            WiFiStatus.IDLE: "idle",
-            WiFiStatus.CONNECTING: "Connecting to Wi-Fi network",
-            WiFiStatus.WRONG_PASSWORD: "Wrong password",
-            WiFiStatus.NO_AP_FOUND: "No AP found",
-            WiFiStatus.CONNECTION_FAILED: "Connection failed due to problems",
-            WiFiStatus.GOT_IP: "Successfully got IP",
-        }
-
+        print("Inside status")
         status = self.wlan.status()
-        debug.debug(f"WLAN status is retrivied: {messages[status]}")
+        debug.debug(f"WLAN status is retrivied: {status}")
 
         status_to_return = (
-            Status.SUCCESS if status == WiFiStatus.GOT_IP else Status.ERROR
+            Status.SUCCESS
+            if (status >= WiFiStatus.GOT_IP or status < WiFiStatus.IDLE)
+            else Status.ERROR
         )
-        return {"status": status_to_return, "response": messages[status]}
+
+        return {"status": status_to_return, "value": status}
 
     def scan_networks(self):
         """Returns the nearby networks sorted as the one which
@@ -146,7 +147,11 @@ class WiFiConnection:
         # Check if there is any network nearby.
         if len(networks_nearby) == 0:
             debug.error("No WiFi networks found nearby.")
-            return {"status": Status.ERROR, "value": networks_nearby, "response": "No WiFi networks found nearby."}
+            return {
+                "status": Status.ERROR,
+                "value": networks_nearby,
+                "response": "No WiFi networks found nearby.",
+            }
 
         # Sort the networks by signal quality.
         networks_nearby = sorted(networks_nearby, key=lambda x: x[3], reverse=True)
@@ -206,11 +211,8 @@ class WiFiConnection:
         sm.add_step(step_deactivate_wlan)
         sm.add_step(step_connect_to_wifi)
 
-        try_count = 0
-        while try_count < self.__max_try_wifi_connection:
+        while True:
             result = sm.run()
+
             if result.get("status") == Status.SUCCESS:
                 return result
-            else:
-                try_count += 1
-                debug.debug("Trying to connect to WiFi network again.")
