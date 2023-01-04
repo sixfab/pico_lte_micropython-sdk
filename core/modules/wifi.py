@@ -7,7 +7,8 @@ import network
 
 from core.temp import debug
 from core.utils.helpers import get_parameter
-from core.utils.enums import WiFiStatus
+from core.utils.manager import StateManager, Step
+from core.utils.enums import WiFiStatus, Status
 
 
 class WiFiConnection:
@@ -22,65 +23,66 @@ class WiFiConnection:
             It must be a list of dictionaries which
             has "ssid" and "password" attributes, by default None
         """
-        self.known_networks: dict = (
+        self.known_networks = (
             wifi_settings if wifi_settings else get_parameter("known_wifi_networks")
         )
         debug.debug("Known hosts are saved into WiFiConnection instance.")
-        
+
+        # Prepare WLAN.
+        self.wlan = None
+        self.prepare_wlan()
+
+        # Internal attributes.
+        self.__max_try_per_network = 50
+        self.__max_try_wifi_connection = 5
+
+    def prepare_wlan(self):
+        """This method is responsible for preparing WLAN."""
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         debug.debug("WLAN stationary mode is activated.")
-
-        # Internal attributes.
-        self.__max_try = 50
+        return {"status": Status.SUCCESS, "response": "WLAN is prepared."}
 
     def connect(self):
         """This method is a coordinator for connecting known networks."""
         networks = self.scan_networks()
         debug.debug("Nearby WiFi network scan is completed.")
 
-        for network in networks:
+        # Check if there is any known network.
+        if not networks.get("value"):
+            debug.debug("No WiFi networks found nearby.")
+            return self.get_status()
+
+        for network in networks.get("value"):
             if network["ssid"] in self.known_networks:
 
+                try_count = 0
                 # Try to connect more than one for a network.
-                while try_count <= self.__max_try:
+                while try_count <= self.__max_try_per_network:
                     # @TODO: Check if it also connects to OPEN networks.
                     result = self.connect_to_network(
                         network["ssid"], self.known_networks[network["ssid"]]
                     )
-                    if result.get("status") == WiFiStatus.GOT_IP:
+                    if result.get("status") == Status.SUCCESS:
                         debug.debug("Connection established to WiFi network.")
                         return result
                     else:
                         try_count += 1
+                    
+                    time.sleep(0.5)
 
-        debug.debug("No known WiFi networks found nearby.")
         return self.get_status()
 
     def connect_to_network(self, ssid, password):
         """This method is responsible for connecting to the WiFi network."""
-        self.wlan.active(True)
-        debug.debug("WLAN activated on stationary mode.")
-
         # Check if the board is already connected to the network.
-        if self.is_connected:
+        if self.is_connected.get("value"):
             debug.debug("The board is already connected to the network.")
-            return
+            return self.get_status()
 
         # Try to connect to the network.
         self.wlan.connect(ssid, password)
         debug.debug(f"Trying to connect to the AP: {ssid}")
-
-        # Wait for a handshake.
-        try_count = 0
-        debug.debug("Waiting for handshake.")
-        while not self.is_connected:
-            try_count += 1
-            time.sleep(0.1)
-
-            if try_count >= self.__max_try:
-                debug.error("Couldn't established a handshake to AP.")
-                try_count = 0
 
         return self.get_status()
 
@@ -92,6 +94,8 @@ class WiFiConnection:
         self.wlan.deinit()
         debug.debug("WiFi network is closed.")
 
+        return {"status": Status.SUCCESS, "response": "WiFi network is disconnected."}
+
     def get_local_ip_address(self):
         """Returns the local ip address of the client.
 
@@ -100,7 +104,7 @@ class WiFiConnection:
         str
             Local IP address of the Crux device
         """
-        return self.wlan.ifconfig()[0]
+        return {"status": Status.SUCCESS, "value": self.wlan.ifconfig()[0]}
 
     def get_status(self):
         """Returns the status of the WiFi connection.
@@ -117,10 +121,14 @@ class WiFiConnection:
             WiFiStatus.CONNECTION_FAILED: "Connection failed due to problems",
             WiFiStatus.GOT_IP: "Successfully got IP",
         }
+
         status = self.wlan.status()
         debug.debug(f"WLAN status is retrivied: {messages[status]}")
 
-        return {"status": status, "response": messages[status]}
+        status_to_return = (
+            Status.SUCCESS if status == WiFiStatus.GOT_IP else Status.ERROR
+        )
+        return {"status": status_to_return, "response": messages[status]}
 
     def scan_networks(self):
         """Returns the nearby networks sorted as the one which
@@ -133,8 +141,16 @@ class WiFiConnection:
             rssi, security, is_hidden attributes.
         """
         networks_nearby = self.wlan.scan()
+
+        # Check if there is any network nearby.
+        if len(networks_nearby) == 0:
+            debug.error("No WiFi networks found nearby.")
+            return {"status": Status.ERROR, "value": networks_nearby, "response": "No WiFi networks found nearby."}
+
+        # Sort the networks by signal quality.
         networks_nearby = sorted(networks_nearby, key=lambda x: x[3], reverse=True)
 
+        # Convert the list of tuples to list of dicts.
         networks_as_dicts = []
         for network in networks_nearby:
             networks_as_dicts.append(
@@ -144,12 +160,56 @@ class WiFiConnection:
                     "channel": network[2],
                     "rssi": network[3],
                     "security": network[4],
-                    "is_hidden": network[5],
+                    "hidden": network[5],
                 }
             )
-        return networks_as_dicts
+        return {"status": Status.SUCCESS, "value": networks_as_dicts}
 
-    @property
     def is_connected(self):
         """Returns the status of connection."""
-        return self.wlan.isconnected()
+        return {"status": Status.SUCCESS, "value": self.wlan.isconnected()}
+
+    def get_ready(self):
+        """
+        This method runs a StateManager which handles
+        connection to a known WiFi network.
+
+        Returns
+        -------
+        dict
+            Result of the WiFi connection handling.
+        """
+        step_activate_wlan = Step(
+            function=self.prepare_wlan,
+            name="activate_wlan",
+            success="wifi_connect",
+            fail="failure",
+        )
+
+        step_deactivate_wlan = Step(
+            function=self.disconnect,
+            name="deactivate_wlan",
+            success="activate_wlan",
+            fail="failure",
+        )
+
+        step_connect_to_wifi = Step(
+            function=self.connect,
+            name="wifi_connect",
+            success="success",
+            fail="deactivate_wlan",
+        )
+
+        sm = StateManager(first_step=step_activate_wlan, function_name="get_wifi_ready")
+        sm.add_step(step_activate_wlan)
+        sm.add_step(step_deactivate_wlan)
+        sm.add_step(step_connect_to_wifi)
+
+        try_count = 0
+        while try_count < self.__max_try_wifi_connection:
+            result = sm.run()
+            if result.get("status") == Status.SUCCESS:
+                return result
+            else:
+                try_count += 1
+                debug.debug("Trying to connect to WiFi network again.")
