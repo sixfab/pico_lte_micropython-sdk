@@ -7,7 +7,7 @@ import network
 
 from core.temp import debug
 from core.utils.helpers import get_parameter
-from core.utils.enums import Connection, WiFiSecurity, WiFiStatus
+from core.utils.enums import WiFiStatus
 
 
 class WiFiConnection:
@@ -25,7 +25,11 @@ class WiFiConnection:
         self.known_networks: dict = (
             wifi_settings if wifi_settings else get_parameter("known_wifi_networks")
         )
+        debug.debug("Known hosts are saved into WiFiConnection instance.")
+        
         self.wlan = network.WLAN(network.STA_IF)
+        self.wlan.active(True)
+        debug.debug("WLAN stationary mode is activated.")
 
         # Internal attributes.
         self.__max_try = 50
@@ -33,6 +37,7 @@ class WiFiConnection:
     def connect(self):
         """This method is a coordinator for connecting known networks."""
         networks = self.scan_networks()
+        debug.debug("Nearby WiFi network scan is completed.")
 
         for network in networks:
             if network["ssid"] in self.known_networks:
@@ -84,7 +89,7 @@ class WiFiConnection:
         self.wlan.disconnect()
         debug.debug("WiFi network is disconnected.")
 
-        self.wlan.active(False)
+        self.wlan.deinit()
         debug.debug("WiFi network is closed.")
 
     def get_local_ip_address(self):
@@ -113,7 +118,7 @@ class WiFiConnection:
             WiFiStatus.GOT_IP: "Successfully got IP",
         }
         status = self.wlan.status()
-        debug.debug("WLAN status is retrivied: {messages[status]}")
+        debug.debug(f"WLAN status is retrivied: {messages[status]}")
 
         return {"status": status, "response": messages[status]}
 
@@ -127,14 +132,15 @@ class WiFiConnection:
             A list of dicts which has ssid, bssid, channel,
             rssi, security, is_hidden attributes.
         """
-        networks_nearby = sorted(self.wlan.scan(), key=lambda x: x[3], reverse=True)
+        networks_nearby = self.wlan.scan()
+        networks_nearby = sorted(networks_nearby, key=lambda x: x[3], reverse=True)
 
         networks_as_dicts = []
         for network in networks_nearby:
             networks_as_dicts.append(
                 {
                     "ssid": network[0].decode("utf-8"),
-                    "bssid": network[1].decode("utf-8"),
+                    "bssid": network[1],
                     "channel": network[2],
                     "rssi": network[3],
                     "security": network[4],
