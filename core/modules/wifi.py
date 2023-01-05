@@ -216,3 +216,6 @@ class WiFiConnection:
 
             if result.get("status") == Status.SUCCESS:
                 return result
+            elif result.get("status") == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
