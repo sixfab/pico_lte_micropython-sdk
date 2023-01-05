@@ -120,7 +120,7 @@ class Slack:
             time.sleep(result["interval"])
 
 
-    def __send_message_on_wifi(self, payload, webhook_url):
+    def __send_message_on_wifi(self, payload, webhook_url, timeout=60):
         """Function for sending message to Slack channel by using
         incoming webhook feature of Slack. It uses WLAN/WiFi connectivity.
 
@@ -144,6 +144,32 @@ class Slack:
             retry=3,
         )
 
+        step_send_message = Step(
+            function=self.__wifi_send_message,
+            function_params={"payload": payload, "webhook_url": webhook_url},
+            name="send_message",
+            success="success",
+            fail="get_wifi_ready",
+            interval=5,
+        )
+
+        # Add cache if it is not already existed
+        function_name = "slack.send_message_on_wifi"
+        sm = StateManager(first_step=step_get_wifi_ready, function_name=function_name)
+        sm.add_step(step_get_wifi_ready)
+        sm.add_step(step_send_message)
+
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
+        return {"status": Status.TIMEOUT, "response": "Timeout reached."}
 
     def __send_message_on_cellular(self, payload, webhook_url):
         """
@@ -233,14 +259,13 @@ class Slack:
             time.sleep(result["interval"])
 
     @staticmethod
-    def __wifi_send_request(method, headers, data, url):
+    def __wifi_send_message(payload, webhook_url):
         """Something will come here"""
         try:
-            response = urequests.request(method, url, headers=headers, data=data)
+            response = urequests.post(webhook_url, data=payload)
             print(response)
             response.close()  # Mandatory to garbage collect this response.
             return {"status": Status.SUCCESS, "response": response}
-
-        except Exception as e:
-            return {"status": Status.ERROR, "response": e}
+        except OSError as err:
+            return {"status": Status.ERROR, "response": err}
 
