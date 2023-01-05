@@ -30,7 +30,6 @@ class WiFiConnection:
 
         # Prepare WLAN.
         self.wlan = None
-        self.prepare_wlan()
 
         # Internal attributes.
         self.__max_try_per_network = 50
@@ -77,6 +76,8 @@ class WiFiConnection:
                         debug.debug("Sleeping for 0.5 seconds.")
                         time.sleep(0.5)
 
+        # If there is no known network, return the status.
+        debug.debug("No known networks nearby.")
         return self.get_status()
 
     def connect_to_network(self, ssid, password):
@@ -120,13 +121,13 @@ class WiFiConnection:
         dict
             A descriptive message and enum value about the status of WiFi connection.
         """
-        print("Inside status")
         status = self.wlan.status()
         debug.debug(f"WLAN status is retrivied: {status}")
 
+        # (status >= WiFiStatus.GOT_IP or status < WiFiStatus.IDLE)
         status_to_return = (
             Status.SUCCESS
-            if (status >= WiFiStatus.GOT_IP or status < WiFiStatus.IDLE)
+            if (status == 3 or status == -1 * 3)
             else Status.ERROR
         )
 
@@ -169,6 +170,7 @@ class WiFiConnection:
                     "hidden": network[5],
                 }
             )
+        debug.debug([ssid["ssid"] for ssid in networks_as_dicts])
         return {"status": Status.SUCCESS, "value": networks_as_dicts}
 
     def is_connected(self):
