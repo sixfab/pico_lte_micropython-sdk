@@ -19,9 +19,9 @@ class WiFiConnection:
 
         Parameters
         ----------
-        wifi_settings : list, optional
-            It must be a list of dictionaries which
-            has "ssid" and "password" attributes, by default None
+        wifi_settings : dict, optional
+            It must be a dict which has "ssid" attributes with "password" values,
+            by default None
         """
         self.known_networks = (
             wifi_settings if wifi_settings else get_parameter("known_wifi_networks")
