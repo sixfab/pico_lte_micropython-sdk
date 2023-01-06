@@ -20,11 +20,11 @@ class Slack:
 
     cache = config["cache"]
 
-    def __init__(self, modem, wifi):
+    def __init__(self, wifi):
         """
         Initialize Slack class.
         """
-        self.modem = modem
+        self.modem = None
         self.wifi = wifi
 
     def send_message(self, message, webhook_url=None, via=Connection.BOTH):
@@ -265,11 +265,22 @@ class Slack:
         if not self.wifi.is_connected():
             return {"status": Status.ERROR, "response": "WiFi is not connected."}
 
+        # Store the reciving status of the message.
+        is_ok_recieved = False
+
+        # Error handling is needed for the memory issues.
         try:
             response = urequests.post(webhook_url, data=payload)
-            print(response)
-            response.close()  # Mandatory to garbage collect this response.
-            return {"status": Status.SUCCESS, "response": response}
+            is_ok_recieved = response.content.decode("utf-8") == "ok"
+            # Mandatory to garbage collect this response.
+            response.close()
+            gc.collect()
+
+            # Return the status.
+            if is_ok_recieved:
+                return {"status": Status.SUCCESS, "response": "Message delivered."}
+            else:
+                return {"status": Status.ERROR, "response": "ok message is not recieved."}
 
         except OSError as os_error:
             if os_error.errno == -2:
