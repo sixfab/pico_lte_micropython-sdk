@@ -155,7 +155,7 @@ class Slack:
 
         # Add cache if it is not already existed
         function_name = "slack.send_message_on_wifi"
-        sm = StateManager(first_step=step_send_message, function_name=function_name)
+        sm = StateManager(first_step=step_get_wifi_ready, function_name=function_name)
         sm.add_step(step_get_wifi_ready)
         sm.add_step(step_send_message)
         sm.add_step(step_disconnect_wifi)

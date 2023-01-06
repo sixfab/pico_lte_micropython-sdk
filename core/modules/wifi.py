@@ -26,7 +26,9 @@ class WiFiConnection:
         self.known_networks = (
             wifi_settings if wifi_settings else get_parameter(["known_wifi_networks"])
         )
-        debug.debug(f"Known hosts are saved into WiFiConnection instance: {self.known_networks}")
+        debug.debug(
+            f"Known hosts are saved into WiFiConnection instance: {self.known_networks}"
+        )
 
         # Prepare WLAN.
         self.wlan = network.WLAN(network.STA_IF)
@@ -125,9 +127,7 @@ class WiFiConnection:
 
         # (status >= WiFiStatus.GOT_IP or status < WiFiStatus.IDLE)
         status_to_return = (
-            Status.SUCCESS
-            if (status == 3 or status == -1 * 3)
-            else Status.ERROR
+            Status.SUCCESS if (status == 3 or status == -1 * 3) else Status.ERROR
         )
 
         return {"status": status_to_return, "value": status}
@@ -186,6 +186,13 @@ class WiFiConnection:
         dict
             Result of the WiFi connection handling.
         """
+        step_check_if_connected = Step(
+            function=self.is_connected,
+            name="wifi_is_connected",
+            success="success",
+            fail="activate_wlan",
+        )
+
         step_activate_wlan = Step(
             function=self.prepare_wlan,
             name="activate_wlan",
@@ -203,11 +210,14 @@ class WiFiConnection:
         step_connect_to_wifi = Step(
             function=self.connect,
             name="wifi_connect",
-            success="success",
+            success="wifi_is_connected",
             fail="deactivate_wlan",
         )
 
-        sm = StateManager(first_step=step_activate_wlan, function_name="get_wifi_ready")
+        sm = StateManager(
+            first_step=step_check_if_connected, function_name="get_wifi_ready"
+        )
+        sm.add_step(step_check_if_connected)
         sm.add_step(step_activate_wlan)
         sm.add_step(step_deactivate_wlan)
         sm.add_step(step_connect_to_wifi)
