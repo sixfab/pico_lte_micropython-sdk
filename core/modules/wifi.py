@@ -14,6 +14,9 @@ from core.utils.enums import WiFiStatus, Status
 class WiFiConnection:
     """This class is responsible for operation related to WiFi network."""
 
+    SLEEP_BETWEEN_CONNECTION_ATTEMPTS = 10
+    SLEEP_WHEN_IT_IS_CONNECTING = 5
+
     def __init__(self, wifi_settings: dict = None):
         """This method is responsible for initializing the WiFiConnection class.
 
@@ -71,11 +74,13 @@ class WiFiConnection:
                         try_count += 1
 
                     if result["value"] == WiFiStatus.CONNECTING:
-                        debug.debug("Sleeping for 2 seconds.")
-                        time.sleep(2)
+                        debug.debug("Sleeping for {self.SLEEP_WHEN_IT_IS_CONNECTING} seconds.")
+                        time.sleep(self.SLEEP_WHEN_IT_IS_CONNECTING)
                     else:
-                        debug.debug("Sleeping for 0.5 seconds.")
-                        time.sleep(0.5)
+                        debug.debug(
+                            f"Sleeping for {self.SLEEP_BETWEEN_CONNECTION_ATTEMPTS} seconds."
+                        )
+                        time.sleep(self.SLEEP_BETWEEN_CONNECTION_ATTEMPTS)
 
         # If there is no known network, return the status.
         debug.debug("No known networks nearby.")
@@ -122,15 +127,16 @@ class WiFiConnection:
         dict
             A descriptive message and enum value about the status of WiFi connection.
         """
-        status = self.wlan.status()
-        debug.debug(f"WLAN status is retrivied: {status}")
+        got_ip = self.wlan.status() == WiFiStatus.GOT_IP
+        connected = self.is_connected()["status"] == Status.SUCCESS
+        debug.debug(f"WLAN status is retrived: GOT_IP={got_ip} CONNECTED={connected}")
 
         # (status >= WiFiStatus.GOT_IP or status < WiFiStatus.IDLE)
-        status_to_return = (
-            Status.SUCCESS if (status == 3 or status == -1 * 3) else Status.ERROR
-        )
+        # @TODO: Check if it is correct. Since 3 is not described in
+        # https://docs.micropython.org/en/latest/library/network.WLAN.html#network.WLAN.status
+        status_to_return = Status.SUCCESS if (connected and got_ip) else Status.ERROR
 
-        return {"status": status_to_return, "value": status}
+        return {"status": status_to_return, "value": [connected, got_ip]}
 
     def scan_networks(self):
         """Returns the nearby networks sorted as the one which
@@ -194,20 +200,20 @@ class WiFiConnection:
             function=self.is_connected,
             name="wifi_is_connected",
             success="success",
-            fail="activate_wlan",
+            fail="wifi_activate_wlan",
         )
 
         step_activate_wlan = Step(
             function=self.prepare_wlan,
-            name="activate_wlan",
+            name="wifi_activate_wlan",
             success="wifi_connect",
             fail="failure",
         )
 
         step_deactivate_wlan = Step(
             function=self.disconnect,
-            name="deactivate_wlan",
-            success="activate_wlan",
+            name="wifi_deactivate_wlan",
+            success="wifi_activate_wlan",
             fail="failure",
         )
 
@@ -215,7 +221,9 @@ class WiFiConnection:
             function=self.connect,
             name="wifi_connect",
             success="wifi_is_connected",
-            fail="deactivate_wlan",
+            fail="wifi_deactivate_wlan",
+            retry=5,
+            interval=1
         )
 
         sm = StateManager(

@@ -23,11 +23,16 @@ class WiFiSecurity:
     WPA2_PSK = 3
     WPA_WPA2_PSK = 4
 
+# @TODO: Update this enumeration for correct status responses.
 class WiFiStatus:
-    """Enumeration for status responses of WiFi driver."""  
+    """Enumeration for status responses of WiFi driver."""
     IDLE = 0
     CONNECTING = 1
-    WRONG_PASSWORD = 2
-    NO_AP_FOUND = 3
-    CONNECTION_FAILED = 4
-    GOT_IP = 5
+    ERROR = 2
+    GOT_IP = 3
+    # IDLE = 0
+    # CONNECTING = 1
+    # WRONG_PASSWORD = 2
+    # NO_AP_FOUND = 3
+    # CONNECTION_FAILED = 4
+    # GOT_IP = 5

@@ -5,8 +5,9 @@ Module for including functions of Slack API operations
 import time
 import json
 import urequests
+import gc
 
-from core.temp import config
+from core.temp import config, debug
 from core.utils.manager import StateManager, Step
 from core.utils.enums import Status, Connection
 from core.utils.helpers import get_parameter
@@ -115,7 +116,7 @@ class Slack:
                 return result
             time.sleep(result["interval"])
 
-    def __send_message_on_wifi(self, payload, webhook_url, timeout=300):
+    def __send_message_on_wifi(self, payload, webhook_url, timeout=50):
         """Function for sending message to Slack channel by using
         incoming webhook feature of Slack. It uses WLAN/WiFi connectivity.
 
@@ -134,23 +135,23 @@ class Slack:
         step_send_message = Step(
             function=self.__wifi_send_message,
             function_params={"payload": payload, "webhook_url": webhook_url},
-            name="send_message",
+            name="slack_send_message",
             success="success",
-            fail="deactivate_wlan",
+            fail="slack_deactivate_wlan",
         )
 
         step_disconnect_wifi = Step(
             function=self.wifi.disconnect,
-            name="deactivate_wlan",
-            success="get_wifi_ready",
+            name="slack_deactivate_wlan",
+            success="slack_get_wifi_ready",
             fail="failure",
         )
 
         step_get_wifi_ready = Step(
             function=self.wifi.get_ready,
-            name="get_wifi_ready",
-            success="send_message",
-            fail="deactivate_wlan",
+            name="slack_get_wifi_ready",
+            success="slack_send_message",
+            fail="slack_deactivate_wlan",
         )
 
         # Add cache if it is not already existed
@@ -270,9 +271,20 @@ class Slack:
             response.close()  # Mandatory to garbage collect this response.
             return {"status": Status.SUCCESS, "response": response}
 
-        except OSError as error:
+        except OSError as os_error:
+            if os_error.errno == -2:
+                debug.error(
+                    "OSError -2 occured. It needs to deinitialize the WLAN interface."
+                )
+            elif os_error.errno == 12:
+                debug.error("Out of memory. Calling garbage collector.")
+                gc.collect()
+                debug.warning(f"Garbage collector freed. Free Memory: {gc.mem_free()}")
+
+            # Close the response if it is not closed.
             try:
                 response.close()
-            except:
-                pass
-            return {"status": Status.ERROR, "response": error}
+            except Exception as closing_error:
+                debug.warning(f"Error while closing response: {closing_error}")
+                return {"status": Status.ERROR, "response": closing_error}
+            return {"status": Status.ERROR, "response": os_error}
