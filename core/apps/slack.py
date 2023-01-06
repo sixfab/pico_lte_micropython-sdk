@@ -271,4 +271,8 @@ class Slack:
             return {"status": Status.SUCCESS, "response": response}
 
         except OSError as error:
+            try:
+                response.close()
+            except:
+                pass
             return {"status": Status.ERROR, "response": error}
