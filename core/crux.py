@@ -6,6 +6,7 @@ of a Sixfab Crux board.
 from core.modules.ulp import ULP
 from core.modules.peripherals import Periph
 from core.modules.modem import Modem
+from core.modules.wifi import WiFiConnection
 
 from core.apps.aws import AWS
 from core.apps.slack import Slack
@@ -23,7 +24,7 @@ class Crux:
         self.peripherals = Periph()
         self.modem = Modem()
         # TODO: Will be implemented in the future.
-        self.wifi = None
+        self.wifi = WiFiConnection()
 
         self.aws = AWS(self.modem, self.wifi)
         self.telegram = Telegram(self.modem, self.wifi)
