@@ -174,7 +174,11 @@ class WiFiConnection:
 
     def is_connected(self):
         """Returns the status of connection."""
-        return {"status": Status.SUCCESS, "value": self.wlan.isconnected()}
+        connection = self.wlan.isconnected()
+        return {
+            "status": Status.SUCCESS if connection else Status.ERROR,
+            "value": connection,
+        }
 
     def get_ready(self):
         """
