@@ -14,7 +14,7 @@ from core.utils.enums import WiFiStatus, Status
 class WiFiConnection:
     """This class is responsible for operation related to WiFi network."""
 
-    def __init__(self, wifi_settings: list = None):
+    def __init__(self, wifi_settings: dict = None):
         """This method is responsible for initializing the WiFiConnection class.
 
         Parameters
