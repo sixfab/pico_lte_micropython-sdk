@@ -55,15 +55,15 @@ class WiFiConnection:
             debug.debug("No WiFi networks found nearby.")
             return self.get_status()
 
-        for network in networks_found.get("value"):
-            if network["ssid"] in self.known_networks:
+        for each_network in networks_found.get("value"):
+            if each_network["ssid"] in self.known_networks:
 
                 try_count = 0
                 # Try to connect more than one for a network.
                 while try_count <= self.__max_try_per_network:
                     # @TODO: Check if it also connects to OPEN networks.
                     result = self.connect_to_network(
-                        network["ssid"], self.known_networks[network["ssid"]]
+                        each_network["ssid"], self.known_networks[each_network["ssid"]]
                     )
 
                     # Return if status is successed.
