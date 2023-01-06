@@ -60,7 +60,6 @@ class Slack:
         else:
             return self.__send_message_on_both(payload, webhook_url)
 
-
     def __send_message_on_both(self, payload, webhook_url):
         """
         Function for sending message to Slack channel by using
@@ -81,10 +80,7 @@ class Slack:
             A dictionary that contains "status" and "message" keys.
         """
 
-        params = {
-            "payload": payload,
-            "webhook_url": webhook_url
-        }
+        params = {"payload": payload, "webhook_url": webhook_url}
 
         step_try_wifi = Step(
             function=self.__send_message_on_wifi,
@@ -119,8 +115,7 @@ class Slack:
                 return result
             time.sleep(result["interval"])
 
-
-    def __send_message_on_wifi(self, payload, webhook_url, timeout=60):
+    def __send_message_on_wifi(self, payload, webhook_url, timeout=300):
         """Function for sending message to Slack channel by using
         incoming webhook feature of Slack. It uses WLAN/WiFi connectivity.
 
@@ -136,28 +131,34 @@ class Slack:
         dict
             A dictionary that contains "status" and "message" keys.
         """
-        step_get_wifi_ready = Step(
-            function=self.wifi.get_ready,
-            name="get_wifi_ready",
-            success="send_message",
-            fail="failure",
-            retry=3,
-        )
-
         step_send_message = Step(
             function=self.__wifi_send_message,
             function_params={"payload": payload, "webhook_url": webhook_url},
             name="send_message",
             success="success",
-            fail="get_wifi_ready",
-            interval=5,
+            fail="deactivate_wlan",
+        )
+
+        step_disconnect_wifi = Step(
+            function=self.wifi.disconnect,
+            name="deactivate_wlan",
+            success="get_wifi_ready",
+            fail="failure",
+        )
+
+        step_get_wifi_ready = Step(
+            function=self.wifi.get_ready,
+            name="get_wifi_ready",
+            success="send_message",
+            fail="deactivate_wlan",
         )
 
         # Add cache if it is not already existed
         function_name = "slack.send_message_on_wifi"
-        sm = StateManager(first_step=step_get_wifi_ready, function_name=function_name)
+        sm = StateManager(first_step=step_send_message, function_name=function_name)
         sm.add_step(step_get_wifi_ready)
         sm.add_step(step_send_message)
+        sm.add_step(step_disconnect_wifi)
 
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -258,14 +259,16 @@ class Slack:
                 return result
             time.sleep(result["interval"])
 
-    @staticmethod
-    def __wifi_send_message(payload, webhook_url):
+    def __wifi_send_message(self, payload, webhook_url):
         """Something will come here"""
+        if not self.wifi.is_connected():
+            return {"status": Status.ERROR, "response": "WiFi is not connected."}
+
         try:
             response = urequests.post(webhook_url, data=payload)
             print(response)
             response.close()  # Mandatory to garbage collect this response.
             return {"status": Status.SUCCESS, "response": response}
-        except OSError as err:
-            return {"status": Status.ERROR, "response": err}
 
+        except OSError as error:
+            return {"status": Status.ERROR, "response": error}
