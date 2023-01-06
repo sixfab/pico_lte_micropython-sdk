@@ -24,9 +24,9 @@ class WiFiConnection:
             by default None
         """
         self.known_networks = (
-            wifi_settings if wifi_settings else get_parameter("known_wifi_networks")
+            wifi_settings if wifi_settings else get_parameter(["known_wifi_networks"])
         )
-        debug.debug("Known hosts are saved into WiFiConnection instance.")
+        debug.debug(f"Known hosts are saved into WiFiConnection instance: {self.known_networks}")
 
         # Prepare WLAN.
         self.wlan = network.WLAN(network.STA_IF)
