@@ -29,16 +29,15 @@ class WiFiConnection:
         debug.debug("Known hosts are saved into WiFiConnection instance.")
 
         # Prepare WLAN.
-        self.wlan = None
+        self.wlan = network.WLAN(network.STA_IF)
 
         # Internal attributes.
         self.__max_try_per_network = 50
 
     def prepare_wlan(self):
         """This method is responsible for preparing WLAN."""
-        self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
-        debug.debug("WLAN stationary mode is activated.")
+        debug.debug("WLAN is activated.")
         return {"status": Status.SUCCESS, "response": "WLAN is prepared."}
 
     def connect(self):
