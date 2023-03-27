@@ -26,7 +26,7 @@ class Base:
         """
         Function for powering on modem
         """
-        powerkey_pin = Pin(15, Pin.OUT)
+        powerkey_pin = Pin(19, Pin.OUT)
         powerkey_pin.value(1)
         time.sleep(2)
         powerkey_pin.value(0)
@@ -40,7 +40,7 @@ class Base:
         power_status : int
             Power status of modem (0=on, 1=off)
         """
-        status_pin = Pin(14, Pin.IN)
+        status_pin = Pin(20, Pin.IN)
         debug.debug("Power status:", status_pin.value())
         return status_pin.value()
 
