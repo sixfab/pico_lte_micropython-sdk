@@ -10,12 +10,12 @@ class Periph:
     """
     Class for inculding periheral hardware functions of picocell module.
     """
-    user_button_pin = Pin(27, Pin.IN)
-    neopixel_pin = Pin(20, Pin.OUT)
+    user_button = Pin(21, Pin.IN)
+    user_led = Pin(22, Pin.OUT)
+    pico_led = Pin("LED", Pin.OUT)
+    neopixel = Pin(15, Pin.OUT)
 
-    qwiic_sda_pin = Pin(21)
-    qwiic_scl_pin = Pin(22)
-    qwiic = I2C(1, scl=qwiic_scl_pin, sda=qwiic_sda_pin, freq=400_000)
+    qwiic = I2C(0, scl=Pin(17), sda=Pin(16), freq=400_000)
 
     def __init__(self):
         """
@@ -31,7 +31,7 @@ class Periph:
         status : int
             User button status
         """
-        return self.user_button_pin.value()
+        return self.user_button.value()
 
     def adjust_neopixel(self, red, green, blue):
         """
@@ -46,7 +46,7 @@ class Periph:
         blue : int
             Blue color value (0-255)
         """
-        neopixel = NeoPixel(self.neopixel_pin, 8)
+        neopixel = NeoPixel(self.neopixel, 8)
         neopixel[0] = (red, green, blue)
         neopixel.write()
 
