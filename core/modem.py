@@ -60,9 +60,9 @@ class Modem:
         self.azure = Azure(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
         self.scriptr = Scriptr(self.base, self.network, self.http)
 
-        # power up modem
+        # Power up modem
         if self.base.power_status() != 0:
-            self.base.power_on_off()
+            self.base.power_on()
         self.base.wait_until_status_on()
         self.base.wait_until_modem_ready_to_communicate()
         self.base.set_echo_off()
