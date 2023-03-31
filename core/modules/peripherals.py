@@ -2,7 +2,7 @@
 Module for incuding periheral hardware functions of picocell module.
 """
 
-from machine import Pin, I2C, ADC
+from machine import Pin, I2C
 from neopixel import NeoPixel
 
 
