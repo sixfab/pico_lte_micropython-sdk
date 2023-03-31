@@ -43,10 +43,8 @@ class Modem:
         self.gps = GPS(self.atcom)
 
         # Powering up the modem.
-        # @TODO: This should be done in a real-hardware.
-        # This is branch is a test branch.
-        # if self.base.power_status() != 0:
-        #    self.base.power_on_off()
-        # self.base.wait_until_status_on()
-        # self.base.wait_until_modem_ready_to_communicate()
-        # self.base.set_echo_off()
+        if self.base.power_status() != 0:
+           self.base.power_on()
+        self.base.wait_until_status_on()
+        self.base.wait_until_modem_ready_to_communicate()
+        self.base.set_echo_off()
