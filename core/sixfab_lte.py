@@ -5,8 +5,8 @@ of a Sixfab Crux board.
 
 from core.modules.ulp import ULP
 from core.modules.peripherals import Periph
-from core.modules.modem import Modem
-from core.modules.wifi import WiFiConnection
+from core.modules.cellular import CellularModem
+from core.modules.wifi import WiFiModem
 
 from core.temp import config
 from core.utils.helpers import read_json_file
@@ -28,12 +28,12 @@ class SixfabLTE:
 
         self.ulp = ULP()
         self.peripherals = Periph()
-        self.modem = Modem()
-        self.wifi = WiFiConnection()
+        self.cellular = CellularModem()
+        self.wifi = WiFiModem()
 
-        self.aws = AWS(self.modem, self.wifi)
-        self.telegram = Telegram(self.modem, self.wifi)
-        self.thingspeak = ThingSpeak(self.modem, self.wifi)
-        self.slack = Slack(self.modem, self.wifi)
-        self.azure = Azure(self.modem, self.wifi)
-        self.scriptr = Scriptr(self.modem, self.wifi)
+        self.aws = AWS(self.cellular, self.wifi)
+        self.telegram = Telegram(self.cellular, self.wifi)
+        self.thingspeak = ThingSpeak(self.cellular, self.wifi)
+        self.slack = Slack(self.cellular, self.wifi)
+        self.azure = Azure(self.cellular, self.wifi)
+        self.scriptr = Scriptr(self.cellular, self.wifi)
