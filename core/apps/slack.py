@@ -20,11 +20,11 @@ class Slack:
 
     cache = config["cache"]
 
-    def __init__(self, wifi):
+    def __init__(self, cellular, wifi):
         """
         Initialize Slack class.
         """
-        self.modem = None
+        self.cellular = cellular
         self.wifi = wifi
 
     def send_message(self, message, webhook_url=None, via=Connection.BOTH):
@@ -192,21 +192,21 @@ class Slack:
         """
 
         step_network_reg = Step(
-            function=self.modem.network.register_network,
+            function=self.cellular.network.register_network,
             name="register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
-            function=self.modem.network.get_pdp_ready,
+            function=self.cellular.network.get_pdp_ready,
             name="get_pdp_ready",
             success="set_server_url",
             fail="failure",
         )
 
         step_set_server_url = Step(
-            function=self.modem.http.set_server_url,
+            function=self.cellular.http.set_server_url,
             name="set_server_url",
             success="set_content_type",
             fail="failure",
@@ -214,7 +214,7 @@ class Slack:
         )
 
         step_set_content_type = Step(
-            function=self.modem.http.set_content_type,
+            function=self.cellular.http.set_content_type,
             name="set_content_type",
             success="post_request",
             fail="failure",
@@ -222,7 +222,7 @@ class Slack:
         )
 
         step_post_request = Step(
-            function=self.modem.http.post,
+            function=self.cellular.http.post,
             name="post_request",
             success="read_response",
             fail="failure",
@@ -232,7 +232,7 @@ class Slack:
         )
 
         step_read_response = Step(
-            function=self.modem.http.read_response,
+            function=self.cellular.http.read_response,
             name="read_response",
             success="success",
             fail="failure",
