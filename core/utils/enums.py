@@ -11,9 +11,9 @@ class Status:
 
 class Connection:
     """Enumeration for connection types."""
-    CELLULAR = 0
-    WIFI = 1
-    BOTH = 2
+    CELLULAR = "cellular"
+    WIFI = "wifi"
+    BOTH = "both"
 
 class WiFiSecurity:
     """Enumeration for WiFi security levels types."""
