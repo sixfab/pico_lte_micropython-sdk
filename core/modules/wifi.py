@@ -11,7 +11,7 @@ from core.utils.manager import StateManager, Step
 from core.utils.enums import WiFiStatus, Status
 
 
-class WiFiConnection:
+class WiFiModem:
     """This class is responsible for operation related to WiFi network."""
 
     SLEEP_BETWEEN_CONNECTION_ATTEMPTS = 10
