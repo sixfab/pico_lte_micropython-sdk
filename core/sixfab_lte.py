@@ -29,7 +29,6 @@ class SixfabLTE:
         self.ulp = ULP()
         self.peripherals = Periph()
         self.modem = Modem()
-        # TODO: Will be implemented in the future.
         self.wifi = WiFiConnection()
 
         self.aws = AWS(self.modem, self.wifi)
