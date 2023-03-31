@@ -2,17 +2,17 @@
 Main code file.
 """
 
-from core.sixfab_lte import SixfabLTE
+from core.pico_lte import PicoLTE
 from core.temp import debug
 
-devboard = SixfabLTE()
+pico_lte = PicoLTE()
 
 
 def main():
     debug.info("Hello from Sixfab...")
-    debug.info("Your Sixfab LTE Development Board is ready to use!")
+    debug.info("Your Sixfab Pico LTE is ready to use!")
     debug.info("Visit the following link to get started")
-    debug.info("http://docs.sixfab.com/sixfab_lte_dev_board/")
+    debug.info("http://docs.sixfab.com/PicoLTE/")
 
 
 if __name__ == "__main__":

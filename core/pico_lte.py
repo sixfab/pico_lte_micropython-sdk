@@ -19,7 +19,7 @@ from core.apps.azure import Azure
 from core.apps.scriptr import Scriptr
 
 
-class SixfabLTE:
+class PicoLTE:
     """This class represents the functionality of a Sixfab Crux board."""
 
     def __init__(self):
