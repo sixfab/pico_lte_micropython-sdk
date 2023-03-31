@@ -9,17 +9,17 @@ from core.utils.helpers import read_json_file
 from core.utils.atcom import ATCom
 from core.modules.config import Config
 
-from core.modules.cellular.base import Base
-from core.modules.cellular.auth import Auth
-from core.modules.cellular.file import File
-from core.modules.cellular.http import HTTP
-from core.modules.cellular.mqtt import MQTT
-from core.modules.cellular.network import Network
-from core.modules.cellular.ssl import SSL
-from core.modules.cellular.gps import GPS
+from core.modules.cellular_modules.base import Base
+from core.modules.cellular_modules.auth import Auth
+from core.modules.cellular_modules.file import File
+from core.modules.cellular_modules.http import HTTP
+from core.modules.cellular_modules.mqtt import MQTT
+from core.modules.cellular_modules.network import Network
+from core.modules.cellular_modules.ssl import SSL
+from core.modules.cellular_modules.gps import GPS
 
 
-class Modem:
+class CellularModem:
     """
     Modem class that contains all functions for working with cellular modem
     """
@@ -33,7 +33,8 @@ class Modem:
         self.atcom = ATCom()
 
         self.base = Base(self.atcom)
-        self.auth = Auth(self.atcom)
+        self.file = File(self.atcom)
+        self.auth = Auth(self.atcom, self.file)
         self.config = Config(self.atcom)
         self.file = File(self.atcom)
         self.network = Network(self.atcom, self.base)

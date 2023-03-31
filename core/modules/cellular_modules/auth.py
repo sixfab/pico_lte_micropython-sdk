@@ -7,7 +7,6 @@ import os
 from core.temp import debug
 from core.utils.enums import Status
 from core.utils.helpers import read_file
-from core.modules.cellular.file import File
 
 
 class Auth:
@@ -15,12 +14,12 @@ class Auth:
     Class for including authentication functions of picocell module.
     """
 
-    def __init__(self, atcom):
+    def __init__(self, atcom, file):
         """
         Constructor for Auth class.
         """
         self.atcom = atcom
-        self.file = File(atcom)
+        self.file = file
 
     def load_certificates(self):
         """
