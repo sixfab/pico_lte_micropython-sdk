@@ -17,8 +17,23 @@ class WiFiConnection:
     SLEEP_BETWEEN_CONNECTION_ATTEMPTS = 10
     SLEEP_WHEN_IT_IS_CONNECTING = 5
 
-    def __init__(self, wifi_settings: dict = None):
-        """This method is responsible for initializing the WiFiConnection class.
+    def __init__(self):
+        """This method is responsible for initializing the WiFiConnection class."""
+        # Prepare WLAN.
+        self.wlan = network.WLAN(network.STA_IF)
+
+        # Internal attributes.
+        self.known_networks = None
+        self.__max_try_per_network = 50
+
+    def prepare_wlan(self):
+        """This method is responsible for preparing WLAN."""
+        self.wlan.active(True)
+        debug.debug("WLAN is activated.")
+        return {"status": Status.SUCCESS, "response": "WLAN is activated."}
+
+    def connect(self, wifi_settings: dict = None):
+        """This method is a coordinator for connecting known networks.
 
         Parameters
         ----------
@@ -33,20 +48,6 @@ class WiFiConnection:
             f"Known hosts are saved into WiFiConnection instance: {self.known_networks}"
         )
 
-        # Prepare WLAN.
-        self.wlan = network.WLAN(network.STA_IF)
-
-        # Internal attributes.
-        self.__max_try_per_network = 50
-
-    def prepare_wlan(self):
-        """This method is responsible for preparing WLAN."""
-        self.wlan.active(True)
-        debug.debug("WLAN is activated.")
-        return {"status": Status.SUCCESS, "response": "WLAN is prepared."}
-
-    def connect(self):
-        """This method is a coordinator for connecting known networks."""
         networks_found = self.scan_networks()
         debug.debug("Nearby WiFi network scan is completed.")
 
@@ -186,7 +187,7 @@ class WiFiConnection:
             "value": connection,
         }
 
-    def get_ready(self):
+    def get_ready(self, wifi_settings: dict = None):
         """
         This method runs a StateManager which handles
         connection to a known WiFi network.
@@ -220,6 +221,7 @@ class WiFiConnection:
         step_connect_to_wifi = Step(
             function=self.connect,
             name="wifi_connect",
+            function_params={"wifi_settings": wifi_settings},
             success="wifi_is_connected",
             fail="wifi_deactivate_wlan",
             retry=5,
