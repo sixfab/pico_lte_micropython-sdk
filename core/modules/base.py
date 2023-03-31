@@ -22,13 +22,22 @@ class Base:
         """
         self.atcom = atcom
 
-    def power_on_off(self):
+    def power_on(self):
         """
-        Function for powering on modem
+        Function for powering on celullar modem
         """
         powerkey_pin = Pin(19, Pin.OUT)
         powerkey_pin.value(1)
-        time.sleep(2)
+        time.sleep(0.5)
+        powerkey_pin.value(0)
+
+    def power_off(self):
+        """
+        Function for powering off the cellular modem.
+        """
+        powerkey_pin = Pin(19, Pin.OUT)
+        powerkey_pin.value(1)
+        time.sleep(1)
         powerkey_pin.value(0)
 
     def power_status(self):
@@ -264,7 +273,7 @@ class Base:
             Technology (default="eMTC")
             * "GSM"
             * "eMTC"
-            * "NB-IoT"
+            * "NBIoT"
 
         Returns
         -------
@@ -282,4 +291,4 @@ class Base:
 
         # TODO: Get all the information from the URC, not the first one.
         command = f'AT+QCELLSCAN={technology_no},{timeout}'
-        return self.atcom.send_at_comm(command, timeout=timeout, urc=True, desired='+QCELLSCAN: ')
+        return self.atcom.send_at_comm(command, timeout=timeout, urc=True, desired='+QCELLSCAN: "{technology}",')
