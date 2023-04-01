@@ -380,7 +380,7 @@ class AWS:
             name="http_ssl_configuration",
             success="set_server_url",
             fail="failure",
-            function_params={"id": 2},
+            function_params={"cid": 2},
         )
 
         step_set_server_url = Step(
