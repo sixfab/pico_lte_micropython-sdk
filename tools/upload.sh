@@ -58,7 +58,22 @@ upload_the_firmware() {
         fi
     fi
 
+    wait_until_volume_detached
     print_the_status_of_command
+}
+
+wait_until_volume_detached() {
+    if [ "$OS" == "macos" ]; then
+        while [ -d /Volumes/RPI-RP2 ]
+        do
+            sleep 0.5
+        done
+    elif [ "$OS" == "linux" ]; then
+        while [ -d /media/$USER/RPI-RP2 ]
+        do
+        sleep 1
+        done
+    fi
 }
 
 argument_parser() {
