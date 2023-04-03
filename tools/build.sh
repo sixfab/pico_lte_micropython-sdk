@@ -28,7 +28,7 @@ download_firmware() {
         git pull > /dev/null
     else
         echo -n "- Downloading latest MicroPython source code..."
-        git clone git@github.com:micropython/micropython.git > /dev/null
+        git clone --quiet git@github.com:micropython/micropython.git > /dev/null
     fi
 
     print_the_status_of_command
@@ -85,7 +85,7 @@ prepare_the_environment() {
     cd ports/rp2
 
     echo -n "- Building the git submodules..."
-    make BOARD=PICO_W submodules > /dev/null
+    make BOARD=PICO_W submodules > /dev/null 2>&1
     print_the_status_of_command
 
     echo -n "- Cleaning the older build files..."
@@ -113,28 +113,6 @@ build_the_firmware() {
     print_the_status_of_command
 
     echo "- Firmware build ID: $BUILD_ID"
-}
-
-wait_user_to_connect_the_pico() {
-    # Display the prompts in green
-    echo -e "\n${GREEN}- Please connect the PicoLTE board to your computer while pressing BOOTSEL button.${NOCOLOR}"
-    echo -e "${GREEN}- Press any key to continue...${NOCOLOR}\n"
-
-    # Wait for the user to press a key
-    read -n 1 -s
-}
-
-upload_the_firmware() {
-    echo -n "- Uploading the firmware to the board..."
-    cd $DOWNLOAD_LOC/micropython/ports/rp2
-
-    if [ "$OS" == "macos" ]; then
-        cp build-PICO_W/firmware.uf2 /Volumes/RPI-RP2
-    elif [ "$OS" == "linux" ]; then
-        cp build-PICO_W/firmware.uf2 /media/$USER/RPI-RP2
-    fi
-
-    print_the_status_of_command
 }
 
 # Main Function
