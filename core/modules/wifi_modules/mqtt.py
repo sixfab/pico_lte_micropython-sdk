@@ -298,7 +298,7 @@ class MQTT:
             "messages": messages,
         }
 
-    def is_connected(self):
+    def is_connected(self, host=None, port=None):
         """
         Check if MQTT client is connected with WiFi.
 
@@ -307,22 +307,42 @@ class MQTT:
         dict
             Result that includes "status" and "response" keys
         """
+        # Check if MQTT client is initialized.
         if self.mqtt_client is None:
             return {
                 "status": Status.ERROR,
                 "response": "MQTT client not initialized yet.",
             }
 
+        # Get MQTT host and port.
+        if host is None:
+            host = get_parameter(["mqtts", "host"])
+        if port is None:
+            port = get_parameter(["mqtts", "port"])
+
+        # Check if MQTT client is connected.
+        if host != self.host or port != self.port:
+            return {
+                "status": Status.ERROR,
+                "response": f"MQTT client is connected to {self.host}:{self.port}.",
+            }
+
+        # If already connected to given host and port, debug it.
+        debug.debug(
+            f"MQTT client is connected to {self.host}:{self.port}."
+        )
+
+        # Ping MQTT server to check if connected.
         try:
-            # Ping MQTT server.
             self.mqtt_client.ping()
-            debug.debug("MQTT client is pinged, it is connected.")
+            debug.debug("MQTT client is pinged, socket is still open.")
         except OSError:
             return {
                 "status": Status.ERROR,
                 "response": "MQTT client is not connected.",
             }
 
+        # Return success since MQTT client is connected and socket is open.
         return {
             "status": Status.SUCCESS,
             "response": "MQTT client is connected.",
@@ -331,17 +351,19 @@ class MQTT:
     def __calback_on_message_recieve(self, topic, message):
         """
         Add MQTT message to buffer.
-        
+
         Parameters
         ----------
         topic : str
             Topic that where the message recieved.
         message : str
             Message that is recieved from MQTT.
-        
+
         Returns
         -------
         None
         """
         self._mqtt_buffer.append({"topic": topic, "message": message})
-        debug.debug(f"Message ({message}) recieved from topic '{topic}' added to the buffer.")
+        debug.debug(
+            f"Message ({message}) recieved from topic '{topic}' added to the buffer."
+        )
