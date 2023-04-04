@@ -136,7 +136,7 @@ class AppBase:
             function=self.__publish_message_on_wifi,
             function_params=params,
             success="success",
-            fail=f"{app_name}_message_on_cellular",
+            fail=f"{app_name}_publish_message_on_cellular",
         )
 
         step_try_cellular = Step(
