@@ -28,7 +28,7 @@ download_firmware() {
         git pull > /dev/null
     else
         echo -n "- Downloading latest MicroPython source code..."
-        git clone --quiet git@github.com:micropython/micropython.git > /dev/null
+        git clone --quiet https://github.com/micropython/micropython.git > /dev/null
     fi
 
     print_the_status_of_command
@@ -93,8 +93,44 @@ prepare_the_environment() {
     print_the_status_of_command
 }
 
+copy_umqtt_as_frozen_module() {
+    UMQTT_SIMPLE_LOC="$DOWNLOAD_LOC/micropython-lib/micropython/umqtt.simple/umqtt"
+    UMQTT_ROBUST_LOC="$DOWNLOAD_LOC/micropython-lib/micropython/umqtt.robust/umqtt"
+
+    echo -n "- Copying the uMQTT library to frozen modules..."
+    # Delete the older version of the library.
+    rm -rf $DOWNLOAD_LOC/micropython/ports/rp2/modules/umqtt > /dev/null 2>&1
+    cp -r $UMQTT_SIMPLE_LOC $DOWNLOAD_LOC/micropython/ports/rp2/modules/
+    status_1=$?
+
+    cp -r $UMQTT_ROBUST_LOC $DOWNLOAD_LOC/micropython/ports/rp2/modules/
+    status_2=$?
+
+    if [ $status_1 -eq 0 ] && [ $status_2 -eq 0 ]; then
+        echo -e " ${GREEN}OK${NOCOLOR}"
+    else
+        echo -e " ${RED}FAILED${NOCOLOR}"
+        exit 1
+    fi
+}
+
+download_neccessary_libs_for_sdk() {
+    echo -n "- Downloading the micropython-lib library..."
+    if [ -d "$DOWNLOAD_LOC/micropython-lib" ]; then
+        git pull > /dev/null
+    else
+        git clone --quiet https://github.com/micropython/micropython-lib.git $DOWNLOAD_LOC/micropython-lib > /dev/null
+    fi
+    print_the_status_of_command
+}
+
+copy_third_party_libs_as_frozen_module() {
+    download_neccessary_libs_for_sdk
+    copy_umqtt_as_frozen_module
+}
+
 copy_the_library_as_frozen_module() {
-    echo -n "- Copying the library to frozen modules..."
+    echo -n "- Copying the PicoLTE SDK to frozen modules..."
     # Delete the older version of the library.
     rm -rf $DOWNLOAD_LOC/micropython/ports/rp2/modules/core > /dev/null 2>&1
     cp -r $PROJECT_DIR/core $DOWNLOAD_LOC/micropython/ports/rp2/modules/
@@ -102,10 +138,10 @@ copy_the_library_as_frozen_module() {
 }
 
 build_the_firmware() {
-    echo -n "- Building the firmware with frozen module..."
-    make BOARD=PICO_W > /dev/null 2>&1
+    echo -n "- Building the firmware with frozen modules..."
+    make -j 11 BOARD=PICO_W > /dev/null 2>&1
     print_the_status_of_command
-    
+
     # Copy the firmware to the project directory.
     mkdir -p $PROJECT_DIR/build
     echo -n "- Copying the firmware to the project directory..."
@@ -119,5 +155,6 @@ build_the_firmware() {
 download_firmware
 prepare_the_environment
 copy_the_library_as_frozen_module
+copy_third_party_libs_as_frozen_module
 build_the_firmware
 echo "- Building process completed."
