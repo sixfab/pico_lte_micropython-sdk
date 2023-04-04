@@ -243,15 +243,16 @@ class ThingSpeak(AppBase):
         step_check_mqtt_is_connected = Step(
             name=f"{ThingSpeak.APP_NAME}_check_mqtt_is_connected",
             function=self.wifi.mqtt.is_connected,
-            success=f"{ThingSpeak.APP_NAME}_close_and_reconnect_mqtt",
-            fail=f"{ThingSpeak.APP_NAME}_connect_to_mqtt",
+            function_params={"host": host, "port": port},
+            success=f"{ThingSpeak.APP_NAME}_publish_message",
+            fail=f"{ThingSpeak.APP_NAME}_close_and_reconnect_mqtt",
         )
 
         step_close_and_reconnect_mqtt = Step(
             name=f"{ThingSpeak.APP_NAME}_close_and_reconnect_mqtt",
             function=self.wifi.mqtt.close_connection,
             success=f"{ThingSpeak.APP_NAME}_connect_to_mqtt",
-            fail="failure",
+            fail=f"{ThingSpeak.APP_NAME}_connect_to_mqtt",
         )
 
         step_connect_to_mqtt = Step(
@@ -272,13 +273,6 @@ class ThingSpeak(AppBase):
             name=f"{ThingSpeak.APP_NAME}_publish_message",
             function=self.wifi.mqtt.publish_message,
             function_params={"payload": message, "topic": topic, "qos": 1},
-            success=f"{ThingSpeak.APP_NAME}_disconnect_from_mqtt",
-            fail="failure",
-        )
-
-        step_disconnect_from_mqtt = Step(
-            name=f"{ThingSpeak.APP_NAME}_disconnect_from_mqtt",
-            function=self.wifi.mqtt.close_connection,
             success="success",
             fail="failure",
         )
@@ -295,7 +289,6 @@ class ThingSpeak(AppBase):
         state_manager.add_step(step_close_and_reconnect_mqtt)
         state_manager.add_step(step_connect_to_mqtt)
         state_manager.add_step(step_publish_message)
-        state_manager.add_step(step_disconnect_from_mqtt)
 
         # Run the state manager.
         while True:
