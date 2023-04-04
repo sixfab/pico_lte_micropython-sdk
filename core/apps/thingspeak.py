@@ -3,170 +3,161 @@ Module for including functions of ThingSpeak for Picocell module.
 """
 import time
 
-from core.temp import config
+from core.apps.app_base import AppBase
+from core.temp import config, debug
 from core.utils.manager import StateManager, Step
-from core.utils.enums import Status
+from core.utils.enums import Status, Connection
 from core.utils.helpers import get_parameter
 
 
-class ThingSpeak:
+class ThingSpeak(AppBase):
     """
-    Class for including functions of ThingSpeak operations for Picocell module.
+    Class for including functions of ThingSpeak connection.
     """
 
     cache = config["cache"]
+    APP_NAME = "thingspeak"
 
-    def __init__(self, modem, wifi, channel_id=None):
-        """Constructor of the class.
-
-        Parameters
-        ----------
-        base : Base
-            Modem Base instance
-        network : Network
-            Modem Network instance
-        mqtt : MQTT
-            Modem MQTT instance
-        """
-        self.modem = modem
-        self.wifi = wifi
-
-        self.channel_id = (
-            get_parameter(["thingspeak", "channel_id"]) if (channel_id is None) else channel_id
-        )
-
-    def publish_message(
+    def __publish_message_on_cellular(
         self,
-        payload,
+        message,
+        field_no=None,
+        channel_id=None,
         host=None,
         port=None,
-        topic=None,
         client_id=None,
         username=None,
         password=None,
     ):
         """
-        Function for publishing a message to ThingSpeak.
+        A function to send a message to ThingSpeak with MQTT using cellular connection.
 
         Parameters
         ----------
-        payload : str
-            Payload of the message.
-        host : str
-            Host of the MQTT broker.
-        port : int
-            Port of the MQTT broker.
-        topic : str
-            Topic of the message.
+        message : str
+            The message to be sent.
+        field_no : int, optional
+            The field number to send the message to.
+        channel_id : int, optional
+            The channel ID to send the message to.
+        host : str, optional
+            The host name of the MQTT broker.
+        port : int, optional
+            The port number of the MQTT broker.
+        client_id : str, optional
+            The client ID to connect to the MQTT broker.
+        username : str, optional
+            The username to connect to the MQTT broker.
+        password : str, optional
+            The password to connect to the MQTT broker.
 
         Returns
         -------
         dict
-            Result that includes "status" and "response" keys
+            A resulting dictionary which has "status" and "response" keys.
         """
+        debug.debug("ThingSpeak: Publishing message on cellular.")
+
+        # Get the parameters from the config file if they are not provided.
+        if field_no is None:
+            field_no = get_parameter([ThingSpeak.APP_NAME, "field_no"])
+        if channel_id is None:
+            channel_id = get_parameter([ThingSpeak.APP_NAME, "channel_id"])
+
         if host is None:
-            host = get_parameter(["thingspeak", "mqtts", "host"], "mqtt3.thingspeak.com")
-
+            host = get_parameter([ThingSpeak.APP_NAME, "host"], "mqtt3.thingspeak.com")
         if port is None:
-            port = get_parameter(["thingspeak", "mqtts", "port"], 1883)
-
-        if client_id is None:
-            client_id = get_parameter(["thingspeak", "mqtts", "client_id"])
-
+            port = get_parameter([ThingSpeak.APP_NAME, "port"], 1883)
         if username is None:
-            username = get_parameter(["thingspeak", "mqtts", "username"])
-
+            username = get_parameter([ThingSpeak.APP_NAME, "username"])
         if password is None:
-            password = get_parameter(["thingspeak", "mqtts", "password"])
+            password = get_parameter([ThingSpeak.APP_NAME, "password"])
+        # If the client ID is not provided, then use the username.
+        if client_id is None:
+            client_id = get_parameter([ThingSpeak.APP_NAME, "client_id"], username)
 
-        if topic is None:
-            topic = get_parameter(
-                ["thingspeak", "mqtts", "pub_topic"],
-                "channels/" + str(self.channel_id) + "/publish",
-            )
+        # Create the topic name.
+        topic = self.__get_topic_name(channel_id, field_no, method="publish")
 
         # Create message from dictionary if needed.
-        if isinstance(payload, dict):
-            payload = ThingSpeak.create_message(payload)
+        if isinstance(message, dict):
+            message = ThingSpeak.__create_message(message)
 
-        # Check if client is connected to the broker
+        # Create steps for the state manager.
         step_check_mqtt_connected = Step(
-            function=self.modem.mqtt.is_connected_to_broker,
-            name="check_connected",
-            success="publish_message",
-            fail="check_opened",
+            name=f"{ThingSpeak.APP_NAME}_check_connected",
+            function=self.cellular.mqtt.is_connected_to_broker,
+            success=f"{ThingSpeak.APP_NAME}_publish_message",
+            fail=f"{ThingSpeak.APP_NAME}_check_opened",
         )
 
-        # Check if client connected to Google Cloud IoT
         step_check_mqtt_opened = Step(
-            function=self.modem.mqtt.has_opened_connection,
-            name="check_opened",
-            success="connect_mqtt_broker",
-            fail="register_network",
+            name=f"{ThingSpeak.APP_NAME}_check_opened",
+            function=self.cellular.mqtt.has_opened_connection,
+            success=f"{ThingSpeak.APP_NAME}_connect_mqtt_broker",
+            fail=f"{ThingSpeak.APP_NAME}_register_network",
         )
 
-        # If client is not connected to the broker and have no open connection with
-        # ThingSpeak, begin the first step of the state machine.
         step_network_reg = Step(
-            function=self.modem.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
+            name=f"{ThingSpeak.APP_NAME}_register_network",
+            function=self.cellular.network.register_network,
+            success=f"{ThingSpeak.APP_NAME}_get_pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
-            function=self.modem.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="open_mqtt_connection",
+            name=f"{ThingSpeak.APP_NAME}_get_pdp_ready",
+            function=self.cellular.network.get_pdp_ready,
+            success=f"{ThingSpeak.APP_NAME}_open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
-            function=self.modem.mqtt.open_connection,
-            name="open_mqtt_connection",
-            success="connect_mqtt_broker",
-            fail="failure",
+            name=f"{ThingSpeak.APP_NAME}_open_mqtt_connection",
+            function=self.cellular.mqtt.open_connection,
             function_params={"host": host, "port": port},
+            success=f"{ThingSpeak.APP_NAME}_connect_mqtt_broker",
+            fail="failure",
             interval=1,
         )
 
         step_connect_mqtt_broker = Step(
-            function=self.modem.mqtt.connect_broker,
-            name="connect_mqtt_broker",
-            success="publish_message",
-            fail="failure",
+            name=f"{ThingSpeak.APP_NAME}_connect_mqtt_broker",
+            function=self.cellular.mqtt.connect_broker,
             function_params={
                 "client_id_string": client_id,
                 "username": username,
                 "password": password,
             },
+            success=f"{ThingSpeak.APP_NAME}_publish_message",
+            fail="failure",
         )
 
         step_publish_message = Step(
-            function=self.modem.mqtt.publish_message,
-            name="publish_message",
+            name=f"{ThingSpeak.APP_NAME}_publish_message",
+            function=self.cellular.mqtt.publish_message,
+            function_params={"payload": message, "topic": topic, "qos": 1},
             success="success",
             fail="failure",
-            function_params={"payload": payload, "topic": topic, "qos": 1},
             retry=3,
             interval=1,
         )
 
-        # Add cache if it is not already existed
-        function_name = "thingspeak.publish_message"
+        state_manager = StateManager(
+            function_name=f"{ThingSpeak.APP_NAME}_publish_message_on_cellular",
+            first_step=step_check_mqtt_connected,
+        )
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
-
-        sm.add_step(step_check_mqtt_connected)
-        sm.add_step(step_check_mqtt_opened)
-        sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_ready)
-        sm.add_step(step_open_mqtt_connection)
-        sm.add_step(step_connect_mqtt_broker)
-        sm.add_step(step_publish_message)
+        state_manager.add_step(step_check_mqtt_connected)
+        state_manager.add_step(step_check_mqtt_opened)
+        state_manager.add_step(step_network_reg)
+        state_manager.add_step(step_pdp_ready)
+        state_manager.add_step(step_open_mqtt_connection)
+        state_manager.add_step(step_connect_mqtt_broker)
+        state_manager.add_step(step_publish_message)
 
         while True:
-            result = sm.run()
+            result = state_manager.run()
 
             if result["status"] == Status.SUCCESS:
                 return result
@@ -174,121 +165,141 @@ class ThingSpeak:
                 return result
             time.sleep(result["interval"])
 
-    def subscribe_topics(
-        self, host=None, port=None, topics=None, client_id=None, username=None, password=None
+    def __publish_message_on_wifi(
+        self,
+        message,
+        field_no=None,
+        channel_id=None,
+        host=None,
+        port=None,
+        client_id=None,
+        username=None,
+        password=None,
     ):
         """
-        Function for subscribing to topics of ThingSpeak.
+        A function to send a message to ThingSpeak with MQTT using WiFi connection.
 
         Parameters
         ----------
-        topics : list
-            List of topics.
+        message : str
+            The message to be sent.
+        field_no : int, optional
+            The field number to send the message to.
+        channel_id : int, optional
+            The channel ID to send the message to.
+        host : str, optional
+            The host name of the MQTT broker.
+        port : int, optional
+            The port number of the MQTT broker.
+        client_id : str, optional
+            The client ID to connect to the MQTT broker.
+        username : str, optional
+            The username to connect to the MQTT broker.
+        password : str, optional
+            The password to connect to the MQTT broker.
 
         Returns
         -------
         dict
-            Result that includes "status" and "response" keys
+            A resulting dictionary which has "status" and "response" keys.
         """
+        debug.debug("ThingSpeak: Publishing message on WiFi.")
+
+        # Get the parameters from the config file if they are not provided.
+        if field_no is None:
+            field_no = get_parameter([ThingSpeak.APP_NAME, "field_no"])
+        if channel_id is None:
+            channel_id = get_parameter([ThingSpeak.APP_NAME, "channel_id"])
+
         if host is None:
-            host = get_parameter(["thingspeak", "mqtts", "host"], "mqtt3.thingspeak.com")
-
+            host = get_parameter([ThingSpeak.APP_NAME, "host"], "mqtt3.thingspeak.com")
         if port is None:
-            port = get_parameter(["thingspeak", "mqtts", "port"], 1883)
-
-        if client_id is None:
-            client_id = get_parameter(["thingspeak", "mqtts", "client_id"])
-
+            port = get_parameter([ThingSpeak.APP_NAME, "port"], 1883)
         if username is None:
-            username = get_parameter(["thingspeak", "mqtts", "username"])
-
+            username = get_parameter([ThingSpeak.APP_NAME, "username"])
         if password is None:
-            password = get_parameter(["thingspeak", "mqtts", "password"])
+            password = get_parameter([ThingSpeak.APP_NAME, "password"])
+        # If the client ID is not provided, then use the username.
+        if client_id is None:
+            client_id = get_parameter([ThingSpeak.APP_NAME, "client_id"], username)
 
-        if topics is None:
-            topics = get_parameter(
-                ["thingspeak", "mqtts", "sub_topics"],
-                ("channels/" + str(self.channel_id) + "/subscribe/fields/+", 0),
-            )
+        # Create the topic name.
+        topic = self.__get_topic_name(channel_id, field_no, method="publish")
 
-        # Check if client is connected to the broker
-        step_check_mqtt_connected = Step(
-            function=self.modem.mqtt.is_connected_to_broker,
-            name="check_connected",
-            success="subscribe_topics",
-            fail="check_opened",
+        # Create message from dictionary if needed.
+        if isinstance(message, dict):
+            message = ThingSpeak.__create_message(message)
+
+        # Create steps for the state manager.
+        step_get_wifi_ready = Step(
+            name=f"{ThingSpeak.APP_NAME}_get_wifi_ready",
+            function=self.wifi.get_ready,
+            success=f"{ThingSpeak.APP_NAME}_check_mqtt_is_connected",
+            fail="failure",
+            retry=5,
+            interval=3,
         )
 
-        # Check if client connected to Google Cloud IoT
-        step_check_mqtt_opened = Step(
-            function=self.modem.mqtt.has_opened_connection,
-            name="check_opened",
-            success="connect_mqtt_broker",
-            fail="register_network",
+        step_check_mqtt_is_connected = Step(
+            name=f"{ThingSpeak.APP_NAME}_check_mqtt_is_connected",
+            function=self.wifi.mqtt.is_connected,
+            success=f"{ThingSpeak.APP_NAME}_close_and_reconnect_mqtt",
+            fail=f"{ThingSpeak.APP_NAME}_connect_to_mqtt",
         )
 
-        # If client is not connected to the broker and have no open connection with
-        # ThingSpeak, begin the first step of the state machine.
-        step_network_reg = Step(
-            function=self.modem.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
+        step_close_and_reconnect_mqtt = Step(
+            name=f"{ThingSpeak.APP_NAME}_close_and_reconnect_mqtt",
+            function=self.wifi.mqtt.close_connection,
+            success=f"{ThingSpeak.APP_NAME}_connect_to_mqtt",
             fail="failure",
         )
 
-        step_pdp_ready = Step(
-            function=self.modem.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="open_mqtt_connection",
-            fail="failure",
-        )
-
-        step_open_mqtt_connection = Step(
-            function=self.modem.mqtt.open_connection,
-            name="open_mqtt_connection",
-            success="connect_mqtt_broker",
-            fail="failure",
-            function_params={"host": host, "port": port},
-            interval=1,
-        )
-
-        step_connect_mqtt_broker = Step(
-            function=self.modem.mqtt.connect_broker,
-            name="connect_mqtt_broker",
-            success="subscribe_topics",
-            fail="failure",
+        step_connect_to_mqtt = Step(
+            name=f"{ThingSpeak.APP_NAME}_connect_to_mqtt",
+            function=self.wifi.mqtt.open_connection,
             function_params={
-                "client_id_string": client_id,
+                "host": host,
+                "port": port,
+                "client_id": client_id,
                 "username": username,
                 "password": password,
             },
+            success=f"{ThingSpeak.APP_NAME}_publish_message",
+            fail="failure",
         )
 
-        step_subscribe_topics = Step(
-            function=self.modem.mqtt.subscribe_topics,
-            name="subscribe_topics",
+        step_publish_message = Step(
+            name=f"{ThingSpeak.APP_NAME}_publish_message",
+            function=self.wifi.mqtt.publish_message,
+            function_params={"payload": message, "topic": topic, "qos": 1},
+            success=f"{ThingSpeak.APP_NAME}_disconnect_from_mqtt",
+            fail="failure",
+        )
+
+        step_disconnect_from_mqtt = Step(
+            name=f"{ThingSpeak.APP_NAME}_disconnect_from_mqtt",
+            function=self.wifi.mqtt.close_connection,
             success="success",
             fail="failure",
-            function_params={"topics": topics},
-            retry=3,
-            interval=1,
         )
 
-        # Add cache if it is not already existed
-        function_name = "thingspeak.subscribe_topics"
+        # Create the state manager.
+        state_manager = StateManager(
+            function_name=f"{ThingSpeak.APP_NAME}_publish_message_on_wifi",
+            first_step=step_get_wifi_ready,
+        )
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        # Add the steps to the state manager.
+        state_manager.add_step(step_get_wifi_ready)
+        state_manager.add_step(step_check_mqtt_is_connected)
+        state_manager.add_step(step_close_and_reconnect_mqtt)
+        state_manager.add_step(step_connect_to_mqtt)
+        state_manager.add_step(step_publish_message)
+        state_manager.add_step(step_disconnect_from_mqtt)
 
-        sm.add_step(step_check_mqtt_connected)
-        sm.add_step(step_check_mqtt_opened)
-        sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_ready)
-        sm.add_step(step_open_mqtt_connection)
-        sm.add_step(step_connect_mqtt_broker)
-        sm.add_step(step_subscribe_topics)
-
+        # Run the state manager.
         while True:
-            result = sm.run()
+            result = state_manager.run()
 
             if result["status"] == Status.SUCCESS:
                 return result
@@ -296,14 +307,88 @@ class ThingSpeak:
                 return result
             time.sleep(result["interval"])
 
-    def read_messages(self):
+    def __publish_message_on_both(
+        self,
+        message,
+        field_no=None,
+        channel_id=None,
+        host=None,
+        port=None,
+        client_id=None,
+        username=None,
+        password=None,
+    ):
         """
-        Read messages from subscribed topics.
+        A function to send a message to ThingSpeak with MQTT.
+
+        Parameters
+        ----------
+        message : str
+            The message to be sent.
+        field_no : int, optional
+            The field number to send the message to.
+        channel_id : int, optional
+            The channel ID to send the message to.
+        host : str, optional
+            The host name of the MQTT broker.
+        port : int, optional
+            The port number of the MQTT broker.
+        client_id : str, optional
+            The client ID to connect to the MQTT broker.
+        username : str, optional
+            The username to connect to the MQTT broker.
+        password : str, optional
+            The password to connect to the MQTT broker.
+
+        Returns
+        -------
+        dict
+            A resulting dictionary which has "status" and "response" keys.
         """
-        return self.modem.mqtt.read_messages()
+        params = {
+            "message": message,
+            "field_no": field_no,
+            "channel_id": channel_id,
+            "host": host,
+            "port": port,
+            "client_id": client_id,
+            "username": username,
+            "password": password,
+        }
+
+        return super().__publish_message_on_both(ThingSpeak.APP_NAME, params)
 
     @staticmethod
-    def create_message(payload_dict):
+    def __get_topic_name(channel_id, field_no, method="publish"):
+        """
+        A function to create the topic name for the ThingSpeak MQTT.
+
+        Parameters
+        ----------
+        channel_id : str
+            The channel ID of the ThingSpeak channel.
+        field_no : str
+            The field number of the ThingSpeak channel.
+            If all the fields are to be used, then use "+".
+
+        Returns
+        -------
+        str
+            The topic name for the ThingSpeak MQTT.
+        """
+        if method == "publish":
+            if field_no == "+":
+                return f"channels/{channel_id}/publish/fields/+"
+            return f"channels/{channel_id}/publish/fields/field{field_no}"
+        elif method == "subscribe":
+            if field_no == "+":
+                return f"channels/{channel_id}/subscribe/fields/+"
+            return f"channels/{channel_id}/subscribe/fields/field{field_no}"
+        else:
+            raise ValueError("Invalid method name.")
+
+    @staticmethod
+    def __create_message(payload_dict):
         """This function generates a payload message for publishing ThingSpeak messages.
 
         Parameters
