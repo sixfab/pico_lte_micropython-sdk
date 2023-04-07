@@ -63,6 +63,15 @@ class AppBase:
         else:
             return self.__subscribe_topics_on_both(*args, **kwargs)
 
+    def read_messages(self, via=Connection.BOTH):
+        """A function to MQTT read messages."""
+        if via == Connection.CELLULAR:
+            return self.__read_messages_on_cellular()
+        elif via == Connection.WIFI:
+            return self.__read_messages_on_wifi()
+        else:
+            return self.__read_messages_on_both()
+
     ############################
     # The methods below are abstract methods.
     # They must be implemented in the child class
@@ -234,3 +243,25 @@ class AppBase:
             elif result["status"] == Status.ERROR:
                 return result
             sleep(result["interval"])
+
+    ############################
+    ##   No Need to Modify    ##
+    ############################
+    def __read_messages_on_wifi(self):
+        """A function to read MQTT messages using WiFi connection."""
+        return self.wifi.mqtt.read_messages()
+
+    def __read_messages_on_cellular(self):
+        """A function to read MQTT messages using cellular connection."""
+        return self.cellular.mqtt.read_messages()
+
+    def __read_messages_on_both(self):
+        """A function to read MQTT messages using both WiFi and cellular connections."""
+        from_wifi = self.__read_messages_on_wifi()
+        wifi = from_wifi["messages"] if from_wifi["status"] == Status.SUCCESS else []
+        from_cell = self.__read_messages_on_cellular()
+        cell = from_cell["messages"] if from_cell["status"] == Status.SUCCESS else []
+        return {
+            "status": Status.SUCCESS,
+            "messages": wifi + cell,
+        }
