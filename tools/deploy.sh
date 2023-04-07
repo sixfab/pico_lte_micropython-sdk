@@ -18,7 +18,7 @@ print_the_status_of_command() {
 
 build_the_firmware() {
     # Run the build script.
-    source $PROJECT_DIR/tools/build.sh
+    source $PROJECT_DIR/tools/build.sh $1
 }
 
 upload_the_script() {
@@ -30,6 +30,6 @@ upload_the_script() {
 
 # Main function
 echo "[  BUILD  ]"
-build_the_firmware
+build_the_firmware $1
 echo "[  UPLOAD  ]"
 upload_the_script

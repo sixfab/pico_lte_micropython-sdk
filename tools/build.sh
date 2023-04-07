@@ -1,14 +1,11 @@
 #!/bin/bash
 # This script is used to embed the library as a frozen module and build the firmware.
 
-DOWNLOAD_LOC="/tmp"
-
-# Internal variables
-PROJECT_DIR=$(pwd)
-BUILD_ID="picoLTE-$(date +%Y-%m-%d-%H-%M-%S)"
+# Terminal ANSI colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NOCOLOR='\033[0m'
+YELLOW='\033[1;33m'
 
 print_the_status_of_command() {
     if [ $? -eq 0 ]; then
@@ -147,11 +144,27 @@ build_the_firmware() {
     echo -n "- Copying the firmware to the project directory..."
     cp build-PICO_W/firmware.uf2 $PROJECT_DIR/build/$BUILD_ID.uf2
     print_the_status_of_command
-
-    echo "- Firmware build ID: $BUILD_ID"
 }
 
-# Main Function
+# ######## MAIN FUNCTION ########
+# If DOWNLOAD_LOC is not set, then the script will download the MicroPython source code to /tmp
+if [ -z "$DOWNLOAD_LOC" ]; then
+    echo -e "${YELLOW}Warning: \$DOWNLOAD_LOC is not set. The script will download the MicroPython source code to /tmp.${NOCOLOR}"
+    DOWNLOAD_LOC="/tmp"
+fi
+
+# If a parameter is given, then the build ID will be set to the parameter.
+if [ -n "$1" ]; then
+    BUILD_ID="picoLTE-$1"
+else
+    # Create the build ID from the date and time.
+    BUILD_ID="picoLTE-$(date +%Y-%m-%d-%H-%M-%S)"
+fi
+
+# Save project directory to use later.
+PROJECT_DIR=$(pwd)
+
+echo "- Firmware build ID: $BUILD_ID"
 download_firmware
 prepare_the_environment
 copy_the_library_as_frozen_module
