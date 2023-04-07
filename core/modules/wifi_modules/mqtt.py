@@ -168,6 +168,34 @@ class MQTT:
             "response": "MQTT connection closed successfully.",
         }
 
+    def reconnect(self):
+        """
+        Reconnect to MQTT server with WiFi.
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
+        """
+        if self.mqtt_client is None:
+            return {
+                "status": Status.ERROR,
+                "response": "MQTT client not initialized yet.",
+            }
+
+        result = self.mqtt_client.connect()
+        if result == 0:
+            debug.debug("MQTT connection reconnected successfully.")
+            return {
+                "status": Status.SUCCESS,
+                "response": "MQTT connection reconnected successfully.",
+            }
+        else:
+            return {
+                "status": Status.ERROR,
+                "response": f"MQTT connection failed. ({result})",
+            }
+
     def publish_message(self, payload, topic=None, qos=1, retain=0):
         """Publish messages into MQTT topics given with WiFi.
 
@@ -215,7 +243,7 @@ class MQTT:
             "response": "Message published successfully.",
         }
 
-    def subscribe_topics(self, topics=None, qos=1):
+    def subscribe_topics(self, topics=None):
         """Function for subscribing MQTT topic with WiFi.
 
         Parameters
@@ -248,6 +276,13 @@ class MQTT:
         # Get MQTT topics.
         if topics is None:
             topics = get_parameter(["mqtts", "sub_topics"])
+
+        # Check if topics is a list.
+        if not isinstance(topics, list):
+            return {
+                "status": Status.ERROR,
+                "response": "Topics must be a list.",
+            }
 
         # Set callback function for MQTT message recieve.
         self.mqtt_client.set_callback(self.__calback_on_message_recieve)
@@ -284,6 +319,7 @@ class MQTT:
             return {
                 "status": Status.ERROR,
                 "response": "MQTT client not initialized yet.",
+                "messages": [],
             }
 
         # Receive messages in non-blocking way.
