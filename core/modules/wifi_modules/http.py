@@ -40,22 +40,27 @@ class HTTP:
         response_content = None
         try:
             response = urequests.post(host, data=payload, headers=headers)
-
-            debug.debug(f"HTTP POST Response: {response.json()}")
             try:
                 response_content = response.json()
             except ValueError:
                 debug.error("HTTP POST message is not in correct format.")
                 response_content = response.text
-
             response.close()
             gc.collect()
             debug.debug("Response object closed. Garbage collector is called.")
             return {"status": Status.SUCCESS, "response": response_content}
 
         except Exception as error:
-            debug.error(f"HTTP POST error: {error}")
-            return {"status": Status.ERROR, "response": error}
+            if isinstance(error, OSError):
+                if error.errno == -2:
+                    debug.error("OSError -2 occured. It needs to deinitialize the WLAN interface.")
+                elif error.errno == 12:
+                    debug.error("Out of memory. Calling garbage collector.")
+                    gc.collect()
+                    debug.info(f"Garbage collector freed. Free Memory: {gc.mem_free()}")
+            else:
+                debug.error(f"HTTP POST: {error}")
+                return {"status": Status.ERROR, "response": error}
 
     def get(self, host=None, payload=None, headers=None, json=None):
         """
@@ -82,7 +87,6 @@ class HTTP:
         response_content = None
         try:
             response = urequests.get(host, data=payload, headers=headers, json=json)
-            debug.debug(f"HTTP GET Response: {response.json()}")
             try:
                 response_content = response.json()
             except ValueError:
@@ -95,5 +99,13 @@ class HTTP:
             return {"status": Status.SUCCESS, "response": response_content}
 
         except Exception as error:
-            debug.error(f"HTTP GET error: {error}")
-            return {"status": Status.ERROR, "response": error}
+            if isinstance(error, OSError):
+                if error.errno == -2:
+                    debug.error("OSError -2 occured. It needs to deinitialize the WLAN interface.")
+                elif error.errno == 12:
+                    debug.error("Out of memory. Calling garbage collector.")
+                    gc.collect()
+                    debug.info(f"Garbage collector freed. Free Memory: {gc.mem_free()}")
+            else:
+                debug.error(f"HTTP GET: {error}")
+                return {"status": Status.ERROR, "response": error}
