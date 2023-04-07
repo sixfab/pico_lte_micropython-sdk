@@ -16,8 +16,8 @@ from core.utils.enums import WiFiStatus, Status
 class WiFiModem:
     """This class is responsible for operation related to WiFi network."""
 
-    SLEEP_BETWEEN_CONNECTION_ATTEMPTS = 5 # seconds
-    SLEEP_WHEN_IT_IS_CONNECTING = 5 # seconds
+    MAX_RECONNECTION_TRY = 2  # times
+    MAX_WAIT_FOR_CONNECTION = 2  # seconds
 
     def __init__(self):
         """This method is responsible for initializing the WiFiConnection class."""
@@ -29,7 +29,7 @@ class WiFiModem:
 
         # Internal attributes.
         self.known_networks = None
-        self.__max_try_per_network = 50
+        self.__reconnection_try_per_network = 3
 
     def prepare_wlan(self):
         """This method is responsible for preparing WLAN."""
@@ -69,9 +69,8 @@ class WiFiModem:
         for each_network in networks_found.get("response"):
             if each_network["ssid"] in wifi_settings:
 
-                try_count = 0
-                # Try to connect more than one for a network.
-                while try_count <= self.__max_try_per_network:
+                start_time = time.time()
+                while time.time() - start_time < self.MAX_WAIT_FOR_CONNECTION:
                     # @TODO: Check if it also connects to OPEN networks.
                     result = self.connect_to(
                         each_network["ssid"], wifi_settings[each_network["ssid"]]
@@ -81,17 +80,10 @@ class WiFiModem:
                     if result.get("status") == Status.SUCCESS:
                         debug.debug("Connection established to WiFi network.")
                         return result
-                    else:
-                        try_count += 1
 
-                    if result["response"] == WiFiStatus.CONNECTING:
-                        debug.debug(f"Sleeping for {self.SLEEP_WHEN_IT_IS_CONNECTING} seconds.")
-                        time.sleep(self.SLEEP_WHEN_IT_IS_CONNECTING)
-                    else:
-                        debug.debug(
-                            f"Sleeping for {self.SLEEP_BETWEEN_CONNECTION_ATTEMPTS} seconds."
-                        )
-                        time.sleep(self.SLEEP_BETWEEN_CONNECTION_ATTEMPTS)
+                    elif result["response"] == WiFiStatus.CONNECTING:
+                        debug.debug("Trying to get IP address from DHCP server.")
+                        time.sleep(0.05)
 
         # If there is no known network, return the status.
         debug.debug("No known networks nearby.")
@@ -106,7 +98,6 @@ class WiFiModem:
 
         # Try to connect to the network.
         self.wlan.connect(ssid, password)
-        debug.debug(f"Trying to connect to the AP: {ssid}")
 
         return self.get_status()
 
@@ -140,7 +131,6 @@ class WiFiModem:
         """
         got_ip = self.wlan.status() == WiFiStatus.GOT_IP
         connected = self.is_connected()["status"] == Status.SUCCESS
-        debug.debug(f"WLAN status is retrived: GOT_IP={got_ip} CONNECTED={connected}")
 
         # (status >= WiFiStatus.GOT_IP or status < WiFiStatus.IDLE)
         # @TODO: Check if it is correct. Since 3 is not described in
@@ -233,8 +223,6 @@ class WiFiModem:
             function_params={"wifi_settings": wifi_settings},
             success="wifi_is_connected",
             fail="wifi_deactivate_wlan",
-            retry=5,
-            interval=1
         )
 
         sm = StateManager(
@@ -245,6 +233,7 @@ class WiFiModem:
         sm.add_step(step_deactivate_wlan)
         sm.add_step(step_connect_to_wifi)
 
+        retry_count = 0
         while True:
             result = sm.run()
 
@@ -252,4 +241,10 @@ class WiFiModem:
                 return result
             elif result.get("status") == Status.ERROR:
                 return result
+
+            if sm.current.name == "wifi_connect":
+                if retry_count >= self.MAX_RECONNECTION_TRY:
+                    return {"status": Status.ERROR, "response": "WiFi connection failed."}
+                retry_count += 1
+
             time.sleep(result["interval"])
