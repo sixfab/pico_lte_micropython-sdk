@@ -17,7 +17,7 @@ class WiFiModem:
     """This class is responsible for operation related to WiFi network."""
 
     MAX_RECONNECTION_TRY = 2  # times
-    MAX_WAIT_FOR_CONNECTION = 2  # seconds
+    MAX_WAIT_FOR_CONNECTION = 5  # seconds
 
     def __init__(self):
         """This method is responsible for initializing the WiFiConnection class."""
@@ -29,7 +29,6 @@ class WiFiModem:
 
         # Internal attributes.
         self.known_networks = None
-        self.__reconnection_try_per_network = 3
 
     def prepare_wlan(self):
         """This method is responsible for preparing WLAN."""
@@ -50,6 +49,9 @@ class WiFiModem:
         if wifi_settings is None:
             wifi_settings = get_parameter(["known_wifi_networks"])
 
+            if wifi_settings is None:
+                return {"status": Status.ERROR, "response": "No WiFi settings found."}
+
         # Save the known networks.
         self.known_networks = wifi_settings
         debug.debug(
@@ -58,6 +60,8 @@ class WiFiModem:
 
         # Scan the network.
         networks_found = self.scan_networks()
+        if networks_found.get("status") != Status.SUCCESS:
+            return {"status": Status.ERROR, "response": "No WiFi networks found."}
         debug.debug("Nearby WiFi network scan is completed.")
 
         # Check if there is any known network.
@@ -78,15 +82,16 @@ class WiFiModem:
 
                     # Return if status is successed.
                     if result.get("status") == Status.SUCCESS:
-                        debug.debug("Connection established to WiFi network.")
+                        debug.info("Connection established to WiFi network.")
                         return result
 
                     elif result["response"] == WiFiStatus.CONNECTING:
                         debug.debug("Trying to get IP address from DHCP server.")
-                        time.sleep(0.05)
 
-        # If there is no known network, return the status.
-        debug.debug("No known networks nearby.")
+                    time.sleep(0.1)
+
+        # If the connection is not established, return the status.
+        debug.debug("Connection could not be established to WiFi network.")
         return self.get_status()
 
     def connect_to(self, ssid, password):
@@ -152,8 +157,8 @@ class WiFiModem:
         networks_nearby = self.wlan.scan()
 
         # Check if there is any network nearby.
-        if len(networks_nearby) == 0:
-            debug.error("No WiFi networks found nearby.")
+        if len(networks_nearby) == 0 or networks_nearby is None:
+            debug.debug("No WiFi networks found nearby.")
             return {
                 "status": Status.ERROR,
                 "response": [],
@@ -222,7 +227,7 @@ class WiFiModem:
             name="wifi_connect",
             function_params={"wifi_settings": wifi_settings},
             success="wifi_is_connected",
-            fail="wifi_deactivate_wlan",
+            fail="wifi_connect",
         )
 
         sm = StateManager(
