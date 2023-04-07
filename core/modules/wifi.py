@@ -6,6 +6,7 @@ import time
 import network
 
 from core.modules.wifi_modules.mqtt import MQTT
+from core.modules.wifi_modules.http import HTTP
 
 from core.temp import debug
 from core.utils.helpers import get_parameter
@@ -26,6 +27,7 @@ class WiFiModem:
 
         # Modules
         self.mqtt = MQTT()
+        self.http = HTTP()
 
         # Internal attributes.
         self.known_networks = None
@@ -248,7 +250,7 @@ class WiFiModem:
                 return result
 
             if sm.current.name == "wifi_connect":
-                if retry_count >= self.MAX_RECONNECTION_TRY:
+                if retry_count > self.MAX_RECONNECTION_TRY:
                     return {"status": Status.ERROR, "response": "WiFi connection failed."}
                 retry_count += 1
 
