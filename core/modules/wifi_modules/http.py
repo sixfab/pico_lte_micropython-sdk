@@ -15,7 +15,9 @@ class HTTP:
     Class for including functions of MQTT related operations of WiFi module.
     """
 
-    def post(self, host=None, payload=None, headers=None, json=None):
+    def post(
+        self, host=None, payload=None, headers=None, json=None, desired_response=None
+    ):
         """
         Function for sending a POST request to a server/host using WiFi.
 
@@ -34,26 +36,39 @@ class HTTP:
             headers = ""
         if json is None:
             json = ""
-        if not host or not payload:
-            return {"status": Status.ERROR, "response": "Missing arguments!"}
+        if not host:
+            return {
+                "status": Status.ERROR,
+                "response": "Missing arguments! No host address is given.",
+            }
+        # Do not send empty payload,
+        # it will cause an error.
+        # Make it None instead.
 
         response_content = None
         try:
-            response = urequests.post(host, data=payload, headers=headers)
+            response = urequests.post(host, data=payload, headers=headers, json=json)
             try:
                 response_content = response.json()
             except ValueError:
-                debug.error("HTTP POST message is not in correct format.")
+                debug.debug("HTTP POST message is not in JSON format.")
                 response_content = response.text
             response.close()
             gc.collect()
             debug.debug("Response object closed. Garbage collector is called.")
+
+            if desired_response is not None and desired_response not in str(
+                response_content
+            ):
+                return {"status": Status.ERROR, "response": response_content}
             return {"status": Status.SUCCESS, "response": response_content}
 
         except Exception as error:
             if isinstance(error, OSError):
                 if error.errno == -2:
-                    debug.error("OSError -2 occured. It needs to deinitialize the WLAN interface.")
+                    debug.error(
+                        "OSError -2 occured. It needs to deinitialize the WLAN interface."
+                    )
                 elif error.errno == 12:
                     debug.error("Out of memory. Calling garbage collector.")
                     gc.collect()
@@ -62,7 +77,9 @@ class HTTP:
                 debug.error(f"HTTP POST: {error}")
                 return {"status": Status.ERROR, "response": error}
 
-    def get(self, host=None, payload=None, headers=None, json=None):
+    def get(
+        self, host=None, payload=None, headers=None, json=None, desired_response=None
+    ):
         """
         Function for sending a GET request to a server/host using WiFi.
 
@@ -81,8 +98,13 @@ class HTTP:
             headers = ""
         if json is None:
             json = ""
+        if payload is None:
+            payload = ""
         if not host:
-            return {"status": Status.ERROR, "response": "Missing arguments!"}
+            return {
+                "status": Status.ERROR,
+                "response": "Missing arguments! No host address is given.",
+            }
 
         response_content = None
         try:
@@ -90,18 +112,25 @@ class HTTP:
             try:
                 response_content = response.json()
             except ValueError:
-                debug.error("HTTP GET message is not in correct format.")
+                debug.debug("HTTP GET message is not in JSON format.")
                 response_content = response.text
 
             response.close()
             gc.collect()
             debug.debug("Response object closed. Garbage collector is called.")
+
+            if desired_response is not None and desired_response not in str(
+                response_content
+            ):
+                return {"status": Status.ERROR, "response": response_content}
             return {"status": Status.SUCCESS, "response": response_content}
 
         except Exception as error:
             if isinstance(error, OSError):
                 if error.errno == -2:
-                    debug.error("OSError -2 occured. It needs to deinitialize the WLAN interface.")
+                    debug.error(
+                        "OSError -2 occured. It needs to deinitialize the WLAN interface."
+                    )
                 elif error.errno == 12:
                     debug.error("Out of memory. Calling garbage collector.")
                     gc.collect()
