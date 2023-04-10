@@ -41,7 +41,7 @@ enter_bootloader_mode_on_pico() {
     # This function uses pyboard tool to enter the bootloader mode on the PicoLTE.
     # with sending "import machine; machine.bootloader()"" command.
     echo -n -e "- Entering the bootloader mode on the PicoLTE..."
-    python $PYBOARD_LOC -d /dev/tty.usbmodem* -c "import machine; machine.bootloader()" > /dev/null 2>&1
+    python3 $PYBOARD_LOC -d /dev/cu.usbmodem* -c "import machine; machine.bootloader()" > /dev/null 2>&1
     sleep 1.5
 
     # Print OK for always since 'sleep' is always successes.
