@@ -3,6 +3,7 @@ Module for including file functions of picocell module.
 """
 
 from core.utils.enums import Status
+from core.utils.helpers import get_desired_data, simplify
 
 
 class File:
@@ -33,7 +34,8 @@ class File:
             Result that includes "status" and "response" keys
         """
         command = f'AT+QFLST="{path}"'
-        return self.atcom.send_at_comm(command)
+        result = self.atcom.send_at_comm(command)
+        return simplify(get_desired_data(result, '+QFLST: '))
 
     def delete_file_from_modem(self, file_name):
         """
