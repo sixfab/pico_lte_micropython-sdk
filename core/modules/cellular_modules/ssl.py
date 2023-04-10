@@ -19,7 +19,7 @@ class SSL:
         """
         self.atcom = atcom
 
-    def set_ca_cert(self, ssl_context_id=2, file_path="/security/cacert.pem"):
+    def set_root_cert(self, file_path, ssl_context_id=2):
         """
         Function for setting modem CA certificate
 
@@ -39,7 +39,7 @@ class SSL:
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
 
-    def set_client_cert(self, ssl_context_id=2, file_path="/security/client.pem"):
+    def set_device_cert(self, file_path, ssl_context_id=2):
         """
         Function for setting modem client certificate
 
@@ -48,7 +48,7 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str, default: "/security/client.pem"
+        file_path : str
             Path to the client certificate file
 
         Returns
@@ -59,7 +59,7 @@ class SSL:
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
 
-    def set_client_key(self, ssl_context_id=2, file_path="/security/user_key.pem"):
+    def set_private_key(self, file_path, ssl_context_id=2):
         """
         Function for setting modem client key
 
@@ -68,7 +68,7 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str, default: "/security/user_key.pem"
+        file_path : str
             Path to the client key file
 
         Returns
@@ -205,7 +205,7 @@ class SSL:
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
         return self.atcom.send_at_comm(command)
 
-    def configure_for_x509_certification(self):
+    def configure_for_x509_certification(self, root_ca, device_cert, private_key):
         """
         Function for configuring the modem for X.509 certification.
 
@@ -215,23 +215,26 @@ class SSL:
             Result that includes "status" and "response" keys
         """
 
-        step_set_ca = Step(
-            function=self.set_ca_cert,
-            name="set_ca",
-            success="set_client_cert",
+        step_set_root_ca = Step(
+            function=self.set_root_cert,
+            function_params={"file_path": root_ca},
+            name="set_root_ca",
+            success="set_device_cert",
             fail="failure",
         )
 
-        step_set_client_cert = Step(
-            function=self.set_client_cert,
-            name="set_client_cert",
-            success="set_client_key",
+        step_set_device_cert = Step(
+            function=self.set_device_cert,
+            function_params={"file_path": device_cert},
+            name="set_device_cert",
+            success="set_private_key",
             fail="failure",
         )
 
-        step_set_client_key = Step(
-            function=self.set_client_key,
-            name="set_client_key",
+        step_set_private_key = Step(
+            function=self.set_private_key,
+            function_params={"file_path": private_key},
+            name="set_private_key",
             success="set_sec_level",
             fail="failure",
         )
@@ -264,10 +267,10 @@ class SSL:
             fail="failure",
         )
 
-        sm = StateManager(first_step=step_set_ca)
-        sm.add_step(step_set_ca)
-        sm.add_step(step_set_client_cert)
-        sm.add_step(step_set_client_key)
+        sm = StateManager(first_step=step_set_root_ca)
+        sm.add_step(step_set_root_ca)
+        sm.add_step(step_set_device_cert)
+        sm.add_step(step_set_private_key)
         sm.add_step(step_set_sec_level)
         sm.add_step(step_set_ssl_ver)
         sm.add_step(step_set_ssl_ciphers)
