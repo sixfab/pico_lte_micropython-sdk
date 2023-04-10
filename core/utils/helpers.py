@@ -68,6 +68,7 @@ def get_desired_data(result, prefix, separator=",", data_index=0):
         if value == "OK" and index > 0:
             valuable_lines = [response[i] for i in range(0, index)]
 
+    result_to_return["value"] = []
     if valuable_lines:
         for line in valuable_lines:
             prefix_index = line.find(prefix)
@@ -78,27 +79,24 @@ def get_desired_data(result, prefix, separator=",", data_index=0):
 
                 if isinstance(data_index, list):  # If desired multiple data
                     data_index = data_index[: len(data_array)]  # Truncate data_index
-                    result_to_return["value"] = [
-                        simplify(data_array[i]) for i in data_index
-                    ]  # Return list
+                    result_to_return["value"].append(simplify(data_array[i]) for i in data_index)
                 elif isinstance(data_index, int):
                     # If data_index is out of range, return first element
                     data_index = data_index if data_index < len(data_array) else 0
-                    result_to_return["value"] = simplify(
-                        data_array[data_index]
-                    )  # Return single data
+                    result_to_return["value"].append(simplify(data_array[data_index]))
                 elif data_index == "all":
-                    result_to_return["value"] = [simplify(data) for data in data_array]
+                    result_to_return["value"].append([simplify(data) for data in data_array])
                 else:
                     # If data_index is unknown type, return first element
                     data_index = 0
-                    result_to_return["value"] = simplify(
-                        data_array[data_index]
-                    )  # Return single data
-                return result_to_return
+                    result_to_return["value"].append(simplify(data_array[data_index]))  # Return single data
+
+        return result_to_return
+
     # if no valuable data found
     result_to_return["value"] = None
     return result_to_return
+
 
 
 def simplify(text):
