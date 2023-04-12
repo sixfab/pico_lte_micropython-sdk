@@ -7,6 +7,7 @@ from core.modules.ulp import ULP
 from core.modules.peripherals import Periph
 from core.modules.cellular import CellularModem
 from core.modules.wifi import WiFiModem
+from core.modules.keycase import KeyCase
 
 from core.temp import config
 from core.utils.helpers import read_json_file
@@ -30,8 +31,9 @@ class PicoLTE:
         self.peripherals = Periph()
         self.cellular = CellularModem()
         self.wifi = WiFiModem()
+        self.keycase = KeyCase(self.cellular, self.wifi)
 
-        self.aws = AWS(self.cellular, self.wifi)
+        self.aws = AWS(self.cellular, self.wifi, self.keycase)
         self.telegram = Telegram(self.cellular, self.wifi)
         self.thingspeak = ThingSpeak(self.cellular, self.wifi)
         self.slack = Slack(self.cellular, self.wifi)

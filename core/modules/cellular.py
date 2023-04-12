@@ -10,7 +10,6 @@ from core.utils.atcom import ATCom
 from core.modules.config import Config
 
 from core.modules.cellular_modules.base import Base
-from core.modules.cellular_modules.auth import Auth
 from core.modules.cellular_modules.file import File
 from core.modules.cellular_modules.http import HTTP
 from core.modules.cellular_modules.mqtt import MQTT
@@ -34,8 +33,6 @@ class CellularModem:
 
         self.base = Base(self.atcom)
         self.file = File(self.atcom)
-        self.auth = Auth(self.atcom, self.file)
-        self.config = Config(self.atcom)
         self.file = File(self.atcom)
         self.network = Network(self.atcom, self.base)
         self.ssl = SSL(self.atcom)
