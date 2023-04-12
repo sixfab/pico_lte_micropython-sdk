@@ -44,9 +44,9 @@ check_if_pyboard_tool_is_installed() {
     fi
 
     # Check if python is installed.
-    if ! command -v python &> /dev/null
+    if ! command -v python3 &> /dev/null
     then
-        echo "- Python is not installed."
+        echo "- Python3 is not installed."
         exit 1
     fi
 }
@@ -75,7 +75,7 @@ run_the_code() {
     echo ""
 
     # Run the code.
-    python $PYBOARD_LOC --device $PORT $1
+    python3 $PYBOARD_LOC --device $PORT $1
 }
 
 # Run the script.
