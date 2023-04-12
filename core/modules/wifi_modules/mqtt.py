@@ -139,7 +139,16 @@ class MQTT:
 
         debug.debug("MQTT client initialized successfully. Trying to connect...")
         # Connect to MQTT server.
-        result = self.mqtt_client.connect()
+        try:
+            result = self.mqtt_client.connect()
+        except ValueError as error:
+            debug.debug(
+                f"MQTT connection failed. ({error}). Perhaps, wrong key format. Use DER formating."
+            )
+            return {
+                "status": Status.ERROR,
+                "response": f"MQTT connection failed. ({error})",
+            }
         debug.debug(f"MQTT connection result: {result}.")
         if result != 0:
             self.mqtt_client = None

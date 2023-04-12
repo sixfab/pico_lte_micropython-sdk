@@ -152,7 +152,7 @@ class KeyCase:
 
         # Read the files and upload them to the secure storage.
         for index, file in enumerate(input_list):
-            file_content = read_file(file)
+            file_content = read_file("/" + file, file_type="b")
             # Check if file exists.
             if file_content is None:
                 raise Exception("File doesn't exist!")

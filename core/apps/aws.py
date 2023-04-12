@@ -277,7 +277,7 @@ class AWS(AppBase):
         step_publish_message = Step(
             name=f"{AWS.APP_NAME}_publish_message",
             function=self.cellular.mqtt.publish_message,
-            function_params={"payload": payload, "topic": topic},
+            function_params={"payload": message, "topic": topic},
             success="success",
             fail="failure",
             cachable=True,
