@@ -125,7 +125,7 @@ class ThingSpeak(AppBase):
             name=f"{ThingSpeak.APP_NAME}_connect_mqtt_broker",
             function=self.cellular.mqtt.connect_broker,
             function_params={
-                "client_id_string": client_id,
+                "client_id": client_id,
                 "username": username,
                 "password": password,
             },
@@ -640,7 +640,7 @@ class ThingSpeak(AppBase):
             name=f"{ThingSpeak.APP_NAME}_connect_mqtt_broker_c",
             function=self.cellular.mqtt.connect_broker,
             function_params={
-                "client_id_string": client_id,
+                "client_id": client_id,
                 "username": username,
                 "password": password,
             },

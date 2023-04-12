@@ -168,7 +168,7 @@ class Azure:
             function_params={
                 "username": username,
                 "password": "unused",
-                "client_id_string": client_id,
+                "client_id": client_id,
             },
         )
 
@@ -332,7 +332,7 @@ class Azure:
             function_params={
                 "username": username,
                 "password": "unused",
-                "client_id_string": client_id,
+                "client_id": client_id,
             },
         )
 
