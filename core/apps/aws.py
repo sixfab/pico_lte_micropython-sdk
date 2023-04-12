@@ -4,32 +4,37 @@ Module for including functions of AWS IoT operations of picocell module.
 
 import time
 
-from core.temp import config
+from core.apps.app_base import AppBase
 from core.utils.manager import StateManager, Step
 from core.utils.enums import Status
 from core.utils.helpers import get_parameter
+from core.temp import config
 
 
-class AWS:
+class AWS(AppBase):
     """
     Class for including functions of AWS IoT operations of picocell module.
     """
 
-    cache = config["cache"]
+    APP_NAME = "aws"
+    CERTS_NEEDED = ["root_ca", "device_cert", "private_key"]
 
-    def __init__(self, cellular, wifi):
-        """
-        Constructor of the class.
-
-        Parameters
-        ----------
-        cache : dict
-            Cache of the class.
-        """
+    def __init__(self, cellular, wifi, keycase):
+        """It is used to initialize the AWS class."""
         self.cellular = cellular
         self.wifi = wifi
+        self.keycase = keycase
 
-    def publish_message(self, payload, host=None, port=None, topic=None):
+    def __publish_message_on_wifi(
+        self,
+        message,
+        host=None,
+        port=None,
+        topic=None,
+        client_id=None,
+        username=None,
+        secure=None,
+    ):
         """
         Function for publishing a message to AWS IoT by using MQTT.
 
@@ -50,125 +55,92 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["aws", "mqtts", "host"])
-
+            host = get_parameter([AWS.APP_NAME, "host"])
         if port is None:
-            port = get_parameter(["aws", "mqtts", "port"], 8883)
-
+            port = get_parameter([AWS.APP_NAME, "port"], 8883)
         if topic is None:
-            topic = get_parameter(["aws", "mqtts", "pub_topic"])
+            topic = get_parameter([AWS.APP_NAME, "pub_topic"])
+        if secure is None:
+            secure = get_parameter([AWS.APP_NAME, "secure_storage"], False)
+        if client_id is None:
+            client_id = get_parameter([AWS.APP_NAME, "client_id"], "Sixfab-PicoLTE")
 
-        # Check if client is connected to the broker
-        step_check_mqtt_connected = Step(
-            function=self.cellular.mqtt.is_connected_to_broker,
-            name="check_connected",
-            success="publish_message",
-            fail="check_opened",
+        # Load the certificates.
+        cert_locs = self.keycase.load_certificates(
+            AWS.APP_NAME, AWS.CERTS_NEEDED, for_connection="wifi"
         )
+        if cert_locs is None:
+            return {"status": Status.ERROR, "response": "Certificate loading failed."}
 
-        # Check if client connected to AWS IoT
-        step_check_mqtt_opened = Step(
-            function=self.cellular.mqtt.has_opened_connection,
-            name="check_opened",
-            success="connect_mqtt_broker",
-            fail="deactivate_pdp_context",
-        )
-
-        # If client is not connected to the broker and have no open connection with AWS IoT
-        # Deactivate PDP and begin first step of the state machine
-        step_deactivate_pdp_context = Step(
-            function=self.cellular.network.deactivate_pdp_context,
-            name="deactivate_pdp_context",
-            success="load_certificates",
+        # Create steps for the state manager.
+        step_get_wifi_ready = Step(
+            name=f"{AWS.APP_NAME}_get_wifi_ready",
+            function=self.wifi.get_ready,
+            success=f"{AWS.APP_NAME}_check_mqtt_is_connected",
             fail="failure",
         )
 
-        step_load_certificates = Step(
-            function=self.cellular.auth.load_certificates,
-            name="load_certificates",
-            success="register_network",
-            fail="failure",
-        )
-        step_network_reg = Step(
-            function=self.cellular.network.register_network,
-            name="register_network",
-            success="get_ready_pdp",
-            fail="failure",
-        )
-
-        step_get_pdp_ready = Step(
-            function=self.cellular.network.get_pdp_ready,
-            name="get_ready_pdp",
-            success="ssl_configuration",
-            fail="failure",
-        )
-
-        step_ssl_configuration = Step(
-            function=self.cellular.ssl.configure_for_x509_certification,
-            name="ssl_configuration",
-            success="set_mqtt_version",
-            fail="failure",
-            cachable=True,
-        )
-
-        step_set_mqtt_version = Step(
-            function=self.cellular.mqtt.set_version_config,
-            name="set_mqtt_version",
-            success="set_mqtt_ssl_mode",
-            fail="failure",
-        )
-
-        step_set_mqtt_ssl_mode = Step(
-            function=self.cellular.mqtt.set_ssl_mode_config,
-            name="set_mqtt_ssl_mode",
-            success="open_mqtt_connection",
-            fail="failure",
-        )
-
-        step_open_mqtt_connection = Step(
-            function=self.cellular.mqtt.open_connection,
-            name="open_mqtt_connection",
-            success="connect_mqtt_broker",
-            fail="failure",
+        step_check_mqtt_is_connected = Step(
+            name=f"{AWS.APP_NAME}_check_mqtt_is_connected",
+            function=self.wifi.mqtt.is_connected,
             function_params={"host": host, "port": port},
+            success=f"{AWS.APP_NAME}_publish_message",
+            fail=f"{AWS.APP_NAME}_reconnect_mqtt",
         )
 
-        step_connect_mqtt_broker = Step(
-            function=self.cellular.mqtt.connect_broker,
-            name="connect_mqtt_broker",
-            success="publish_message",
+        step_reconnect_mqtt = Step(
+            name=f"{AWS.APP_NAME}_reconnect_mqtt",
+            function=self.wifi.mqtt.reconnect,
+            success=f"{AWS.APP_NAME}_check_mqtt_is_connected",
+            fail=f"{AWS.APP_NAME}_close_and_reconnect_mqtt",
+        )
+
+        step_close_and_reconnect_mqtt = Step(
+            name=f"{AWS.APP_NAME}_close_and_reconnect_mqtt",
+            function=self.wifi.mqtt.close_connection,
+            success=f"{AWS.APP_NAME}_connect_to_mqtt",
+            fail=f"{AWS.APP_NAME}_connect_to_mqtt",
+        )
+
+        step_connect_to_mqtt = Step(
+            name=f"{AWS.APP_NAME}_connect_to_mqtt",
+            function=self.wifi.mqtt.open_connection,
+            function_params={
+                "host": host,
+                "port": port,
+                "client_id": client_id,
+                "ssl_device_cert": "/" + cert_locs[1],
+                "ssl_private_key": "/" + cert_locs[2],
+            },
+            success=f"{AWS.APP_NAME}_check_mqtt_is_connected",
             fail="failure",
         )
 
         step_publish_message = Step(
-            function=self.cellular.mqtt.publish_message,
-            name="publish_message",
+            name=f"{AWS.APP_NAME}_publish_message",
+            function=self.wifi.mqtt.publish_message,
+            function_params={"payload": message, "topic": topic, "qos": 1},
             success="success",
             fail="failure",
-            function_params={"payload": payload, "topic": topic},
-            cachable=True,
         )
 
-        # Add cache if it is not already existed
-        function_name = "aws.publish_message"
+        # Create the state manager.
+        state_manager = StateManager(
+            function_name=f"{AWS.APP_NAME}_publish_message_on_wifi",
+            first_step=step_get_wifi_ready,
+        )
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        # Add the steps to the state manager.
+        state_manager.add_step(step_get_wifi_ready)
+        state_manager.add_step(step_check_mqtt_is_connected)
+        state_manager.add_step(step_reconnect_mqtt)
+        state_manager.add_step(step_close_and_reconnect_mqtt)
+        state_manager.add_step(step_connect_to_mqtt)
+        state_manager.add_step(step_publish_message)
 
-        sm.add_step(step_check_mqtt_connected)
-        sm.add_step(step_check_mqtt_opened)
-        sm.add_step(step_deactivate_pdp_context)
-        sm.add_step(step_load_certificates)
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_ssl_configuration)
-        sm.add_step(step_set_mqtt_version)
-        sm.add_step(step_set_mqtt_ssl_mode)
-        sm.add_step(step_open_mqtt_connection)
-        sm.add_step(step_connect_mqtt_broker)
-        sm.add_step(step_publish_message)
-
+        # Run the state manager.
         while True:
-            result = sm.run()
+            result = state_manager.run()
 
             if result["status"] == Status.SUCCESS:
                 return result
@@ -176,255 +148,161 @@ class AWS:
                 return result
             time.sleep(result["interval"])
 
-    def subscribe_topics(self, host=None, port=None, topics=None):
+    def __publish_message_on_cellular(
+        self,
+        message,
+        host=None,
+        port=None,
+        topic=None,
+        client_id=None,
+        username=None,
+        secure=None,
+    ):
         """
-        Function for subscribing to topics of AWS.
-
-        Parameters
-        ----------
-        topics : list
-            List of topics.
-
-        Returns
-        -------
-        dict
-            Result that includes "status" and "response" keys
-        """
-        if topics is None:
-            topics = get_parameter(["aws", "mqtts", "sub_topics"])
-
-        if host is None:
-            host = get_parameter(["aws", "mqtts", "host"])
-
-        if port is None:
-            port = get_parameter(["aws", "mqtts", "port"], 8883)
-
-        # Check if client is connected to the broker
-        step_check_mqtt_connected = Step(
-            function=self.cellular.mqtt.is_connected_to_broker,
-            name="check_connected",
-            success="subscribe_topics",
-            fail="check_opened",
-            retry=2,
-        )
-
-        # Check if client connected to AWS IoT
-        step_check_mqtt_opened = Step(
-            function=self.cellular.mqtt.has_opened_connection,
-            name="check_opened",
-            success="connect_mqtt_broker",
-            fail="deactivate_pdp_context",
-            retry=2,
-        )
-
-        # If client is not connected to the broker and have no open connection with AWS IoT
-        # Deactivate PDP and begin first step of the state machine
-        step_deactivate_pdp_context = Step(
-            function=self.cellular.network.deactivate_pdp_context,
-            name="deactivate_pdp_context",
-            success="load_certificates",
-            fail="failure",
-        )
-
-        step_load_certificates = Step(
-            function=self.cellular.auth.load_certificates,
-            name="load_certificates",
-            success="register_network",
-            fail="failure",
-        )
-
-        step_network_reg = Step(
-            function=self.cellular.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
-        )
-
-        step_get_pdp_ready = Step(
-            function=self.cellular.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="ssl_configuration",
-            fail="failure",
-        )
-
-        step_ssl_configuration = Step(
-            function=self.cellular.ssl.configure_for_x509_certification,
-            name="ssl_configuration",
-            success="set_mqtt_version",
-            fail="failure",
-        )
-
-        step_set_mqtt_version = Step(
-            function=self.cellular.mqtt.set_version_config,
-            name="set_mqtt_version",
-            success="set_mqtt_ssl_mode",
-            fail="failure",
-        )
-
-        step_set_mqtt_ssl_mode = Step(
-            function=self.cellular.mqtt.set_ssl_mode_config,
-            name="set_mqtt_ssl_mode",
-            success="open_mqtt_connection",
-            fail="failure",
-        )
-
-        step_open_mqtt_connection = Step(
-            function=self.cellular.mqtt.open_connection,
-            name="open_mqtt_connection",
-            success="connect_mqtt_broker",
-            fail="failure",
-            function_params={"host": host, "port": port},
-        )
-
-        step_connect_mqtt_broker = Step(
-            function=self.cellular.mqtt.connect_broker,
-            name="connect_mqtt_broker",
-            success="subscribe_topics",
-            fail="failure",
-        )
-
-        step_subscribe_topics = Step(
-            function=self.cellular.mqtt.subscribe_topics,
-            name="subscribe_topics",
-            success="success",
-            fail="failure",
-            function_params={"topics": topics},
-            cachable=True,
-        )
-
-        # Add cache if it is not already existed
-        function_name = "aws.subscribe_message"
-
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
-
-        sm.add_step(step_check_mqtt_connected)
-        sm.add_step(step_check_mqtt_opened)
-        sm.add_step(step_deactivate_pdp_context)
-        sm.add_step(step_load_certificates)
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_ssl_configuration)
-        sm.add_step(step_set_mqtt_version)
-        sm.add_step(step_set_mqtt_ssl_mode)
-        sm.add_step(step_open_mqtt_connection)
-        sm.add_step(step_connect_mqtt_broker)
-        sm.add_step(step_subscribe_topics)
-
-        while True:
-            result = sm.run()
-
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
-
-    def read_messages(self):
-        """
-        Read messages from subscribed topics.
-        """
-        return self.cellular.mqtt.read_messages()
-
-    def post_message(self, payload, url=None):
-        """
-        Function for publishing a message to AWS IoT by using HTTPS.
+        Function for publishing a message to AWS IoT by using MQTT.
 
         Parameters
         ----------
         payload : str
             Payload of the message.
-        url : str
-            URL of the AWS device shadow
+        host : str
+            Host of the MQTT broker.
+        port : int
+            Port of the MQTT broker.
+        topic : str
+            Topic of the message.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
-        if url is None:
-            endpoint = get_parameter(["aws", "https", "endpoint"])
-            topic = get_parameter(["aws", "https", "topic"])
+        if host is None:
+            host = get_parameter([AWS.APP_NAME, "host"])
+        if port is None:
+            port = get_parameter([AWS.APP_NAME, "port"], 8883)
+        if topic is None:
+            topic = get_parameter([AWS.APP_NAME, "pub_topic"])
+        if secure is None:
+            secure = get_parameter([AWS.APP_NAME, "secure_storage"], False)
 
-            if endpoint and topic:
-                url = f"https://{endpoint}:8443/topics/{topic}?qos=1"
+        # Load the certificates to the cellular modem.
+        cert_locs = self.keycase.load_certificates(
+            AWS.APP_NAME, AWS.CERTS_NEEDED, for_connection="cellular", secure=secure
+        )
+        if cert_locs is None:
+            return {"status": Status.ERROR, "response": "Certificate loading failed."}
 
-        step_load_certificates = Step(
-            function=self.cellular.auth.load_certificates,
-            name="load_certificates",
-            success="register_network",
+        # Check if client is connected to the broker
+        step_check_mqtt_connected = Step(
+            name=f"{AWS.APP_NAME}_check_connected",
+            function=self.cellular.mqtt.is_connected_to_broker,
+            success=f"{AWS.APP_NAME}_publish_message",
+            fail=f"{AWS.APP_NAME}_check_opened",
+        )
+
+        # Check if client connected to AWS IoT
+        step_check_mqtt_opened = Step(
+            name=f"{AWS.APP_NAME}_check_opened",
+            function=self.cellular.mqtt.has_opened_connection,
+            success=f"{AWS.APP_NAME}_connect_mqtt_broker",
+            fail=f"{AWS.APP_NAME}_deactivate_pdp_context",
+        )
+
+        # If client is not connected to the broker and have no open connection with AWS IoT
+        # Deactivate PDP and begin first step of the state machine
+        step_deactivate_pdp_context = Step(
+            name=f"{AWS.APP_NAME}_deactivate_pdp_context",
+            function=self.cellular.network.deactivate_pdp_context,
+            success=f"{AWS.APP_NAME}_register_network",
             fail="failure",
         )
+
         step_network_reg = Step(
+            name=f"{AWS.APP_NAME}_register_network",
             function=self.cellular.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
+            success=f"{AWS.APP_NAME}_get_ready_pdp",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
+            name=f"{AWS.APP_NAME}_get_ready_pdp",
             function=self.cellular.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="ssl_configuration",
+            success=f"{AWS.APP_NAME}_ssl_configuration",
             fail="failure",
         )
 
         step_ssl_configuration = Step(
+            name=f"{AWS.APP_NAME}_ssl_configuration",
             function=self.cellular.ssl.configure_for_x509_certification,
-            name="ssl_configuration",
-            success="http_ssl_configuration",
+            function_params={
+                "root_ca": cert_locs[0],
+                "device_cert": cert_locs[1],
+                "private_key": cert_locs[2],
+            },
+            success=f"{AWS.APP_NAME}_set_mqtt_version",
             fail="failure",
-        )
-
-        step_http_ssl_configuration = Step(
-            function=self.cellular.http.set_ssl_context_id,
-            name="http_ssl_configuration",
-            success="set_server_url",
-            fail="failure",
-            function_params={"cid": 2},
-        )
-
-        step_set_server_url = Step(
-            function=self.cellular.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.cellular.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={"data": payload},
             cachable=True,
-            interval=2,
         )
 
-        step_read_response = Step(
-            function=self.cellular.http.read_response,
-            name="read_response",
+        step_set_mqtt_version = Step(
+            name=f"{AWS.APP_NAME}_set_mqtt_version",
+            function=self.cellular.mqtt.set_version_config,
+            success=f"{AWS.APP_NAME}_set_mqtt_ssl_mode",
+            fail="failure",
+        )
+
+        step_set_mqtt_ssl_mode = Step(
+            name=f"{AWS.APP_NAME}_set_mqtt_ssl_mode",
+            function=self.cellular.mqtt.set_ssl_mode_config,
+            success=f"{AWS.APP_NAME}_open_mqtt_connection",
+            fail="failure",
+        )
+
+        step_open_mqtt_connection = Step(
+            name=f"{AWS.APP_NAME}_open_mqtt_connection",
+            function=self.cellular.mqtt.open_connection,
+            function_params={"host": host, "port": port},
+            success=f"{AWS.APP_NAME}_connect_mqtt_broker",
+            fail="failure",
+        )
+
+        step_connect_mqtt_broker = Step(
+            name=f"{AWS.APP_NAME}_connect_mqtt_broker",
+            function=self.cellular.mqtt.connect_broker,
+            success=f"{AWS.APP_NAME}_publish_message",
+            fail="failure",
+        )
+
+        step_publish_message = Step(
+            name=f"{AWS.APP_NAME}_publish_message",
+            function=self.cellular.mqtt.publish_message,
+            function_params={"payload": payload, "topic": topic},
             success="success",
             fail="failure",
-            function_params={"desired_response": '"message":"OK"'},
+            cachable=True,
         )
 
-        # Add cache if it is not already existed
-        function_name = "aws.post_message"
+        state_manager = StateManager(
+            function_name=f"{AWS.APP_NAME}_publish_message",
+            first_step=step_check_mqtt_connected,
+        )
 
-        sm = StateManager(first_step=step_load_certificates, function_name=function_name)
-
-        sm.add_step(step_load_certificates)
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_ssl_configuration)
-        sm.add_step(step_http_ssl_configuration)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
+        state_manager.add_step(step_check_mqtt_connected)
+        state_manager.add_step(step_check_mqtt_opened)
+        state_manager.add_step(step_deactivate_pdp_context)
+        state_manager.add_step(step_network_reg)
+        state_manager.add_step(step_get_pdp_ready)
+        state_manager.add_step(step_ssl_configuration)
+        state_manager.add_step(step_set_mqtt_version)
+        state_manager.add_step(step_set_mqtt_ssl_mode)
+        state_manager.add_step(step_open_mqtt_connection)
+        state_manager.add_step(step_connect_mqtt_broker)
+        state_manager.add_step(step_publish_message)
 
         while True:
-            result = sm.run()
+            result = state_manager.run()
+
             if result["status"] == Status.SUCCESS:
                 return result
             elif result["status"] == Status.ERROR:

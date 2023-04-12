@@ -67,8 +67,8 @@ class MQTT:
         client_id=None,
         username=None,
         password=None,
-        ssl=False,
-        ssl_params=None,
+        ssl_device_cert=None,
+        ssl_private_key=None,
     ):
         """
         Open connection to MQTT server with WiFi.
@@ -87,8 +87,10 @@ class MQTT:
             Password for authentication.
         ssl : bool, default: False
             Enable SSL.
-        ssl_params : dict, default: None
-            SSL parameters.
+        ssl_device_cert : str, default: None
+            Device certificate file path.
+        ssl_private_key : str, default: None
+            Private key file path.
 
         Returns
         -------
@@ -107,11 +109,22 @@ class MQTT:
             host = get_parameter(["mqtts", "host"])
         if port is None:
             port = get_parameter(["mqtts", "port"], 8883)  # default port is 8883
-        if username is None and password is None:
-            username = get_parameter(["mqtts", "username"])
-            password = get_parameter(["mqtts", "password"])
-        if client_id is None:
-            client_id = get_parameter(["mqtts", "client_id"], "Picocell")
+
+        ssl_params = None
+        is_ssl = False
+        if ssl_device_cert and ssl_private_key:
+            device_cert = ""
+            private_key = ""
+            is_ssl = True
+            try:
+                with open(ssl_device_cert, "rb") as device_file:
+                    device_cert = device_file.read()
+                with open(ssl_private_key, "rb") as private_file:
+                    private_key = private_file.read()
+            except Exception as error:
+                debug.debug(f"File not found or can't be opened: {error}.")
+            ssl_params = {"cert": device_cert, "key": private_key, "server_side": False}
+            debug.debug("SSL parameters set successfully.")
 
         # Initialize MQTT client.
         self.mqtt_client = MQTTClient(
@@ -120,12 +133,14 @@ class MQTT:
             port=port,
             user=username,
             password=password,
-            ssl=ssl,
+            ssl=is_ssl,
             ssl_params=ssl_params,
         )
 
+        debug.debug("MQTT client initialized successfully. Trying to connect...")
         # Connect to MQTT server.
         result = self.mqtt_client.connect()
+        debug.debug(f"MQTT connection result: {result}.")
         if result != 0:
             self.mqtt_client = None
             return {
@@ -236,7 +251,7 @@ class MQTT:
             topic = get_parameter(["mqtts", "topic"])
 
         # Publish message.
-        self.mqtt_client.publish(topic, payload, qos, retain)
+        self.mqtt_client.publish(topic, payload, qos=qos, retain=retain)
         debug.debug(f"Message ({payload}) published to topic '{topic}'.")
         return {
             "status": Status.SUCCESS,
@@ -364,9 +379,7 @@ class MQTT:
             }
 
         # If already connected to given host and port, debug it.
-        debug.debug(
-            f"MQTT client is connected to {self.host}:{self.port}."
-        )
+        debug.debug(f"MQTT client is connected to {self.host}:{self.port}.")
 
         # Ping MQTT server to check if connected.
         try:
