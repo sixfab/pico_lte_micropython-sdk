@@ -4,7 +4,7 @@ incoming webhooks feature of Slack API.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -15,11 +15,11 @@ config.json
 }
 """
 
-from core.modem import Modem
-from core.temp import debug
+from pico_lte.core import PicoLTE
+from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 debug.info("Sending message to slack channel...")
-result = modem.slack.send_message("It is test message from Picocell!")
+result = picoLTE.slack.send_message("It is test message from PicoLTE!")
 debug.info("Result:", result)

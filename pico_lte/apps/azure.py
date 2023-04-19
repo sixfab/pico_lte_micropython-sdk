@@ -1,23 +1,23 @@
 """
-Module for including functions of AWS IoT operations of picocell module.
+Module for including functions of Azure IoT operations of PicoLTE module.
 """
 
 import time
 
-from core.temp import config
-from core.utils.manager import StateManager, Step
-from core.utils.status import Status
-from core.utils.helpers import get_parameter
+from pico_lte.common import config
+from pico_lte.utils.manager import StateManager, Step
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import get_parameter
 
 
-class AWS:
+class Azure:
     """
-    Class for including functions of AWS IoT operations of picocell module.
+    Class for including functions of Azure IoT operations of PicoLTE module.
     """
 
     cache = config["cache"]
 
-    def __init__(self, base, auth, network, ssl, mqtt, http):
+    def __init__(self, base, auth, network, ssl, mqtt, http, device_id=None, hub_name=None):
         """
         Constructor of the class.
 
@@ -33,9 +33,14 @@ class AWS:
         self.mqtt = mqtt
         self.http = http
 
-    def publish_message(self, payload, host=None, port=None, topic=None):
+        self.device_id = get_parameter(["azure", "device_id"]) if (device_id is None) else device_id
+        self.hub_name = get_parameter(["azure", "hub_name"]) if (hub_name is None) else hub_name
+
+    def publish_message(
+        self, payload, host=None, port=None, topic=None, client_id=None, username=None
+    ):
         """
-        Function for publishing a message to AWS IoT by using MQTT.
+        Function for publishing a message to Azure IoT Hub by using MQTT.
 
         Parameters
         ----------
@@ -53,14 +58,36 @@ class AWS:
         dict
             Result that includes "status" and "response" keys
         """
-        if host is None:
-            host = get_parameter(["aws", "mqtts", "host"])
+        host = (
+            get_parameter(["azure", "mqtts", "host"], f"{self.hub_name}.azure-devices.net")
+            if (host is None)
+            else host
+        )
 
-        if port is None:
-            port = get_parameter(["aws", "mqtts", "port"], 8883)
+        port = get_parameter(["azure", "mqtts", "port"], 8883) if (port is None) else port
 
-        if topic is None:
-            topic = get_parameter(["aws", "mqtts", "pub_topic"])
+        topic = (
+            get_parameter(
+                ["azure", "mqtts", "pub_topic"], "$iothub/twin/PATCH/properties/reported/?$rid=1"
+            )
+            if (topic is None)
+            else topic
+        )
+
+        client_id = (
+            get_parameter(["azure", "mqtts", "client_id"], self.device_id)
+            if (client_id is None)
+            else client_id
+        )
+
+        username = (
+            get_parameter(
+                ["azure", "mqtts", "username"],
+                f"{self.hub_name}.azure-devices.net/{self.device_id}/?api-version=2021-04-12",
+            )
+            if (username is None)
+            else username
+        )
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -142,6 +169,11 @@ class AWS:
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
+            function_params={
+                "username": username,
+                "password": "unused",
+                "client_id_string": client_id,
+            },
         )
 
         step_publish_message = Step(
@@ -154,7 +186,7 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "aws.publish_message"
+        function_name = "azure.publish_message"
 
         sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
@@ -180,9 +212,9 @@ class AWS:
                 return result
             time.sleep(result["interval"])
 
-    def subscribe_topics(self, host=None, port=None, topics=None):
+    def subscribe_topics(self, host=None, port=None, topics=None, client_id=None, username=None):
         """
-        Function for subscribing to topics of AWS.
+        Function for subscribing to topics of Azure IoT Hub.
 
         Parameters
         ----------
@@ -194,14 +226,30 @@ class AWS:
         dict
             Result that includes "status" and "response" keys
         """
-        if topics is None:
-            topics = get_parameter(["aws", "mqtts", "sub_topics"])
+        host = (
+            get_parameter(["azure", "mqtts", "host"], f"{self.hub_name}.azure-devices.net")
+            if (host is None)
+            else host
+        )
 
-        if host is None:
-            host = get_parameter(["aws", "mqtts", "host"])
+        port = get_parameter(["azure", "mqtts", "port"], 8883) if (port is None) else port
 
-        if port is None:
-            port = get_parameter(["aws", "mqtts", "port"], 8883)
+        topics = get_parameter(["azure", "mqtts", "sub_topics"]) if (topics is None) else topics
+
+        client_id = (
+            get_parameter(["azure", "mqtts", "client_id"], self.device_id)
+            if (client_id is None)
+            else client_id
+        )
+
+        username = (
+            get_parameter(
+                ["azure", "mqtts", "username"],
+                f"{self.hub_name}.azure-devices.net/{self.device_id}/?api-version=2021-04-12",
+            )
+            if (username is None)
+            else username
+        )
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -285,6 +333,11 @@ class AWS:
             name="connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
+            function_params={
+                "username": username,
+                "password": "unused",
+                "client_id_string": client_id,
+            },
         )
 
         step_subscribe_topics = Step(
@@ -297,7 +350,7 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "aws.subscribe_message"
+        function_name = "azure.subscribe_message"
 
         sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
@@ -329,108 +382,27 @@ class AWS:
         """
         return self.mqtt.read_messages()
 
-    def post_message(self, payload, url=None):
-        """
-        Function for publishing a message to AWS IoT by using HTTPS.
-
-        Parameters
-        ----------
-        payload : str
-            Payload of the message.
-        url : str
-            URL of the AWS device shadow
+    def subscribe_to_device_commands(self):
+        """Subscribe to the device commands from Azure IoT Hub
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
-        if url is None:
-            endpoint = get_parameter(["aws", "https", "endpoint"])
-            topic = get_parameter(["aws", "https", "topic"])
-
-            if endpoint and topic:
-                url = f"https://{endpoint}:8443/topics/{topic}?qos=1"
-
-        step_load_certificates = Step(
-            function=self.auth.load_certificates,
-            name="load_certificates",
-            success="register_network",
-            fail="failure",
-        )
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        return self.subscribe_topics(
+            topics=[(f"devices/{self.device_id}/messages/devicebound/#", 1)]
         )
 
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="ssl_configuration",
-            fail="failure",
-        )
+    def retrieve_device_twin_status(self):
+        """It sends a request to the MQTT server for retriving the "desired" and
+        "reported" status of the device twin. You need to call read_messages() after
+        this method.
 
-        step_ssl_configuration = Step(
-            function=self.ssl.configure_for_x509_certification,
-            name="ssl_configuration",
-            success="http_ssl_configuration",
-            fail="failure",
-        )
-
-        step_http_ssl_configuration = Step(
-            function=self.http.set_ssl_context_id,
-            name="http_ssl_configuration",
-            success="set_server_url",
-            fail="failure",
-            function_params={"cid": 2},
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={"data": payload},
-            cachable=True,
-            interval=2,
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": '"message":"OK"'},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "aws.post_message"
-
-        sm = StateManager(first_step=step_load_certificates, function_name=function_name)
-
-        sm.add_step(step_load_certificates)
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_ssl_configuration)
-        sm.add_step(step_http_ssl_configuration)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
+        """
+        self.subscribe_topics(topics=["$iothub/twin/res/#", 1])
+        return self.publish_message("", topic="$iothub/twin/GET/?$rid=1")

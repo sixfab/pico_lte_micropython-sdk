@@ -3,7 +3,7 @@ Example code for publising data to Azure IoT Hub Device twin by using MQTT.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -25,14 +25,14 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 "device_id" is the only ones needed.
 """
 import json
-from core.modem import Modem
-from core.temp import debug
+from pico_lte.core import PicoLTE
+from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 payload_json = {"App": "Azure MQTT Example"}
 
 debug.info("Publishing data to Azure IoT Hub...")
 payload = json.dumps(payload_json)
-result = modem.azure.publish_message(payload)
+result = picoLTE.azure.publish_message(payload)
 debug.info("Result", result)

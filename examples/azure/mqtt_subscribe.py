@@ -3,7 +3,7 @@ Example code for subscribing topics from Azure IoT Hub by using MQTT.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -28,14 +28,14 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 "device_id" is the only ones needed.
 """
 import time
-from core.modem import Modem
-from core.temp import debug
-from core.utils.status import Status
+from pico_lte.core import PicoLTE
+from pico_lte.common import debug
+from pico_lte.utils.status import Status
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 debug.info("Subscribing to topics...")
-result = modem.azure.subscribe_topics()
+result = picoLTE.azure.subscribe_topics()
 debug.info(result)
 
 if result.get("status") == Status.SUCCESS:
@@ -43,6 +43,6 @@ if result.get("status") == Status.SUCCESS:
     # Check is there any data in subscribed topics
     # in each 5 seconds for 5 times
     for _ in range(0, 5):
-        result = modem.azure.read_messages()
+        result = picoLTE.azure.read_messages()
         debug.info(result.get("messages"))
         time.sleep(5)

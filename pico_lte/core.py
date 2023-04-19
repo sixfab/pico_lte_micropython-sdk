@@ -1,36 +1,33 @@
 """
-Module for ease to use of cellular modem. This module includes required functions
+Module for ease to use of cellular PicoLTE. This module includes required functions
 for working with cellular modem without need of AT command knowledge.
 """
+from pico_lte.common import config
 
-from core.temp import config
+from pico_lte.utils.helpers import read_json_file
+from pico_lte.utils.atcom import ATCom
 
-from core.utils.helpers import read_json_file
-from core.utils.atcom import ATCom
+from pico_lte.modules.base import Base
+from pico_lte.modules.auth import Auth
+from pico_lte.modules.file import File
+from pico_lte.modules.http import HTTP
+from pico_lte.modules.mqtt import MQTT
+from pico_lte.modules.network import Network
+from pico_lte.modules.peripherals import Periph
+from pico_lte.modules.ssl import SSL
+from pico_lte.modules.gps import GPS
 
-from core.modules.ulp import ULP
-from core.modules.base import Base
-from core.modules.auth import Auth
-from core.modules.config import Config
-from core.modules.file import File
-from core.modules.http import HTTP
-from core.modules.mqtt import MQTT
-from core.modules.network import Network
-from core.modules.peripherals import Periph
-from core.modules.ssl import SSL
-from core.modules.gps import GPS
-
-from core.apps.aws import AWS
-from core.apps.slack import Slack
-from core.apps.telegram import Telegram
-from core.apps.thingspeak import ThingSpeak
-from core.apps.azure import Azure
-from core.apps.scriptr import Scriptr
+from pico_lte.apps.aws import AWS
+from pico_lte.apps.slack import Slack
+from pico_lte.apps.telegram import Telegram
+from pico_lte.apps.thingspeak import ThingSpeak
+from pico_lte.apps.azure import Azure
+from pico_lte.apps.scriptr import Scriptr
 
 
-class Modem:
+class PicoLTE:
     """
-    Modem class that contains all functions for working with cellular modem
+    PicoLTE modem class that contains all functions for working with cellular modem
     """
 
     def __init__(self):
@@ -39,13 +36,11 @@ class Modem:
         """
         config["params"] = read_json_file("config.json")
 
-        self.ulp = ULP()
         self.peripherals = Periph()
         self.atcom = ATCom()
 
         self.base = Base(self.atcom)
         self.auth = Auth(self.atcom)
-        self.config = Config(self.atcom)
         self.file = File(self.atcom)
         self.network = Network(self.atcom, self.base)
         self.ssl = SSL(self.atcom)

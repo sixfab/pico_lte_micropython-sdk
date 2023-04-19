@@ -5,13 +5,13 @@ Test module for the utils.atcom module.
 import pytest
 from machine import UART
 
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 class TestATCom:
     """The test class for ATCom module which lets us to communicate
-    with the modem.
+    with the PicoLTE.
     """
 
     @pytest.fixture
@@ -21,7 +21,7 @@ class TestATCom:
 
     @pytest.fixture
     def example_response(self):
-        """A fixtures simulates arbitrary response of the modem."""
+        """A fixtures simulates arbitrary response of the PicoLTE."""
         return [
             "+Q",
             "HT",
@@ -42,7 +42,7 @@ class TestATCom:
 
     @pytest.fixture
     def example_urc_response(self):
-        """A fixtures simulates arbitrary URC response of the modem."""
+        """A fixtures simulates arbitrary URC response of the PicoLTE."""
         return [
             "\r\nOK\r\n",
             "CONN",
@@ -108,7 +108,7 @@ class TestATCom:
         assert result["response"] == "timeout"
 
     def test_get_response_no_informative_response(self, mocker, atcom):
-        """Test the get_response() method with no informative response from modem."""
+        """Test the get_response() method with no informative response from PicoLTE."""
         mocker.patch("machine.UART.any", side_effect=[True, True, False])
         mocker.patch("machine.UART.read", return_value="OK".encode())
 
@@ -255,10 +255,10 @@ class TestATCom:
     )
     def test_send_at_comm(self, mocker, atcom, return_dict):
         """Test the send_at_comm() method."""
-        mocker.patch("core.utils.atcom.ATCom.send_at_comm_once", return_value=None)
+        mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm_once", return_value=None)
         mocker.patch("time.sleep", return_value=None)
-        mocker.patch("core.utils.atcom.ATCom.get_urc_response", return_value=return_dict)
-        mocker.patch("core.utils.atcom.ATCom.get_response", return_value=return_dict)
+        mocker.patch("pico_lte.utils.atcom.ATCom.get_urc_response", return_value=return_dict)
+        mocker.patch("pico_lte.utils.atcom.ATCom.get_response", return_value=return_dict)
 
         result_one = atcom.send_at_comm("example", desired="CONNECT", fault="ERROR", urc=True)
         assert result_one["status"] == return_dict["status"]

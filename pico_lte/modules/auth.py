@@ -1,18 +1,18 @@
 """
-Module for including authentication functions of picocell module.
+Module for including authentication functions of PicoLTE module.
 """
 
 import os
 
-from core.temp import debug
-from core.utils.status import Status
-from core.utils.helpers import read_file
-from core.modules.file import File
+from pico_lte.common import debug
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import read_file
+from pico_lte.modules.file import File
 
 
 class Auth:
     """
-    Class for including authentication functions of picocell module.
+    Class for including authentication functions of PicoLTE module.
     """
 
     def __init__(self, atcom):
@@ -81,8 +81,8 @@ class Auth:
                     client_key_in_modem = True
 
             if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
-                debug.info("Certificates found in modem.")
-                return {"status": Status.SUCCESS, "response": "Certificates found in modem."}
+                debug.info("Certificates found in PicoLTE.")
+                return {"status": Status.SUCCESS, "response": "Certificates found in PicoLTE."}
             else:
                 debug.error("Certificates couldn't find in modem!")
                 return {"status": Status.ERROR, "response": "Certificates couldn't find in modem!"}

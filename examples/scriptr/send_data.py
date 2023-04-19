@@ -1,7 +1,7 @@
 """
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 config.json
 {
@@ -12,14 +12,14 @@ config.json
 }
 """
 import json
-from core.modem import Modem
-from core.temp import debug
+from pico_lte.core import PicoLTE
+from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 payload_json = {"temp": "25"}
 payload = json.dumps(payload_json)
 
 debug.info("Sending data to Scriptr.io script...")
-result = modem.scriptr.send_data(payload)
+result = picoLTE.scriptr.send_data(payload)
 debug.info("Result:", result)

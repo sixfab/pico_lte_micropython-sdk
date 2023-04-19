@@ -4,9 +4,9 @@ Test module for the modules.file module.
 
 import pytest
 
-from core.modules.file import File
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.file import File
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 class TestFile:
@@ -28,7 +28,7 @@ class TestFile:
     def test_get_file_list(self, mocker, file):
         """This method checks the get_file_list() with mocked ATCom responses."""
         mocked_return = {"status": Status.SUCCESS, "response": ["some", "response"]}
-        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_return)
+        mocking = mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", return_value=mocked_return)
 
         result = file.get_file_list()
 
@@ -38,7 +38,7 @@ class TestFile:
     def test_delete_file_from_modem(self, mocker, file):
         """This method checks the delete_file_from_modem() with mocked ATCom responses."""
         mocked_return = {"status": Status.SUCCESS, "response": ["some", "response"]}
-        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_return)
+        mocking = mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", return_value=mocked_return)
 
         result = file.delete_file_from_modem("file.pem")
 
@@ -48,13 +48,13 @@ class TestFile:
     def test_upload_file_to_modem_ordinary_case(self, mocker, file):
         """This method checks the upload_file_to_modem() with mocked ATCom responses."""
         # Mock the necessary function.
-        mocker.patch("core.modules.file.len", return_value=60)
-        mocker.patch("core.utils.atcom.ATCom.send_at_comm_once")
+        mocker.patch("pico_lte.modules.file.len", return_value=60)
+        mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm_once")
         mocked_responses = [
             {"status": Status.SUCCESS, "response": ["CONNECT"]},
             {"status": Status.SUCCESS, "response": ["OK"]},
         ]
-        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", side_effect=mocked_responses)
+        mocking = mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", side_effect=mocked_responses)
 
         result = file.upload_file_to_modem("file.pem", None)
 
@@ -67,9 +67,9 @@ class TestFile:
         but with no CONNECT returned.
         """
         # Mock the necessary function.
-        mocker.patch("core.modules.file.len", return_value=60)
+        mocker.patch("pico_lte.modules.file.len", return_value=60)
         mocked_response = {"status": Status.TIMEOUT, "response": "timeout"}
-        mocking = mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=mocked_response)
+        mocking = mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", return_value=mocked_response)
 
         result = file.upload_file_to_modem("file.pem", None)
 

@@ -5,7 +5,7 @@ Test module for the utils.helpers module.
 import json
 import pytest
 
-from core.utils.helpers import *
+from pico_lte.utils.helpers import *
 
 
 class TestHelpers:
@@ -98,7 +98,7 @@ class TestHelpers:
 
     def test_get_desired_data_not_success(self):
         """It tests get_desired_data() function with non-successful response
-        from Modem. It should return None in "value" attribute.
+        from PicoLTE. It should return None in "value" attribute.
         """
         example_result = {"status": Status.TIMEOUT, "response": "timeout"}
         result = get_desired_data(example_result, "some_prefix")
@@ -109,7 +109,7 @@ class TestHelpers:
 
     def test_get_desired_data_success_empty_response(self):
         """It tests get_desired_data() function with empty but succesful response
-        from Modem. It should return None in "value" attribute.
+        from PicoLTE. It should return None in "value" attribute.
         """
         example_result = {"status": Status.SUCCESS, "response": []}
         result = get_desired_data(example_result, prefix="+CME")
@@ -120,7 +120,7 @@ class TestHelpers:
 
     def test_get_desired_data_success_response_without_ok(self):
         """It tests get_desired_data() function with successful but
-        have not finished response from Modem. It should return None
+        have not finished response from PicoLTE. It should return None
         in "value" attribute.
         """
         example_result = {
@@ -135,7 +135,7 @@ class TestHelpers:
 
     def test_get_desired_data_success_response_includes_ok_with_wrong_prefix(self, example_result):
         """It tests get_desired_data() function with successful and
-        finished response but without having prefix from Modem. It
+        finished response but without having prefix from PicoLTE. It
         should return None in "value" attribute.
         """
         result = get_desired_data(example_result, prefix="+ERROR:", separator=" ")
@@ -148,7 +148,7 @@ class TestHelpers:
         self, example_result
     ):
         """It tests get_desired_data() function with successful and
-        finished response but with unuseful seperator from Modem. It
+        finished response but with unuseful seperator from PicoLTE. It
         should return None in "value" attribute.
         """
         result = get_desired_data(example_result, prefix="+DATA:", separator=" ")
@@ -235,19 +235,19 @@ class TestHelpers:
 
     def test_get_parameter_without_config_and_default(self, mocker):
         """It tests get_parameter() function without predefined config and default values."""
-        mocker.patch("core.temp.config", return_value={})
+        mocker.patch("pico_lte.common.config", return_value={})
         assert get_parameter("some_path") is None
 
     def test_get_parameter_no_config_with_default(self, mocker):
         """It tests get_parameter() function and using default values without predefined config."""
-        mocker.patch("core.temp.config", return_value={})
+        mocker.patch("pico_lte.common.config", return_value={})
         assert get_parameter("some_path", default="test") == "test"
 
     def test_get_parameter_not_included_info(self, mocker, prepared_config):
         """It tests get_parameter() function in a case that config file does not
         have asked information.
         """
-        mocker.patch("core.temp.config", prepared_config)
+        mocker.patch("pico_lte.common.config", prepared_config)
 
         result_without_default = get_parameter(["not", "included", "path_name"])
         result_with_default = get_parameter(["not", "included", "path_name"], default="TestDefault")
@@ -258,7 +258,7 @@ class TestHelpers:
     def test_get_parameter_included_info(self, mocker, prepared_config):
         """It tests get_parameter() function in a case that config file has asked"""
 
-        mocker.patch.dict("core.temp.config", prepared_config)
+        mocker.patch.dict("pico_lte.common.config", prepared_config)
 
         assert get_parameter(["app_service", "mqtts", "host"]) == "test_app_mqtts_host"
 

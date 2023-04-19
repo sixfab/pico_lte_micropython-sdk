@@ -5,7 +5,7 @@ Test module for the utils.debug module.
 import pytest
 from machine import UART
 
-from core.utils.debug import DebugChannel, DebugLevel, Debug
+from pico_lte.utils.debug import DebugChannel, DebugLevel, Debug
 
 
 class TestDebugChannel:

@@ -2,7 +2,7 @@
 Test module for the utils.status module.
 """
 
-from core.utils.status import Status
+from pico_lte.utils.status import Status
 
 
 class TestStatus:

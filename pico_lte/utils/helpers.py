@@ -3,8 +3,8 @@ Module for storing helper functions
 """
 
 import json
-from core.temp import config
-from core.utils.status import Status
+from pico_lte.common import config
+from pico_lte.utils.status import Status
 
 
 def read_json_file(file_path):

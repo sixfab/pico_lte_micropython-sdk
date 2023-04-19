@@ -1,14 +1,14 @@
 """
-Module for including functions of MQTT related operations of picocell module.
+Module for including functions of MQTT related operations of PicoLTE module.
 """
 
-from core.utils.status import Status
-from core.utils.helpers import get_parameter
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import get_parameter
 
 
 class MQTT:
     """
-    Class for including functions of MQTT related operations of picocell module.
+    Class for including functions of MQTT related operations of PicoLTE module.
     """
 
     CTRL_Z = "\x1A"
@@ -301,7 +301,7 @@ class MQTT:
             result = self.atcom.get_urc_response(desired_response, timeout=60)
         return result
 
-    def connect_broker(self, client_id_string="Picocell", username=None, password=None, cid=0):
+    def connect_broker(self, client_id_string="PicoLTE", username=None, password=None, cid=0):
         """
         Function for connecting to MQTT broker. This function is used when a client requests a
         connection to the MQTT server. When a TCP/IP socket connection is established between
@@ -309,7 +309,7 @@ class MQTT:
 
         Parameters
         ----------
-        client_id_string : str, default: "Picocell"
+        client_id_string : str, default: "PicoLTE"
             Client ID string. Maximum length: 23 bytes.
         username : str, default: None
             Username. Maximum length: 23 bytes.
