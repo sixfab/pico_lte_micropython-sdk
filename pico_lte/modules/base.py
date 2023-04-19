@@ -22,7 +22,7 @@ class Base:
         """
         self.atcom = atcom
         self.powerkey_pin = Pin(19, Pin.OUT)
-        self.status_pin = Pin(14, Pin.IN)
+        self.status_pin = Pin(20, Pin.IN)
 
     def power_off(self):
         """
