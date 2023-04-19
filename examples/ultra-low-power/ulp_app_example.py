@@ -1,10 +1,10 @@
 """
 Example code to find out ultra low power concept of the
-picocell SDK and how to use it. This example imitates the
+PicoLTE SDK and how to use it. This example imitates the
 real jobs with a neopixel indicator function. Please change
 the job() function with yours.
 
-The SDK and the picocell hardware have same pre-configured
+The SDK and the PicoLTE hardware have same pre-configured
 settings. Min control period is the most important preset in
 this case. Min control period is 5 mins. This means, SDK checks
 the wakeup reason every 5 mins. You can adjust the sleep period

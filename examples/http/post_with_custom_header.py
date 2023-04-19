@@ -3,7 +3,7 @@ Example code for performing HTTP request to a server with using custom headers.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -42,7 +42,7 @@ else:
     debug.error("Missing argument: server")
 
 # The messages that will be sent.
-DATA_TO_POST = {"message": "Picocell HTTP POST Example with Custom Header"}
+DATA_TO_POST = {"message": "PicoLTE HTTP POST Example with Custom Header"}
 payload = json.dumps(DATA_TO_POST)
 
 # Custom header

@@ -1,5 +1,5 @@
 """
-Module for including functions of ssl operations of picocell module.
+Module for including functions of ssl operations of PicoLTE module.
 """
 
 import time
@@ -10,7 +10,7 @@ from pico_lte.utils.status import Status
 
 class SSL:
     """
-    Class for including functions of ssl operations of picocell module.
+    Class for including functions of ssl operations of PicoLTE module.
     """
 
     def __init__(self, atcom):

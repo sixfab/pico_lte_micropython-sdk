@@ -1,5 +1,5 @@
 """
-Module for including file functions of picocell module.
+Module for including file functions of PicoLTE module.
 """
 
 from pico_lte.utils.status import Status
@@ -7,7 +7,7 @@ from pico_lte.utils.status import Status
 
 class File:
     """
-    Class for inculding functions of file operations of picocell module.
+    Class for inculding functions of file operations of PicoLTE module.
     """
 
     CTRL_Z = "\x1A"

@@ -1,5 +1,5 @@
 """
-Module for including ultra low power functions of picocell module.
+Module for including ultra low power functions of PicoLTE module.
 
 This module uses ultra lower power load switch and timer hardwares.
 """
@@ -18,7 +18,7 @@ ULP_FILE_PATH = "ulp.json"
 
 class ULP:
     """
-    Class for including ultra low power functions of picocell module.
+    Class for including ultra low power functions of PicoLTE module.
     """
 
     timer_done_pin = Pin(11, Pin.OUT)
@@ -80,7 +80,7 @@ class ULP:
 
     def deep_sleep(self):
         """
-        Function for shutting down picocell module
+        Function for shutting down PicoLTE module
         """
         self.timer_done_pin.value(1)
 

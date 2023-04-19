@@ -1,5 +1,5 @@
 """
-Module for including functions of Telegram bot for Picocell module.
+Module for including functions of Telegram bot for PicoLTE module.
 """
 import time
 
@@ -11,7 +11,7 @@ from pico_lte.utils.helpers import get_parameter
 
 class Telegram:
     """
-    Telegram App module for Picocell lets you to create
+    Telegram App module for PicoLTE lets you to create
     connections to your Telegram bot easily.
     """
 
@@ -23,11 +23,11 @@ class Telegram:
         Parameters
         ----------
         base : Base
-            Picocell Base class
+            PicoLTE Base class
         network : Network
-            Picocell Network class
+            PicoLTE Network class
         http : HTTP
-            Picocell HTTP class
+            PicoLTE HTTP class
         """
         self.base = base
         self.network = network

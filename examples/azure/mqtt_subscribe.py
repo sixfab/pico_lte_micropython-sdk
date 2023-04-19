@@ -3,7 +3,7 @@ Example code for subscribing topics from Azure IoT Hub by using MQTT.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json

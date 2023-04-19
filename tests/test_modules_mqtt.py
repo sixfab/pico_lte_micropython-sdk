@@ -345,12 +345,12 @@ class TestMQTT:
         [
             {
                 "status": Status.ERROR,
-                "response": ['AT+QMTCONN=0,"Picocell"\r', "ERROR"],
+                "response": ['AT+QMTCONN=0,"PicoLTE"\r', "ERROR"],
             },
-            {"status": Status.SUCCESS, "response": ['AT+QMTCONN=0,"Picocell"\r', "OK"]},
+            {"status": Status.SUCCESS, "response": ['AT+QMTCONN=0,"PicoLTE"\r', "OK"]},
             {
                 "status": Status.ERROR,
-                "response": ['AT+QMTCONN=0,"Picocell"\r', "OK", "+QMTSTAT: 0,3"],
+                "response": ['AT+QMTCONN=0,"PicoLTE"\r', "OK", "+QMTSTAT: 0,3"],
             },
             default_response_types()[1],
             default_response_types()[2],
@@ -369,23 +369,23 @@ class TestMQTT:
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
         mqtt.connect_broker()
 
-        mocking.assert_called_once_with('AT+QMTCONN=0,"Picocell"')
+        mocking.assert_called_once_with('AT+QMTCONN=0,"PicoLTE"')
 
     @pytest.mark.parametrize(
         "mocked_response",
         [
             {
                 "status": Status.ERROR,
-                "response": ['AT+QMTCONN=0,"Picocell","john","doe123"\r', "ERROR"],
+                "response": ['AT+QMTCONN=0,"PicoLTE","john","doe123"\r', "ERROR"],
             },
             {
                 "status": Status.SUCCESS,
-                "response": ['AT+QMTCONN=0,"Picocell","john","doe123"\r', "OK"],
+                "response": ['AT+QMTCONN=0,"PicoLTE","john","doe123"\r', "OK"],
             },
             {
                 "status": Status.ERROR,
                 "response": [
-                    'AT+QMTCONN=0,"Picocell","john","doe123"\r',
+                    'AT+QMTCONN=0,"PicoLTE","john","doe123"\r',
                     "OK",
                     "+QMTSTAT: 0,4",
                 ],
@@ -409,7 +409,7 @@ class TestMQTT:
         mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
         result = mqtt.connect_broker()
 
-        mocking.assert_called_once_with('AT+QMTCONN=0,"Picocell","john","doe123"')
+        mocking.assert_called_once_with('AT+QMTCONN=0,"PicoLTE","john","doe123"')
         assert result == mocked_response
 
     def test_connect_broker_when_send_at_comm_return_error(self, mocker, mqtt):

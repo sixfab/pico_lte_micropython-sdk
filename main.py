@@ -9,9 +9,9 @@ picoLTE = PicoLTE()
 
 def main():
     debug.info("Hello from Sixfab...")
-    debug.info("Your Picocell is ready to use!")
+    debug.info("Your PicoLTE is ready to use!")
     debug.info("Visit the following link to get started")
-    debug.info("http://docs.sixfab.com/picocell/")
+    debug.info("http://sixfab.com/picolte/")
 
 
 if __name__ == "__main__":

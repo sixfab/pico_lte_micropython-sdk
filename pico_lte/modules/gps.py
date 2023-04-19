@@ -1,5 +1,5 @@
 """
-Module for including functions of location service of picocell module.
+Module for including functions of location service of PicoLTE module.
 """
 
 from pico_lte.utils.helpers import get_desired_data
@@ -8,7 +8,7 @@ from pico_lte.utils.status import Status
 
 class GPS:
     """
-    Class for inculding functions of location service of picocell module.
+    Class for inculding functions of location service of PicoLTE module.
     """
 
     def __init__(self, atcom):

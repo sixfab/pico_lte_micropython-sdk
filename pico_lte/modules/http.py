@@ -1,5 +1,5 @@
 """
-Module for including functions of HTTP related operations of picocell module.
+Module for including functions of HTTP related operations of PicoLTE module.
 
 HTTP Result Codes
 ------------------------------------------
@@ -56,7 +56,7 @@ from pico_lte.common import debug
 
 class HTTP:
     """
-    Class for including functions of HTTP related operations of picocell module.
+    Class for including functions of HTTP related operations of PicoLTE module.
     """
 
     def __init__(self, atcom):

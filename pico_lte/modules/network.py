@@ -1,5 +1,5 @@
 """
-Module for including network functions of picocell module.
+Module for including network functions of PicoLTE module.
 """
 import time
 
@@ -11,7 +11,7 @@ from pico_lte.utils.status import Status
 
 class Network:
     """
-    Class for inculding functions of network operations of picocell module.
+    Class for inculding functions of network operations of PicoLTE module.
     """
 
     cache = config["cache"]

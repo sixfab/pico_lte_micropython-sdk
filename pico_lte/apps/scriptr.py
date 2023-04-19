@@ -23,11 +23,11 @@ class Scriptr:
         Parameters
         ----------
         base : Base
-            Picocell Base class
+            PicoLTE Base class
         network : Network
-            Picocell Network class
+            PicoLTE Network class
         http : HTTP
-            Picocell HTTP class
+            PicoLTE HTTP class
         """
         self.base = base
         self.network = network

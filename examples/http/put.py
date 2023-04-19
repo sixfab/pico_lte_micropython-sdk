@@ -3,7 +3,7 @@ Example code for performing PUT request to a server with using HTTP.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -31,7 +31,7 @@ picoLTE.http.set_server_url()
 
 debug.info("Sending a PUT request.")
 
-payload_dict = {"message": "Picocell HTTP Put Example"}
+payload_dict = {"message": "PicoLTE HTTP Put Example"}
 payload_json = json.dumps(payload_dict)
 result = picoLTE.http.put(data=payload_json)
 debug.info(result)

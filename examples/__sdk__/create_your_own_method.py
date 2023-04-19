@@ -1,5 +1,5 @@
 """
-This example is aim to find out how to use manager utility of picocell SDK.
+This example is aim to find out how to use manager utility of PicoLTE SDK.
 Manager is a utility to manage the complicated processes have multiple steps,
 specific execution order, need of response binded decision, etc.
 
@@ -8,7 +8,7 @@ We will explain how to create a method by using manager step by step.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -63,7 +63,7 @@ def our_http_post_method(message):
     # In this step we will set the server URL
     # picoLTE.http.set_server_url function gets server URL from
     # the config.json file automatically. You must just create a
-    # config.json file and put it in the picocell root path.
+    # config.json file and put it in the PicoLTE root path.
 
     step_set_server_url = Step(
         name="set_server_url",

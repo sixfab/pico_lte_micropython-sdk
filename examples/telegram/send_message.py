@@ -3,7 +3,7 @@ Example code for sending message to group chat in Telegram with using its Bot AP
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -21,5 +21,5 @@ from pico_lte.common import debug
 picoLTE = PicoLTE()
 
 debug.info("Sending message to Telegram channel...")
-result = picoLTE.telegram.send_message("Picocell Telegram Example")
+result = picoLTE.telegram.send_message("PicoLTE Telegram Example")
 debug.info("Result:", result)

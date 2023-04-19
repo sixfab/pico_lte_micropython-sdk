@@ -1,5 +1,5 @@
 """
-Module for including base functionalities of picocell module.
+Module for including base functionalities of PicoLTE module.
 For example; power control of modem, basic communication check etc.
 """
 
@@ -13,7 +13,7 @@ from pico_lte.utils.helpers import get_desired_data
 
 class Base:
     """
-    Class for inculding basic functions of picocell module.
+    Class for inculding basic functions of PicoLTE module.
     """
 
     def __init__(self, atcom):

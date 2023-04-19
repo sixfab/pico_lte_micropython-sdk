@@ -1,5 +1,5 @@
 """
-Module for including authentication functions of picocell module.
+Module for including authentication functions of PicoLTE module.
 """
 
 import os
@@ -12,7 +12,7 @@ from pico_lte.modules.file import File
 
 class Auth:
     """
-    Class for including authentication functions of picocell module.
+    Class for including authentication functions of PicoLTE module.
     """
 
     def __init__(self, atcom):

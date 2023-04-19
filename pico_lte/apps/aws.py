@@ -1,5 +1,5 @@
 """
-Module for including functions of AWS IoT operations of picocell module.
+Module for including functions of AWS IoT operations of PicoLTE module.
 """
 
 import time
@@ -12,7 +12,7 @@ from pico_lte.utils.helpers import get_parameter
 
 class AWS:
     """
-    Class for including functions of AWS IoT operations of picocell module.
+    Class for including functions of AWS IoT operations of PicoLTE module.
     """
 
     cache = config["cache"]

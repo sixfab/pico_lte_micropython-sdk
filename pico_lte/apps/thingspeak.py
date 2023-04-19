@@ -1,5 +1,5 @@
 """
-Module for including functions of ThingSpeak for Picocell module.
+Module for including functions of ThingSpeak for PicoLTE module.
 """
 import time
 
@@ -11,7 +11,7 @@ from pico_lte.utils.helpers import get_parameter
 
 class ThingSpeak:
     """
-    Class for including functions of ThingSpeak operations for Picocell module.
+    Class for including functions of ThingSpeak operations for PicoLTE module.
     """
 
     cache = config["cache"]
@@ -322,7 +322,7 @@ class ThingSpeak:
         payload_string = ""
 
         if "status" not in payload_dict:
-            payload_dict["status"] = "MQTT_PICOCELL_PUBLISH"
+            payload_dict["status"] = "MQTT_PicoLTE_PUBLISH"
 
         for key, value in payload_dict.items():
             payload_string += f"{key}={value}&"

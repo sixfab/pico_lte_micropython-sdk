@@ -1,5 +1,5 @@
 """
-Module for including extended configuration function of picocell module.
+Module for including extended configuration function of PicoLTE module.
 """
 
 from pico_lte.common import config
