@@ -2,11 +2,10 @@
 Main code file.
 """
 
-from pico_lte.modem import Modem
+from pico_lte.modem import PicoLTE
 from pico_lte.common import debug
 
-modem = Modem()
-
+modem = PicoLTE()
 
 def main():
     debug.info("Hello from Sixfab...")
