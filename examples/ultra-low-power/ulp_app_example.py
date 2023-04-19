@@ -12,21 +12,21 @@ with power of 5 mins.
 """
 
 import time
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
 DELAY = 0.2
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 # ULP setup
-modem.ulp.enable()  # enable ultra low power mode
-modem.ulp.set_deep_sleep_period(5)  # set sleep period
+picoLTE.ulp.enable()  # enable ultra low power mode
+picoLTE.ulp.set_deep_sleep_period(5)  # set sleep period
 
 # Do ULP check every reboot
-modem.peripherals.adjust_neopixel(255, 0, 0)  # indicator led
+picoLTE.peripherals.adjust_neopixel(255, 0, 0)  # indicator led
 time.sleep(1)
-modem.ulp.check()
+picoLTE.ulp.check()
 time.sleep(1)
 
 
@@ -36,16 +36,16 @@ def job():
     data to cloud service or mailing some data to someone etc.
     """
     debug.info("Doing the job...")
-    modem.peripherals.adjust_neopixel(255, 0, 0)
+    picoLTE.peripherals.adjust_neopixel(255, 0, 0)
     time.sleep(DELAY)
-    modem.peripherals.adjust_neopixel(0, 255, 0)
+    picoLTE.peripherals.adjust_neopixel(0, 255, 0)
     time.sleep(DELAY)
-    modem.peripherals.adjust_neopixel(0, 0, 255)
+    picoLTE.peripherals.adjust_neopixel(0, 0, 255)
     time.sleep(DELAY)
-    modem.peripherals.adjust_neopixel(255, 255, 255)
+    picoLTE.peripherals.adjust_neopixel(255, 255, 255)
     time.sleep(DELAY)
 
 
 while True:
     job()
-    modem.ulp.deep_sleep()  # go to sleep
+    picoLTE.ulp.deep_sleep()  # go to sleep

@@ -73,7 +73,7 @@ class TestAuth:
         result = auth.load_certificates()
 
         assert result["status"] == Status.SUCCESS
-        assert result["response"] == "Certificates found in modem."
+        assert result["response"] == "Certificates found in PicoLTE."
 
     def test_load_certificates_wrong_certificate_names(self, mocker, auth):
         """This method tests the load_certificates() method without
@@ -132,11 +132,11 @@ class TestAuth:
         result = auth.load_certificates()
 
         assert result["status"] == Status.SUCCESS
-        assert result["response"] == "Certificates found in modem."
+        assert result["response"] == "Certificates found in PicoLTE."
 
     def test_load_certificates_with_error_on_get_file_list(self, mocker, auth):
         """This method tests load_certificates() method when it is not the first_try
-        and there is an error at connection with modem.
+        and there is an error at connection with PicoLTE.
         """
         # Data which simulates system behaviour.
         mocked_data = {

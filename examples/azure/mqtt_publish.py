@@ -25,14 +25,14 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 "device_id" is the only ones needed.
 """
 import json
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 payload_json = {"App": "Azure MQTT Example"}
 
 debug.info("Publishing data to Azure IoT Hub...")
 payload = json.dumps(payload_json)
-result = modem.azure.publish_message(payload)
+result = picoLTE.azure.publish_message(payload)
 debug.info("Result", result)

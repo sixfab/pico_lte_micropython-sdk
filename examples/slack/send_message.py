@@ -15,11 +15,11 @@ config.json
 }
 """
 
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 debug.info("Sending message to slack channel...")
-result = modem.slack.send_message("It is test message from Picocell!")
+result = picoLTE.slack.send_message("It is test message from Picocell!")
 debug.info("Result:", result)

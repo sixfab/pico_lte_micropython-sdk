@@ -17,14 +17,14 @@ config.json
 }
 """
 import json
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 payload_json = {"state": {"reported": {"App": "AWS HTTP Example"}}}
 
 debug.info("Publishing data to AWS IoT...")
 payload = json.dumps(payload_json)
-result = modem.aws.post_message(payload)
+result = picoLTE.aws.post_message(payload)
 debug.info("Result", result)

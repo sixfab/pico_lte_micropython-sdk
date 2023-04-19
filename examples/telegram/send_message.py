@@ -15,11 +15,11 @@ config.json
 }
 """
 
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 debug.info("Sending message to Telegram channel...")
-result = modem.telegram.send_message("Picocell Telegram Example")
+result = picoLTE.telegram.send_message("Picocell Telegram Example")
 debug.info("Result:", result)

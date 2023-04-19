@@ -19,13 +19,13 @@ config.json
     }
 }
 """
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 payload = {"field1": 30, "field2": 40, "status": "PICOCELL_THINGSPEAK_EXAMPLE"}
 
 debug.info("Publishing data to ThingSpeak...")
-result = modem.thingspeak.publish_message(payload)
+result = picoLTE.thingspeak.publish_message(payload)
 debug.info("Result:", result)

@@ -19,26 +19,26 @@ config.json
 
 import time
 
-from pico_lte.modem import Modem
+from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 from pico_lte.utils.status import Status
 
 PERIOD = 30  # seconds
 fix = False
 
-modem = Modem()
+picoLTE = PicoLTE()
 
 debug.info("GPS Example")
 
 while True:
     # First go to GNSS prior mode and turn on GPS.
-    modem.gps.set_priority(0)
+    picoLTE.gps.set_priority(0)
     time.sleep(3)
-    modem.gps.turn_on()
+    picoLTE.gps.turn_on()
     debug.info("Trying to fix GPS...")
 
     for _ in range(0, 45):
-        result = modem.gps.get_location()
+        result = picoLTE.gps.get_location()
         debug.info(result)
 
         if result["status"] == Status.SUCCESS:
@@ -54,11 +54,11 @@ while True:
 
     if fix:
         # Go to WWAN prior mode and turn on GPS.
-        modem.gps.set_priority(1)
-        modem.gps.turn_off()
+        picoLTE.gps.set_priority(1)
+        picoLTE.gps.turn_off()
 
         debug.info("Sending message to telegram channel...")
-        result = modem.telegram.send_message(loc_message)
+        result = picoLTE.telegram.send_message(loc_message)
         debug.info(result)
 
         if result["status"] == Status.SUCCESS:

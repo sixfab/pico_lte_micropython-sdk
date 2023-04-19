@@ -81,8 +81,8 @@ class Auth:
                     client_key_in_modem = True
 
             if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
-                debug.info("Certificates found in modem.")
-                return {"status": Status.SUCCESS, "response": "Certificates found in modem."}
+                debug.info("Certificates found in PicoLTE.")
+                return {"status": Status.SUCCESS, "response": "Certificates found in PicoLTE."}
             else:
                 debug.error("Certificates couldn't find in modem!")
                 return {"status": Status.ERROR, "response": "Certificates couldn't find in modem!"}

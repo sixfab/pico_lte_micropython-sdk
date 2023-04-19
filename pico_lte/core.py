@@ -1,5 +1,5 @@
 """
-Module for ease to use of cellular modem. This module includes required functions
+Module for ease to use of cellular PicoLTE. This module includes required functions
 for working with cellular modem without need of AT command knowledge.
 """
 from pico_lte.common import config

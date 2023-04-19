@@ -98,7 +98,7 @@ class TestHelpers:
 
     def test_get_desired_data_not_success(self):
         """It tests get_desired_data() function with non-successful response
-        from Modem. It should return None in "value" attribute.
+        from PicoLTE. It should return None in "value" attribute.
         """
         example_result = {"status": Status.TIMEOUT, "response": "timeout"}
         result = get_desired_data(example_result, "some_prefix")
@@ -109,7 +109,7 @@ class TestHelpers:
 
     def test_get_desired_data_success_empty_response(self):
         """It tests get_desired_data() function with empty but succesful response
-        from Modem. It should return None in "value" attribute.
+        from PicoLTE. It should return None in "value" attribute.
         """
         example_result = {"status": Status.SUCCESS, "response": []}
         result = get_desired_data(example_result, prefix="+CME")
@@ -120,7 +120,7 @@ class TestHelpers:
 
     def test_get_desired_data_success_response_without_ok(self):
         """It tests get_desired_data() function with successful but
-        have not finished response from Modem. It should return None
+        have not finished response from PicoLTE. It should return None
         in "value" attribute.
         """
         example_result = {
@@ -135,7 +135,7 @@ class TestHelpers:
 
     def test_get_desired_data_success_response_includes_ok_with_wrong_prefix(self, example_result):
         """It tests get_desired_data() function with successful and
-        finished response but without having prefix from Modem. It
+        finished response but without having prefix from PicoLTE. It
         should return None in "value" attribute.
         """
         result = get_desired_data(example_result, prefix="+ERROR:", separator=" ")
@@ -148,7 +148,7 @@ class TestHelpers:
         self, example_result
     ):
         """It tests get_desired_data() function with successful and
-        finished response but with unuseful seperator from Modem. It
+        finished response but with unuseful seperator from PicoLTE. It
         should return None in "value" attribute.
         """
         result = get_desired_data(example_result, prefix="+DATA:", separator=" ")

@@ -5,7 +5,7 @@ Main code file.
 from pico_lte.modem import PicoLTE
 from pico_lte.common import debug
 
-modem = PicoLTE()
+picoLTE = PicoLTE()
 
 def main():
     debug.info("Hello from Sixfab...")
