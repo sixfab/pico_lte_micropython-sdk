@@ -10,7 +10,7 @@ an embedded framework to make easier cellular connections
 
 <div align="center">
 
-![version: v0.2.0](https://img.shields.io/badge/version-v0.2.0-blue?style=flat-square) ![](https://img.shields.io/badge/license-MIT-critical?style=flat-square) ![applications: 6 services](https://img.shields.io/badge/applications-6%20services-success?style=flat-square) ![Stars count in GitHub](https://img.shields.io/github/stars/sixfab/picocell_python-sdk?style=flat-square)
+![version](https://img.shields.io/github/package-json/v/sixfab/picocell_python-sdk?logoColor=blue&style=flat-square) ![](https://img.shields.io/badge/license-MIT-critical?style=flat-square) ![applications](https://img.shields.io/badge/applications-6%20services-success?style=flat-square) ![stars](https://img.shields.io/github/stars/sixfab/picocell_python-sdk?style=flat-square)
 
 </div>
 
