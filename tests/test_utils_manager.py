@@ -162,7 +162,7 @@ class TestManager:
         with cache's last response.
         """
         mocker.patch(
-            "core.temp.StateCache.get_last_response",
+            "pico_lte.common.StateCache.get_last_response",
             return_value="last_response_mocked",
         )
         returned_value = predefined_state_manager.success()
@@ -174,7 +174,7 @@ class TestManager:
         with cache's last response.
         """
         mocker.patch(
-            "core.temp.StateCache.get_last_response",
+            "pico_lte.common.StateCache.get_last_response",
             return_value="last_response_mocked",
         )
         returned_value = predefined_state_manager.failure()
@@ -188,7 +188,7 @@ class TestManager:
         and cached step is not available.
         """
         mocker.patch(
-            "core.temp.StateCache.get_state",
+            "pico_lte.common.StateCache.get_state",
             return_value=None,
         )
         assert predefined_state_manager.current.name == "organizer"
@@ -204,7 +204,7 @@ class TestManager:
         """Tests the organizer() method with current step as organizer
         and cache exists."""
         mocker.patch(
-            "core.temp.StateCache.get_state",
+            "pico_lte.common.StateCache.get_state",
             return_value="ThirdStep",
         )
 

@@ -30,7 +30,7 @@ class TestHTTP:
     @staticmethod
     def mock_send_at_comm(mocker, responses_to_return, is_side_effect=False):
         """This is a wrapper function to repeated long mocker.patch() statements."""
-        patch_location = "core.utils.atcom.ATCom.send_at_comm"
+        patch_location = "pico_lte.utils.atcom.ATCom.send_at_comm"
         if is_side_effect:
             return mocker.patch(patch_location, side_effect=responses_to_return)
 
@@ -167,7 +167,7 @@ class TestHTTP:
 
     def test_set_auth_when_none_but_config_ok(self, mocker, http):
         """This method tests set_auth() with parameter from config."""
-        mocker.patch("core.modules.http.get_parameter", side_effect=["user", "pass"])
+        mocker.patch("pico_lte.modules.http.get_parameter", side_effect=["user", "pass"])
         mocking = TestHTTP.mock_send_at_comm(mocker, None)
         http.set_auth()
 
@@ -175,7 +175,7 @@ class TestHTTP:
 
     def test_set_auth_when_all_none(self, mocker, http):
         """This method tests set_auth() when get_parameter returns None."""
-        mocker.patch("core.modules.http.get_parameter", return_value=None)
+        mocker.patch("pico_lte.modules.http.get_parameter", return_value=None)
         result = http.set_auth()
 
         assert result["status"] == Status.ERROR
@@ -220,7 +220,7 @@ class TestHTTP:
         """This method tests set_server_url() with a response of None from config.
         It also tests the default parameter.
         """
-        mocker.patch("core.modules.http.get_parameter", return_value=None)
+        mocker.patch("pico_lte.modules.http.get_parameter", return_value=None)
         result = http.set_server_url()
 
         assert result["status"] == Status.ERROR
@@ -231,7 +231,7 @@ class TestHTTP:
         get_parameter().
         """
         # Mock the get_parameter() method.
-        get_parameter_loc = "core.modules.http.get_parameter"
+        get_parameter_loc = "pico_lte.modules.http.get_parameter"
         mocker.patch(get_parameter_loc, return_value="https://sixfab.com")
         # Mock the ATCom.send_at_com() method.
         connect_success = {"status": Status.SUCCESS, "response": ["CONNECT", "OK"]}

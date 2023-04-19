@@ -36,19 +36,19 @@ class TestAuth:
             "response": simulation_data["file_name"],
         }
 
-        mocker.patch("core.modules.auth.read_file", side_effect=simulation_data["file_inside"])
+        mocker.patch("pico_lte.modules.auth.read_file", side_effect=simulation_data["file_inside"])
         mocker.patch(
-            "core.modules.file.File.delete_file_from_modem",
+            "pico_lte.modules.file.File.delete_file_from_modem",
             return_value=None,
             side_effect=side_effect_delete_file_from_modem,
         )
         mocker.patch(
-            "core.modules.file.File.upload_file_to_modem",
+            "pico_lte.modules.file.File.upload_file_to_modem",
             return_value=return_value_upload_to_file,
         )
         mocker.patch("os.remove", side_effect=side_effect_os_remove)
         mocker.patch(
-            "core.modules.file.File.get_file_list",
+            "pico_lte.modules.file.File.get_file_list",
             return_value=mocked_response_get_file_list,
         )
 

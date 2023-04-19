@@ -255,10 +255,10 @@ class TestATCom:
     )
     def test_send_at_comm(self, mocker, atcom, return_dict):
         """Test the send_at_comm() method."""
-        mocker.patch("core.utils.atcom.ATCom.send_at_comm_once", return_value=None)
+        mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm_once", return_value=None)
         mocker.patch("time.sleep", return_value=None)
-        mocker.patch("core.utils.atcom.ATCom.get_urc_response", return_value=return_dict)
-        mocker.patch("core.utils.atcom.ATCom.get_response", return_value=return_dict)
+        mocker.patch("pico_lte.utils.atcom.ATCom.get_urc_response", return_value=return_dict)
+        mocker.patch("pico_lte.utils.atcom.ATCom.get_response", return_value=return_dict)
 
         result_one = atcom.send_at_comm("example", desired="CONNECT", fault="ERROR", urc=True)
         assert result_one["status"] == return_dict["status"]

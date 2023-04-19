@@ -33,7 +33,7 @@ class TestNetwork:
     @staticmethod
     def mock_send_at_comm(mocker, response_to_return):
         """This is a wrapper function for repeated long mocker.patch() statements."""
-        return mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=response_to_return)
+        return mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", return_value=response_to_return)
 
     def test_constructor(self, network):
         """This methods tests if the constructor correctly set the attributes."""
@@ -325,7 +325,7 @@ class TestNetwork:
             {"status": Status.SUCCESS, "response": "check_network_registration 2"},
         ]
         mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
+            "pico_lte.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
         )
         result = network.register_network()
 
@@ -357,7 +357,7 @@ class TestNetwork:
             {"status": Status.SUCCESS, "response": "check_network_registration 2"},
         ]
         mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
+            "pico_lte.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
         )
         result = network.register_network()
 
@@ -383,7 +383,7 @@ class TestNetwork:
             {"status": Status.ERROR, "response": "check_network_registration 1"},
             {"status": Status.ERROR, "response": "check_atcom"},
         ]
-        mocker.patch("core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses)
+        mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses)
         result = network.register_network()
 
         # Test if called necessary functions.
@@ -422,7 +422,7 @@ class TestNetwork:
             {"status": Status.SUCCESS, "response": "check_pdp_context_status 2"},
         ]
         mocking = mocker.patch(
-            "core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
+            "pico_lte.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses
         )
         result = network.get_pdp_ready()
 
@@ -446,7 +446,7 @@ class TestNetwork:
             {"status": Status.ERROR, "response": "check_pdp_context_status 1"},
             {"status": Status.ERROR, "response": "configure_pdp_context"},
         ]
-        mocker.patch("core.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses)
+        mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", side_effect=side_effect_responses)
         result = network.get_pdp_ready()
 
         # Test if called necessary functions.

@@ -45,7 +45,7 @@ class TestConfig:
 
     def test_read_parameters_from_json_file(self, mocker, config_instance, example_config_params):
         """This method tests the read_parameters_from_json_file() method."""
-        mocker.patch("core.modules.config.read_json_file", return_value=example_config_params)
+        mocker.patch("pico_lte.modules.config.read_json_file", return_value=example_config_params)
 
         config_instance.read_parameters_from_json_file("some_path.json")
         assert config["params"] == example_config_params

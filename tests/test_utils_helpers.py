@@ -235,19 +235,19 @@ class TestHelpers:
 
     def test_get_parameter_without_config_and_default(self, mocker):
         """It tests get_parameter() function without predefined config and default values."""
-        mocker.patch("core.temp.config", return_value={})
+        mocker.patch("pico_lte.common.config", return_value={})
         assert get_parameter("some_path") is None
 
     def test_get_parameter_no_config_with_default(self, mocker):
         """It tests get_parameter() function and using default values without predefined config."""
-        mocker.patch("core.temp.config", return_value={})
+        mocker.patch("pico_lte.common.config", return_value={})
         assert get_parameter("some_path", default="test") == "test"
 
     def test_get_parameter_not_included_info(self, mocker, prepared_config):
         """It tests get_parameter() function in a case that config file does not
         have asked information.
         """
-        mocker.patch("core.temp.config", prepared_config)
+        mocker.patch("pico_lte.common.config", prepared_config)
 
         result_without_default = get_parameter(["not", "included", "path_name"])
         result_with_default = get_parameter(["not", "included", "path_name"], default="TestDefault")
@@ -258,7 +258,7 @@ class TestHelpers:
     def test_get_parameter_included_info(self, mocker, prepared_config):
         """It tests get_parameter() function in a case that config file has asked"""
 
-        mocker.patch.dict("core.temp.config", prepared_config)
+        mocker.patch.dict("pico_lte.common.config", prepared_config)
 
         assert get_parameter(["app_service", "mqtts", "host"]) == "test_app_mqtts_host"
 
