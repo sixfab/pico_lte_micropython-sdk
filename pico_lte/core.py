@@ -7,7 +7,6 @@ from pico_lte.common import config
 from pico_lte.utils.helpers import read_json_file
 from pico_lte.utils.atcom import ATCom
 
-from pico_lte.modules.ulp import ULP
 from pico_lte.modules.base import Base
 from pico_lte.modules.auth import Auth
 from pico_lte.modules.file import File
@@ -37,7 +36,6 @@ class PicoLTE:
         """
         config["params"] = read_json_file("config.json")
 
-        self.ulp = ULP()
         self.peripherals = Periph()
         self.atcom = ATCom()
 

@@ -20,7 +20,6 @@ PicoLTE SDK is a framework that you can use in your embedded systems projects an
 * Less than 40 lines when making a connection to a built-in application.
 * Support for SSL/TLS certification and their secure storage.
 * Easy-to-use GPS, HTTPS and MQTTS interfaces.
-* Ultra-low power mode for better battery life.
 * Chance to create your own application module with state machines.
 
 ## Installation
@@ -29,7 +28,7 @@ PicoLTE SDK is a framework that you can use in your embedded systems projects an
 3. Your PicoLTE device will be removed and re-inserted into your computer. That's all, it is ready to use!
 
 ## Usage
-Using the framework is pretty straightforward. A `main.py` file is needed to run in a MicroPython environment, therefore, please create a `main.py` script in your PicoLTE's file system. Import the framework with `from core.modem import Modem` line, and code your embedded project!
+Using the framework is pretty straightforward. A `main.py` file is needed to run in a MicroPython environment, therefore, please create a `main.py` script in your PicoLTE's file system. Import the framework with `from pico_lte.core import PicoLTE` line, and code your embedded project!
 
 **Note**: It is a must to have a tool to upload your `main.py` file or any example from our repository to your PicoLTE device. [Thonny IDE](https://thonny.org/) is a very common tool that has an easy GUI to perform this kind of operation. For a more compact and smaller size tool, we can recommend [Adafruit's Ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy) to you.
 
@@ -48,8 +47,6 @@ For further reference about installing or usage, please refer to our documentati
 You can use a configuration file to increase maintainability of your embedded code. This file is named as `config.json` and stores necessary connection parameters which are designed for you to easily connect to the applications. You can find example files for each application and module in [CONFIGURATIONS.md](./CONFIGURATIONS.md) page.
 
 This file has to be in the root directory of the PicoLTE device's file system.
-
-
 
 ## Contributing
 All contributions are welcome. You can find the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
