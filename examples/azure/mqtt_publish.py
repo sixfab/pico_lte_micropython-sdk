@@ -25,8 +25,8 @@ Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
 "device_id" is the only ones needed.
 """
 import json
-from core.modem import Modem
-from core.temp import debug
+from pico_lte.modem import Modem
+from pico_lte.common import debug
 
 modem = Modem()
 

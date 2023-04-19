@@ -4,10 +4,10 @@ Test module for the modules.network module.
 
 import pytest
 
-from core.modules.network import Network
-from core.modules.base import Base
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.network import Network
+from pico_lte.modules.base import Base
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 def default_response_types():

@@ -4,9 +4,9 @@ Test module for the modules.file module.
 
 import pytest
 
-from core.modules.file import File
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.file import File
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 class TestFile:

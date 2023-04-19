@@ -4,8 +4,8 @@ Test module for the modules.config module.
 
 import pytest
 
-from core.modules.config import Config
-from core.temp import config
+from pico_lte.modules.config import Config
+from pico_lte.common import config
 
 
 class TestConfig:

@@ -19,8 +19,8 @@ config.json
     }
 }
 """
-from core.modem import Modem
-from core.temp import debug
+from pico_lte.modem import Modem
+from pico_lte.common import debug
 
 modem = Modem()
 

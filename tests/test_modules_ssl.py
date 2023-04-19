@@ -4,9 +4,9 @@ Test module for the modules.ssl module.
 
 import pytest
 
-from core.modules.ssl import SSL
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.ssl import SSL
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 def default_response_types():

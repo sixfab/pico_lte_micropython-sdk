@@ -4,10 +4,10 @@ Module for including authentication functions of picocell module.
 
 import os
 
-from core.temp import debug
-from core.utils.status import Status
-from core.utils.helpers import read_file
-from core.modules.file import File
+from pico_lte.common import debug
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import read_file
+from pico_lte.modules.file import File
 
 
 class Auth:

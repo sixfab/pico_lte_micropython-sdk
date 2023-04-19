@@ -1,74 +1,57 @@
 """
-Module for including functions of scripter.io operations
+Module for including functions of Slack API operations
 """
 
 import time
+import json
 
-from core.temp import config
-from core.utils.manager import StateManager, Step
-from core.utils.status import Status
-from core.utils.helpers import get_parameter
+from pico_lte.common import config
+from pico_lte.utils.manager import StateManager, Step
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import get_parameter
 
 
-class Scriptr:
+class Slack:
     """
-    Class for including Scriptr.io functions.
+    Class for including Slack API functions.
     """
 
     cache = config["cache"]
 
     def __init__(self, base, network, http):
-        """Constructor of the class.
-
-        Parameters
-        ----------
-        base : Base
-            Picocell Base class
-        network : Network
-            Picocell Network class
-        http : HTTP
-            Picocell HTTP class
+        """
+        Initialize Slack class.
         """
         self.base = base
         self.network = network
         self.http = http
 
-    def send_data(self, data, query=None, authorization=None):
+    def send_message(self, message, webhook_url=None):
         """
-        Function for sending data to script.
+        Function for sending message to Slack channel by using
+        incoming webhook feature of Slack.
 
         Parameters
         ----------
-        data: str
-            Json for sending data to the script
-        query: str
-            Query of script
-        authorization: str
-            Authorization token
+        message: str
+            Message to send
+        webhook_url: str
+            Webhook URL of the Slack application
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status" and "message" keys.
         """
 
-        if query is None:
-            query = get_parameter(["scriptr", "query"])
+        payload_json = {"text": message}
+        payload = json.dumps(payload_json)
 
-        if authorization is None:
-            authorization = get_parameter(["scriptr", "authorization"])
+        if webhook_url is None:
+            webhook_url = get_parameter(["slack", "webhook_url"])
 
-        header = (
-            "POST "
-            + query
-            + " HTTP/1.1\n"
-            + "Host: "
-            + "api.scriptrapps.io"
-            + "\n"
-            + "Content-Type: application/json\n"
-            + "Content-Length: "
-            + str(len(data) + 1)
-            + "\n"
-            + "Authorization: Bearer "
-            + authorization
-            + "\n"
-            + "\n\n"
-        )
+        if not webhook_url:
+            return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         step_network_reg = Step(
             function=self.network.register_network,
@@ -87,9 +70,17 @@ class Scriptr:
         step_set_server_url = Step(
             function=self.http.set_server_url,
             name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": webhook_url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
             success="post_request",
             fail="failure",
-            function_params={"url": "https://api.scriptrapps.io"},
+            function_params={"content_type": 4},
         )
 
         step_post_request = Step(
@@ -97,7 +88,7 @@ class Scriptr:
             name="post_request",
             success="read_response",
             fail="failure",
-            function_params={"data": header + data, "header_mode": "1"},
+            function_params={"data": payload},
             cachable=True,
             interval=2,
         )
@@ -110,14 +101,16 @@ class Scriptr:
             function_params={"desired_response": "ok"},
         )
 
-        function_name = "scriptr_io.send_data"
+        # Add cache if it is not already existed
+        function_name = "slack.send_message"
+
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
         sm.add_step(step_network_reg)
         sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_set_content_type)
         sm.add_step(step_set_server_url)
         sm.add_step(step_post_request)
-        time.sleep(4)
         sm.add_step(step_read_response)
 
         while True:

@@ -4,9 +4,9 @@ Test module for the modules.gps module.
 
 import pytest
 
-from core.modules.gps import GPS
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.gps import GPS
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 def default_response_types():

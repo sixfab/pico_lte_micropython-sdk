@@ -18,10 +18,10 @@ config.json
 
 import json
 import time
-from core.utils.status import Status
-from core.modem import Modem
-from core.temp import debug
-from core.utils.helpers import get_parameter
+from pico_lte.utils.status import Status
+from pico_lte.modem import Modem
+from pico_lte.common import debug
+from pico_lte.utils.helpers import get_parameter
 
 # Prepare HTTP connection.
 modem = Modem()

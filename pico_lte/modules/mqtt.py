@@ -2,8 +2,8 @@
 Module for including functions of MQTT related operations of picocell module.
 """
 
-from core.utils.status import Status
-from core.utils.helpers import get_parameter
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import get_parameter
 
 
 class MQTT:

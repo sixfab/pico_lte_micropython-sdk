@@ -3,10 +3,10 @@ Module for including network functions of picocell module.
 """
 import time
 
-from core.temp import config
-from core.utils.helpers import get_desired_data
-from core.utils.manager import StateManager, Step
-from core.utils.status import Status
+from pico_lte.common import config
+from pico_lte.utils.helpers import get_desired_data
+from pico_lte.utils.manager import StateManager, Step
+from pico_lte.utils.status import Status
 
 
 class Network:

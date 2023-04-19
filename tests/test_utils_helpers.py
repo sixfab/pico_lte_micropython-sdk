@@ -5,7 +5,7 @@ Test module for the utils.helpers module.
 import json
 import pytest
 
-from core.utils.helpers import *
+from pico_lte.utils.helpers import *
 
 
 class TestHelpers:

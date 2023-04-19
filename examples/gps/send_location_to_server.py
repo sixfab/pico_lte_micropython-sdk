@@ -19,9 +19,9 @@ config.json
 
 import time
 
-from core.modem import Modem
-from core.temp import debug
-from core.utils.status import Status
+from pico_lte.modem import Modem
+from pico_lte.common import debug
+from pico_lte.utils.status import Status
 
 
 fix = False

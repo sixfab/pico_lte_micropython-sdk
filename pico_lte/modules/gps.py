@@ -2,8 +2,8 @@
 Module for including functions of location service of picocell module.
 """
 
-from core.utils.helpers import get_desired_data
-from core.utils.status import Status
+from pico_lte.utils.helpers import get_desired_data
+from pico_lte.utils.status import Status
 
 
 class GPS:

@@ -4,10 +4,10 @@ Test module for the modules.mqtt module.
 
 import pytest
 
-from core.modules.mqtt import MQTT
-from core.utils.atcom import ATCom
-from core.utils.status import Status
-from core.temp import config
+from pico_lte.modules.mqtt import MQTT
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
+from pico_lte.common import config
 
 
 def default_response_types():

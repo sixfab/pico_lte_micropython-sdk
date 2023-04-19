@@ -12,8 +12,8 @@ with power of 5 mins.
 """
 
 import time
-from core.modem import Modem
-from core.temp import debug
+from pico_lte.modem import Modem
+from pico_lte.common import debug
 
 DELAY = 0.2
 

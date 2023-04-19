@@ -22,9 +22,9 @@ config.json
 """
 import time
 
-from core.utils.status import Status
-from core.utils.manager import StateManager, Step
-from core.modem import Modem
+from pico_lte.utils.status import Status
+from pico_lte.utils.manager import StateManager, Step
+from pico_lte.modem import Modem
 
 
 # First of all we need to create the function

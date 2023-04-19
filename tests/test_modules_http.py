@@ -3,9 +3,9 @@ Test module for the modules.http module.
 """
 import pytest
 
-from core.modules.http import HTTP
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.http import HTTP
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 def default_response_types():

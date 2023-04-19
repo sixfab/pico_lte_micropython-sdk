@@ -4,7 +4,7 @@ Test module for the modules.peripheral module.
 import pytest
 from machine import Pin, I2C
 
-from core.modules.peripherals import Periph
+from pico_lte.modules.peripherals import Periph
 
 
 class TestPeriph:

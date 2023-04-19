@@ -6,9 +6,9 @@ This module uses ultra lower power load switch and timer hardwares.
 
 import os
 from machine import Pin
-from core.temp import config, debug
-from core.utils.helpers import read_json_file, write_json_file
-from core.utils.status import Status
+from pico_lte.common import config, debug
+from pico_lte.utils.helpers import read_json_file, write_json_file
+from pico_lte.utils.status import Status
 
 
 CONST_TIMER = 1  # minutes

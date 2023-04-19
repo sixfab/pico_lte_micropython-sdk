@@ -5,8 +5,8 @@ Test module for the utils.atcom module.
 import pytest
 from machine import UART
 
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 class TestATCom:

@@ -2,8 +2,8 @@
 Module for including extended configuration function of picocell module.
 """
 
-from core.temp import config
-from core.utils.helpers import read_json_file
+from pico_lte.common import config
+from pico_lte.utils.helpers import read_json_file
 
 
 class Config:

@@ -4,9 +4,9 @@ Test Module for the utils.manager module.
 
 import pytest
 
-from core.utils.manager import Step, StateManager
-from core.utils.status import Status
-from core.temp import config
+from pico_lte.utils.manager import Step, StateManager
+from pico_lte.utils.status import Status
+from pico_lte.common import config
 
 
 def example_function(function_code):

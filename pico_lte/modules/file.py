@@ -2,7 +2,7 @@
 Module for including file functions of picocell module.
 """
 
-from core.utils.status import Status
+from pico_lte.utils.status import Status
 
 
 class File:

@@ -5,9 +5,9 @@ Test module for the modules.base module.
 import pytest
 from machine import Pin
 
-from core.modules.base import Base
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.base import Base
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 class TestBase:
