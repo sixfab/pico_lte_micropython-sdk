@@ -23,9 +23,7 @@ PicoLTE SDK is a framework that you can use in your embedded systems projects an
 * Chance to create your own application module with state machines.
 
 ## Installation
-1. Go to the **Releases** section on the sidebar of this repository and download the most recent version to your computer (or download it using [this link](/sixfab/picocell_python-sdk/releases/latest/download/picocell.uf2)).
-2. After downloading is finished, plug in the _PicoLTE_ to your computer, and drag and drop the UF2 file into the _PicoLTE_'s file system. Since the MicroPython is included in the released UF2 file, there will be no additional step to install MicroPython separately.
-3. Your PicoLTE device will be removed and re-inserted into your computer. That's all, it is ready to use!
+You can install the framework by cloning the repository to your local machine. You can also download the repository as a zip file and extract it to your local machine. After that, you can upload the `pico_lte` folder to your PicoLTE device's file system.
 
 ## Usage
 Using the framework is pretty straightforward. A `main.py` file is needed to run in a MicroPython environment, therefore, please create a `main.py` script in your PicoLTE's file system. Import the framework with `from pico_lte.core import PicoLTE` line, and code your embedded project!
