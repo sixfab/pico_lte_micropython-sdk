@@ -26,7 +26,7 @@ class Base:
 
     def power_off(self):
         """
-        Function for powering off modem
+        Function for powering off celullar modem
         """
         self.powerkey_pin.value(1)
         time.sleep(1)
@@ -34,7 +34,7 @@ class Base:
 
     def power_on(self):
         """
-        Function for powering on modem
+        Function for powering on celullar modem
         """
         self.powerkey_pin.value(1)
         time.sleep(0.5)
@@ -238,3 +238,56 @@ class Base:
         """
         command = f'AT+QCFG="iotopmode",{iotopmode}'
         return self.atcom.send_at_comm(command)
+
+    ####################
+    ### CellularTech ###
+    ####################
+    def get_cell_information(self, cell_type):
+        """
+        Function for getting cell information
+
+        Parameters
+        ----------
+        cell_type : str
+            Cell type ("servingcell" or "neighbourcell")
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys.
+        """
+        if cell_type not in ["servingcell", "neighbourcell"]:
+            return {"status": Status.ERROR, "response": "Invalid cell type"}
+
+        command = f'AT+QENG="{cell_type}"' 
+        return self.atcom.send_at_comm(command)
+
+    def get_all_cells(self, technology="eMTC", timeout=60):
+        """
+        Function for getting all cells
+
+        Parameters
+        ----------
+        technology : str
+            Technology (default="eMTC")
+            * "GSM"
+            * "eMTC"
+            * "NBIoT"
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys.
+        """
+        if technology == "GSM":
+            technology_no = 1
+        elif technology == "eMTC":
+            technology_no = 8
+        elif technology == "NBIoT":
+            technology_no = 9
+        else:
+            return {"status": Status.ERROR, "response": "Invalid technology"}
+
+        # TODO: Get all the information from the URC, not the first one.
+        command = f'AT+QCELLSCAN={technology_no},{timeout}'
+        return self.atcom.send_at_comm(command, timeout=timeout, urc=True, desired='+QCELLSCAN: "{technology}",')
