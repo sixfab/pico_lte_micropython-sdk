@@ -84,7 +84,7 @@ class Telegram:
             name="http_ssl_configuration",
             success="set_server_url",
             fail="failure",
-            function_params={"id": 2},
+            function_params={"cid": 2},
         )
 
         step_set_server_url = Step(
@@ -111,6 +111,8 @@ class Telegram:
             success="success",
             fail="failure",
             function_params={"desired_response": '"ok":true'},
+            interval=3,
+            retry=5,
         )
 
         # Add cache if it is not already existed
