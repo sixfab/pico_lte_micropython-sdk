@@ -3,7 +3,6 @@ Module for including functions of ThingSpeak for PicoLTE module.
 """
 import time
 
-from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.utils.status import Status
 from pico_lte.utils.helpers import get_parameter
@@ -194,7 +193,7 @@ class ThingSpeak:
         Parameters
         ----------
         topics : list
-            List of topics to be subscribed.
+            List of topics to be subscribed. Default is all topics.
         host : str
             Host name of the broker. Default is mqtt3.thingspeak.com.
         port : int
