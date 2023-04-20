@@ -155,9 +155,11 @@ class ThingSpeak:
         )
 
         # Add cache if it is not already existed
-        function_name = "thingspeak.publish_message"
+        function_name = self.APP_NAME + ".publish_message"
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        sm = StateManager(
+            first_step=step_check_mqtt_connected, function_name=function_name
+        )
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
@@ -177,7 +179,14 @@ class ThingSpeak:
             time.sleep(result["interval"])
 
     def subscribe_topics(
-        self, host=None, port=None, topics=None, client_id=None, username=None, password=None
+        self,
+        topics=None,
+        username=None,
+        password=None,
+        host=None,
+        port=None,
+        client_id=None,
+        channel_id=None,
     ):
         """
         Function for subscribing to topics of ThingSpeak.
@@ -185,33 +194,66 @@ class ThingSpeak:
         Parameters
         ----------
         topics : list
-            List of topics.
+            List of topics to be subscribed.
+        host : str
+            Host name of the broker. Default is mqtt3.thingspeak.com.
+        port : int
+            Port number of the broker. Default is 1883.
+        username : str
+            Username of the broker.
+        password : str
+            Password of the broker.
+        client_id : str
+            Client ID of the client. If not provided, then the username is used.
+        channel_id : str
+            Channel ID of the channel.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
+        # Check the parameters and set the default values.
         if host is None:
-            host = get_parameter([self.APP_NAME, "mqtts", "host"], "mqtt3.thingspeak.com")
-
+            host = get_parameter([self.APP_NAME, "host"], "mqtt3.thingspeak.com")
         if port is None:
-            port = get_parameter([self.APP_NAME, "mqtts", "port"], 1883)
-
-        if client_id is None:
-            client_id = get_parameter([self.APP_NAME, "mqtts", "client_id"])
-
+            port = get_parameter([self.APP_NAME, "port"], 1883)
         if username is None:
-            username = get_parameter([self.APP_NAME, "mqtts", "username"])
-
+            username = get_parameter([self.APP_NAME, "username"])
         if password is None:
-            password = get_parameter([self.APP_NAME, "mqtts", "password"])
+            password = get_parameter([self.APP_NAME, "password"])
+        if client_id is None:
+            client_id = get_parameter([self.APP_NAME, "client_id"], username)
+        if channel_id is None:
+            channel_id = get_parameter([self.APP_NAME, "channel_id"])
 
+        # Check the topics list.
         if topics is None:
-            topics = get_parameter(
-                [self.APP_NAME, "mqtts", "sub_topics"],
-                ("channels/" + str(self.channel_id) + "/subscribe/fields/+", 0),
-            )
+            topics = []
+            config_topics = get_parameter([self.APP_NAME, "sub_topics"])
+            config_fields = get_parameter([self.APP_NAME, "sub_fields"])
+
+            # If both the topics and fields are not defined, then select all fields.
+            if config_topics is None and config_fields is None:
+                topics = [
+                    (self.__get_topic_name(channel_id, "+", method="subscribe"), 1)
+                ]
+
+            # If the topics are not defined, but the fields are defined, then select the fields.
+            if config_topics is None and config_fields is not None:
+                for field_no in config_fields:
+                    topics.append(
+                        (
+                            self.__get_topic_name(
+                                channel_id, field_no, method="subscribe"
+                            ),
+                            1,
+                        )
+                    )
+
+            # If the topics are defined, then select the topics.
+            if config_topics is not None:
+                topics = config_topics
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -277,9 +319,11 @@ class ThingSpeak:
         )
 
         # Add cache if it is not already existed
-        function_name = "thingspeak.subscribe_topics"
+        function_name = self.APP_NAME + ".subscribe_topics"
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        sm = StateManager(
+            first_step=step_check_mqtt_connected, function_name=function_name
+        )
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
