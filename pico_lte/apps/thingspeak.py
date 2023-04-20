@@ -14,9 +14,9 @@ class ThingSpeak:
     Class for including functions of ThingSpeak operations for PicoLTE module.
     """
 
-    cache = config["cache"]
+    APP_NAME = "thingspeak"
 
-    def __init__(self, base, network, mqtt, channel_id=None):
+    def __init__(self, base, network, mqtt):
         """Constructor of the class.
 
         Parameters
@@ -31,16 +31,14 @@ class ThingSpeak:
         self.base = base
         self.network = network
         self.mqtt = mqtt
-        self.channel_id = (
-            get_parameter(["thingspeak", "channel_id"]) if (channel_id is None) else channel_id
-        )
 
     def publish_message(
         self,
         payload,
+        channel_id=None,
+        field_no=None,
         host=None,
         port=None,
-        topic=None,
         client_id=None,
         username=None,
         password=None,
@@ -51,43 +49,47 @@ class ThingSpeak:
         Parameters
         ----------
         payload : str
-            Payload of the message.
+            Message to be published.
+        channel_id : str
+            Channel ID of ThingSpeak.
+        field_no : str
+            The field number to be updated.
         host : str
-            Host of the MQTT broker.
+            Host name of the broker. Default is mqtt3.thingspeak.com.
         port : int
-            Port of the MQTT broker.
-        topic : str
-            Topic of the message.
+            Port number of the broker. Default is 1883.
+        client_id : str
+            Client ID of the client. If not provided, then the username is used.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
-        if host is None:
-            host = get_parameter(["thingspeak", "mqtts", "host"], "mqtt3.thingspeak.com")
-
-        if port is None:
-            port = get_parameter(["thingspeak", "mqtts", "port"], 1883)
-
-        if client_id is None:
-            client_id = get_parameter(["thingspeak", "mqtts", "client_id"])
-
+        # Get the parameters from the config file if they are not provided.
+        if field_no is None:
+            field_no = get_parameter([self.APP_NAME, "field_no"])
+        if channel_id is None:
+            channel_id = get_parameter([self.APP_NAME, "channel_id"])
         if username is None:
-            username = get_parameter(["thingspeak", "mqtts", "username"])
-
+            username = get_parameter([self.APP_NAME, "username"])
         if password is None:
-            password = get_parameter(["thingspeak", "mqtts", "password"])
+            password = get_parameter([self.APP_NAME, "password"])
 
-        if topic is None:
-            topic = get_parameter(
-                ["thingspeak", "mqtts", "pub_topic"],
-                "channels/" + str(self.channel_id) + "/publish",
-            )
+        if host is None:
+            host = get_parameter([self.APP_NAME, "host"], "mqtt3.thingspeak.com")
+        if port is None:
+            port = get_parameter([self.APP_NAME, "port"], 1883)
+        # If the client ID is not provided, then use the username.
+        if client_id is None:
+            client_id = get_parameter([self.APP_NAME, "client_id"], username)
+
+        # Create the topic name.
+        topic = self.__get_topic_name(channel_id, field_no, method="publish")
 
         # Create message from dictionary if needed.
         if isinstance(payload, dict):
-            payload = ThingSpeak.create_message(payload)
+            payload = self.create_message(payload)
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -191,23 +193,23 @@ class ThingSpeak:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["thingspeak", "mqtts", "host"], "mqtt3.thingspeak.com")
+            host = get_parameter([self.APP_NAME, "mqtts", "host"], "mqtt3.thingspeak.com")
 
         if port is None:
-            port = get_parameter(["thingspeak", "mqtts", "port"], 1883)
+            port = get_parameter([self.APP_NAME, "mqtts", "port"], 1883)
 
         if client_id is None:
-            client_id = get_parameter(["thingspeak", "mqtts", "client_id"])
+            client_id = get_parameter([self.APP_NAME, "mqtts", "client_id"])
 
         if username is None:
-            username = get_parameter(["thingspeak", "mqtts", "username"])
+            username = get_parameter([self.APP_NAME, "mqtts", "username"])
 
         if password is None:
-            password = get_parameter(["thingspeak", "mqtts", "password"])
+            password = get_parameter([self.APP_NAME, "mqtts", "password"])
 
         if topics is None:
             topics = get_parameter(
-                ["thingspeak", "mqtts", "sub_topics"],
+                [self.APP_NAME, "mqtts", "sub_topics"],
                 ("channels/" + str(self.channel_id) + "/subscribe/fields/+", 0),
             )
 
@@ -328,3 +330,32 @@ class ThingSpeak:
             payload_string += f"{key}={value}&"
 
         return payload_string[:-1]
+
+    @staticmethod
+    def __get_topic_name(channel_id, field_no, method="publish"):
+        """
+        A function to create the topic name for the ThingSpeak MQTT.
+
+        Parameters
+        ----------
+        channel_id : str
+            The channel ID of the ThingSpeak channel.
+        field_no : str
+            The field number of the ThingSpeak channel.
+            If all the fields are to be used, then use "+".
+
+        Returns
+        -------
+        str
+            The topic name for the ThingSpeak MQTT.
+        """
+        if method == "publish":
+            if field_no == "+":
+                return f"channels/{channel_id}/publish/fields/+"
+            return f"channels/{channel_id}/publish/fields/field{field_no}"
+        elif method == "subscribe":
+            if field_no == "+":
+                return f"channels/{channel_id}/subscribe/fields/+"
+            return f"channels/{channel_id}/subscribe/fields/field{field_no}"
+        else:
+            raise ValueError("Invalid method name.")
