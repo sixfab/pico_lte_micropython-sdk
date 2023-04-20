@@ -129,8 +129,8 @@ copy_third_party_libs_as_frozen_module() {
 copy_the_library_as_frozen_module() {
     echo -n "- Copying the PicoLTE SDK to frozen modules..."
     # Delete the older version of the library.
-    rm -rf $DOWNLOAD_LOC/micropython/ports/rp2/modules/core > /dev/null 2>&1
-    cp -r $PROJECT_DIR/core $DOWNLOAD_LOC/micropython/ports/rp2/modules/
+    rm -rf $DOWNLOAD_LOC/micropython/ports/rp2/modules/pico_lte > /dev/null 2>&1
+    cp -r $PROJECT_DIR/pico_lte $DOWNLOAD_LOC/micropython/ports/rp2/modules/
     print_the_status_of_command
 }
 
