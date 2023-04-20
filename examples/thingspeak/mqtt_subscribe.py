@@ -11,14 +11,9 @@ config.json
 {
     "thingspeak": {
         "channel_id": "[YOUR_CHANNEL_ID]",
-        "mqtts": {
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "username": "[DEVICE_MQTT_USERNAME]",
-            "password": "[DEVICE_MQTT_PASSWORD]",
-            "sub_topics": [
-                ["[YOUR_MQTT_TOPIC]", [QOS]]
-            ]
-        }
+        "username": "[DEVICE_MQTT_USERNAME]",
+        "password": "[DEVICE_MQTT_PASSWORD]",
+        "sub_fields": [FIELD_NO_INTEGER, FIELD_NO_INTEGER_2, ...]
     }
 }
 """

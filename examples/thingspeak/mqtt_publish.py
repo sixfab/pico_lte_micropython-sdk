@@ -10,12 +10,9 @@ config.json
 {
     "thingspeak": {
         "channel_id": "[YOUR_CHANNEL_ID]",
-        "mqtts": {
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "username": "[DEVICE_MQTT_USERNAME]",
-            "password": "[DEVICE_MQTT_PASSWORD]",
-            "pub_topic": "[YOUR_MQTT_TOPIC]"
-        }
+        "username": "[DEVICE_MQTT_USERNAME]",
+        "password": "[DEVICE_MQTT_PASSWORD]",
+        "field_no": [FIELD_NO_INTEGER],
     }
 }
 """
@@ -24,8 +21,6 @@ from pico_lte.common import debug
 
 picoLTE = PicoLTE()
 
-payload = {"field1": 30, "field2": 40, "status": "PicoLTE_THINGSPEAK_EXAMPLE"}
-
 debug.info("Publishing data to ThingSpeak...")
-result = picoLTE.thingspeak.publish_message(payload)
+result = picoLTE.thingspeak.publish_message(40)
 debug.info("Result:", result)
