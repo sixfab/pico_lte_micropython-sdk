@@ -1,7 +1,7 @@
 # Configuration Files
 Each application module designed to work with configuration files for easier manipulation to server-side changes. A configuration file is named as `config.json` and stores necessary connection parameters which are designed for you to easily connect to the applications.
 
-In this file, you can find example configuration files for each application module and their mandatory and optional parameters. This file must be placed on the root directory of picocell module.
+In this file, you can find example configuration files for each application module and their mandatory and optional parameters. This file must be placed on the root directory of PicoLTE module.
 
 ## Table of Contents
 1. [Amazon Web Services IoT Core](#amazon-web-services-iot-core-configurations)
@@ -166,7 +166,7 @@ Some use-cases can be implemented by using modules when there is no spesific app
 ```
 
 ## Configuration Files for Your Own Application Module
-The most important feature that we've developed in picocell SDK is the ability to create new applications for your specific services. Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) guidelines. You need to follow standarts that we used to create an application configuration parameters.
+The most important feature that we've developed in PicoLTE SDK is the ability to create new applications for your specific services. Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) guidelines. You need to follow standarts that we used to create an application configuration parameters.
 
  This is the general structure of a `config.json` file:
  ```

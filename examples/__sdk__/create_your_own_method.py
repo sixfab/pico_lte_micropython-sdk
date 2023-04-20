@@ -1,5 +1,5 @@
 """
-This example is aim to find out how to use manager utility of picocell SDK.
+This example is aim to find out how to use manager utility of PicoLTE SDK.
 Manager is a utility to manage the complicated processes have multiple steps,
 specific execution order, need of response binded decision, etc.
 
@@ -8,7 +8,7 @@ We will explain how to create a method by using manager step by step.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -22,9 +22,9 @@ config.json
 """
 import time
 
-from core.utils.status import Status
-from core.utils.manager import StateManager, Step
-from core.modem import Modem
+from pico_lte.utils.status import Status
+from pico_lte.utils.manager import StateManager, Step
+from pico_lte.core import PicoLTE
 
 
 # First of all we need to create the function
@@ -32,7 +32,7 @@ def our_http_post_method(message):
     """Function for performing HTTP POST request to a server."""
 
     # create instance of Modem class
-    modem = Modem()
+    picoLTE = PicoLTE()
 
     # Creating step 1. In this case this step
     # will check the network registeration status
@@ -40,7 +40,7 @@ def our_http_post_method(message):
 
     step_check_network = Step(
         name="check_network", # name of the step
-        function=modem.network.register_network, # function to be executed
+        function=picoLTE.network.register_network, # function to be executed
         success="prepare_pdp", # if succied then go to next step
         fail="failure", # if failed then go to next step
         retry=3 # number of retries if failed without going on the failure step
@@ -54,20 +54,20 @@ def our_http_post_method(message):
 
     step_prepare_pdp = Step(
         name="prepare_pdp",
-        function=modem.network.get_pdp_ready,
+        function=picoLTE.network.get_pdp_ready,
         success="set_server_url",
         fail="failure",
     )
 
     # Creating step 3.
     # In this step we will set the server URL
-    # modem.http.set_server_url function gets server URL from
+    # picoLTE.http.set_server_url function gets server URL from
     # the config.json file automatically. You must just create a
-    # config.json file and put it in the picocell root path.
+    # config.json file and put it in the PicoLTE root path.
 
     step_set_server_url = Step(
         name="set_server_url",
-        function=modem.http.set_server_url,
+        function=picoLTE.http.set_server_url,
         success="post_request",
         fail="failure",
     )
@@ -81,7 +81,7 @@ def our_http_post_method(message):
 
     step_post_request = Step(
         name="post_request",
-        function=modem.http.post,
+        function=picoLTE.http.post,
         success="read_response",
         fail="failure",
         function_params={"data": message},
@@ -96,7 +96,7 @@ def our_http_post_method(message):
 
     step_read_response = Step(
         name="read_response",
-        function=modem.http.read_response,
+        function=picoLTE.http.read_response,
         success="success",
         fail="failure",
         function_params={

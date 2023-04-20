@@ -4,9 +4,9 @@ Test module for the modules.gps module.
 
 import pytest
 
-from core.modules.gps import GPS
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.gps import GPS
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 def default_response_types():
@@ -31,7 +31,7 @@ class TestGPS:
     @staticmethod
     def mock_send_at_comm(mocker, responses_to_return):
         """This is a wrapper function to repeated long mocker.patch() statements."""
-        return mocker.patch("core.utils.atcom.ATCom.send_at_comm", return_value=responses_to_return)
+        return mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", return_value=responses_to_return)
 
     def test_constructor(self, gps):
         """This method tests the __init__ constructor."""

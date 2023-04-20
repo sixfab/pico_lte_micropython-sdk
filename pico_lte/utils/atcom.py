@@ -4,8 +4,8 @@ Module for communicating with cellular modem over UART interface.
 
 import time
 from machine import UART, Pin
-from core.temp import debug
-from core.utils.status import Status
+from pico_lte.common import debug
+from pico_lte.utils.status import Status
 
 
 class ATCom:

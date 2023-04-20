@@ -3,7 +3,7 @@ Example code for performing HTTP request to a server with using custom headers.
 
 Example Configuration
 ---------------------
-Create a config.json file in the root directory of the picocell device.
+Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 config.json
@@ -18,17 +18,17 @@ config.json
 
 import json
 import time
-from core.utils.status import Status
-from core.modem import Modem
-from core.temp import debug
-from core.utils.helpers import get_parameter
+from pico_lte.utils.status import Status
+from pico_lte.core import PicoLTE
+from pico_lte.common import debug
+from pico_lte.utils.helpers import get_parameter
 
 # Prepare HTTP connection.
-modem = Modem()
-modem.network.register_network()
-modem.http.set_context_id()
-modem.network.get_pdp_ready()
-modem.http.set_server_url()
+picoLTE = PicoLTE()
+picoLTE.network.register_network()
+picoLTE.http.set_context_id()
+picoLTE.network.get_pdp_ready()
+picoLTE.http.set_server_url()
 
 # Get URL from the config.json.
 url = get_parameter(["https", "server"])
@@ -55,12 +55,12 @@ HEADER = "\n".join(
 )
 
 debug.info("Sending a GET request with custom header...")
-result = modem.http.get(HEADER, header_mode=1)
+result = picoLTE.http.get(HEADER, header_mode=1)
 debug.info("Result:", result)
 
 time.sleep(5)
 
-result = modem.http.read_response()
+result = picoLTE.http.read_response()
 debug.info(result)
 if result["status"] == Status.SUCCESS:
     debug.info("GET request succeeded.")

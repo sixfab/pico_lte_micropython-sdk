@@ -1,5 +1,5 @@
 """
-Module for including functions of HTTP related operations of picocell module.
+Module for including functions of HTTP related operations of PicoLTE module.
 
 HTTP Result Codes
 ------------------------------------------
@@ -49,14 +49,14 @@ HTTP Server Response Codes
 ---------------------------
 """
 
-from core.utils.status import Status
-from core.utils.helpers import get_parameter
-from core.temp import debug
+from pico_lte.utils.status import Status
+from pico_lte.utils.helpers import get_parameter
+from pico_lte.common import debug
 
 
 class HTTP:
     """
-    Class for including functions of HTTP related operations of picocell module.
+    Class for including functions of HTTP related operations of PicoLTE module.
     """
 
     def __init__(self, atcom):
@@ -300,7 +300,7 @@ class HTTP:
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
             if header_mode == 1:
-                # Send a GET request to the modem.
+                # Send a GET request to the PicoLTE.
                 command = f"AT+QHTTPGET={timeout},{len(data)},{input_timeout}"
                 result = self.atcom.send_at_comm(
                     command,
@@ -381,7 +381,7 @@ class HTTP:
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
-            # Send a POST request to the modem.
+            # Send a POST request to the PicoLTE.
             command = f"AT+QHTTPPOST={len(data)},{input_timeout},{timeout}"
             result = self.atcom.send_at_comm(
                 command,
@@ -486,7 +486,7 @@ class HTTP:
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
         if result["status"] == Status.SUCCESS:
-            # Send a PUT request to the modem.
+            # Send a PUT request to the PicoLTE.
             command = f"AT+QHTTPPUT={len(data)},{input_timeout},{timeout}"
             result = self.atcom.send_at_comm(
                 command,
@@ -566,7 +566,7 @@ class HTTP:
         if fault_response is None:
             fault_response = [f"+QHTTPREAD: {str(error_code)}" for error_code in range(701, 731, 1)]
 
-        # Send a READ request to the modem.
+        # Send a READ request to the PicoLTE.
         command = f"AT+QHTTPREAD={timeout}"
         result = self.atcom.send_at_comm(
             command,

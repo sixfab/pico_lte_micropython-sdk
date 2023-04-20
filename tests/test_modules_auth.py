@@ -4,10 +4,10 @@ Test module for the modules.auth module.
 
 import pytest
 
-from core.modules.auth import Auth
-from core.modules.file import File
-from core.utils.atcom import ATCom
-from core.utils.status import Status
+from pico_lte.modules.auth import Auth
+from pico_lte.modules.file import File
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
 
 
 class TestAuth:
@@ -36,19 +36,19 @@ class TestAuth:
             "response": simulation_data["file_name"],
         }
 
-        mocker.patch("core.modules.auth.read_file", side_effect=simulation_data["file_inside"])
+        mocker.patch("pico_lte.modules.auth.read_file", side_effect=simulation_data["file_inside"])
         mocker.patch(
-            "core.modules.file.File.delete_file_from_modem",
+            "pico_lte.modules.file.File.delete_file_from_modem",
             return_value=None,
             side_effect=side_effect_delete_file_from_modem,
         )
         mocker.patch(
-            "core.modules.file.File.upload_file_to_modem",
+            "pico_lte.modules.file.File.upload_file_to_modem",
             return_value=return_value_upload_to_file,
         )
         mocker.patch("os.remove", side_effect=side_effect_os_remove)
         mocker.patch(
-            "core.modules.file.File.get_file_list",
+            "pico_lte.modules.file.File.get_file_list",
             return_value=mocked_response_get_file_list,
         )
 
@@ -73,7 +73,7 @@ class TestAuth:
         result = auth.load_certificates()
 
         assert result["status"] == Status.SUCCESS
-        assert result["response"] == "Certificates found in modem."
+        assert result["response"] == "Certificates found in PicoLTE."
 
     def test_load_certificates_wrong_certificate_names(self, mocker, auth):
         """This method tests the load_certificates() method without
@@ -132,11 +132,11 @@ class TestAuth:
         result = auth.load_certificates()
 
         assert result["status"] == Status.SUCCESS
-        assert result["response"] == "Certificates found in modem."
+        assert result["response"] == "Certificates found in PicoLTE."
 
     def test_load_certificates_with_error_on_get_file_list(self, mocker, auth):
         """This method tests load_certificates() method when it is not the first_try
-        and there is an error at connection with modem.
+        and there is an error at connection with PicoLTE.
         """
         # Data which simulates system behaviour.
         mocked_data = {

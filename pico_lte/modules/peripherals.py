@@ -1,5 +1,5 @@
 """
-Module for incuding periheral hardware functions of picocell module.
+Module for incuding periheral hardware functions of PicoLTE module.
 """
 
 from machine import Pin, I2C
@@ -8,7 +8,7 @@ from neopixel import NeoPixel
 
 class Periph:
     """
-    Class for inculding periheral hardware functions of picocell module.
+    Class for inculding periheral hardware functions of PicoLTE module.
     """
     user_button = Pin(21, Pin.IN)
     user_led = Pin(22, Pin.OUT)

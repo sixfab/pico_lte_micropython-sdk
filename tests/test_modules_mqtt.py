@@ -4,10 +4,10 @@ Test module for the modules.mqtt module.
 
 import pytest
 
-from core.modules.mqtt import MQTT
-from core.utils.atcom import ATCom
-from core.utils.status import Status
-from core.temp import config
+from pico_lte.modules.mqtt import MQTT
+from pico_lte.utils.atcom import ATCom
+from pico_lte.utils.status import Status
+from pico_lte.common import config
 
 
 def default_response_types():
@@ -33,7 +33,7 @@ class TestMQTT:
     @staticmethod
     def mock_send_at_comm(mocker, responses_to_return, is_side_effect=False):
         """This is a wrapper function to repeated long mocker.patch() statements."""
-        patch_location = "core.utils.atcom.ATCom.send_at_comm"
+        patch_location = "pico_lte.utils.atcom.ATCom.send_at_comm"
         if is_side_effect:
             return mocker.patch(patch_location, side_effect=responses_to_return)
         return mocker.patch(patch_location, return_value=responses_to_return)
@@ -199,7 +199,7 @@ class TestMQTT:
         """This method tests open_connect() when there is no given parameter,
         and config is empty.
         """
-        mocker.patch("core.modules.mqtt.get_parameter", return_value=None)
+        mocker.patch("pico_lte.modules.mqtt.get_parameter", return_value=None)
         result = mqtt.open_connection()
 
         assert result["status"] == Status.ERROR
@@ -218,7 +218,7 @@ class TestMQTT:
             {"status": Status.SUCCESS, "response": ["+QMTOPEN: 0,0"]},
         ]
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_responses[0])
-        get_urc_response_loc = "core.utils.atcom.ATCom.get_urc_response"
+        get_urc_response_loc = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(get_urc_response_loc, return_value=mocked_responses[1])
         mqtt.open_connection(host="https://sixfab.com")
 
@@ -236,7 +236,7 @@ class TestMQTT:
             {"status": Status.SUCCESS, "response": ["+QMTOPEN: 0,0"]},
         ]
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_responses[0])
-        get_urc_response_loc = "core.utils.atcom.ATCom.get_urc_response"
+        get_urc_response_loc = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(get_urc_response_loc, return_value=mocked_responses[1])
         mqtt.open_connection(host="https://sixfab.com", port="1111")
 
@@ -309,7 +309,7 @@ class TestMQTT:
             {"status": Status.SUCCESS, "response": ["+QMTCLOSE: 0,0"]},
         ]
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_responses[0])
-        get_urc_response_loc = "core.utils.atcom.ATCom.get_urc_response"
+        get_urc_response_loc = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(get_urc_response_loc, return_value=mocked_responses[1])
         result = mqtt.close_connection()
 
@@ -324,7 +324,7 @@ class TestMQTT:
             {"status": Status.SUCCESS, "response": ["+QMTCLOSE: 0,0"]},
         ]
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_responses[0])
-        get_urc_response_loc = "core.utils.atcom.ATCom.get_urc_response"
+        get_urc_response_loc = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(get_urc_response_loc, return_value=mocked_responses[1])
         mqtt.close_connection(params)
 
@@ -345,12 +345,12 @@ class TestMQTT:
         [
             {
                 "status": Status.ERROR,
-                "response": ['AT+QMTCONN=0,"Picocell"\r', "ERROR"],
+                "response": ['AT+QMTCONN=0,"PicoLTE"\r', "ERROR"],
             },
-            {"status": Status.SUCCESS, "response": ['AT+QMTCONN=0,"Picocell"\r', "OK"]},
+            {"status": Status.SUCCESS, "response": ['AT+QMTCONN=0,"PicoLTE"\r', "OK"]},
             {
                 "status": Status.ERROR,
-                "response": ['AT+QMTCONN=0,"Picocell"\r', "OK", "+QMTSTAT: 0,3"],
+                "response": ['AT+QMTCONN=0,"PicoLTE"\r', "OK", "+QMTSTAT: 0,3"],
             },
             default_response_types()[1],
             default_response_types()[2],
@@ -364,28 +364,28 @@ class TestMQTT:
         # Mock config again not the be mixed with old test injections.
         config["params"] = {}
         mocker.patch(
-            "core.utils.atcom.ATCom.get_urc_response",
+            "pico_lte.utils.atcom.ATCom.get_urc_response",
         )
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
         mqtt.connect_broker()
 
-        mocking.assert_called_once_with('AT+QMTCONN=0,"Picocell"')
+        mocking.assert_called_once_with('AT+QMTCONN=0,"PicoLTE"')
 
     @pytest.mark.parametrize(
         "mocked_response",
         [
             {
                 "status": Status.ERROR,
-                "response": ['AT+QMTCONN=0,"Picocell","john","doe123"\r', "ERROR"],
+                "response": ['AT+QMTCONN=0,"PicoLTE","john","doe123"\r', "ERROR"],
             },
             {
                 "status": Status.SUCCESS,
-                "response": ['AT+QMTCONN=0,"Picocell","john","doe123"\r', "OK"],
+                "response": ['AT+QMTCONN=0,"PicoLTE","john","doe123"\r', "OK"],
             },
             {
                 "status": Status.ERROR,
                 "response": [
-                    'AT+QMTCONN=0,"Picocell","john","doe123"\r',
+                    'AT+QMTCONN=0,"PicoLTE","john","doe123"\r',
                     "OK",
                     "+QMTSTAT: 0,4",
                 ],
@@ -404,12 +404,12 @@ class TestMQTT:
         """This method tests connect_broker() without parameters, and with
         pre-defined config file which includes username and password."""
         config["params"] = {"mqtts": {"username": "john", "password": "doe123"}}
-        urc_response_patch = "core.utils.atcom.ATCom.get_urc_response"
+        urc_response_patch = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(urc_response_patch, return_value=mocked_response)
         mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
         result = mqtt.connect_broker()
 
-        mocking.assert_called_once_with('AT+QMTCONN=0,"Picocell","john","doe123"')
+        mocking.assert_called_once_with('AT+QMTCONN=0,"PicoLTE","john","doe123"')
         assert result == mocked_response
 
     def test_connect_broker_when_send_at_comm_return_error(self, mocker, mqtt):
@@ -490,7 +490,7 @@ class TestMQTT:
     )
     def test_subscribe_topics_parameter(self, mocker, mqtt, mocked_response):
         """This method tests subscribe_topics() with parameter installation."""
-        get_urc_response_patch = "core.utils.atcom.ATCom.get_urc_response"
+        get_urc_response_patch = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(get_urc_response_patch, return_value=mocked_response)
         mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
         topics_list = [("topic1", 0), ("topic2", 1), ("topic2", 2)]
@@ -565,7 +565,7 @@ class TestMQTT:
         """This method tests publish_message() when both send_at_comm()
         functions returns successfull responses.
         """
-        send_at_comm_once_patch = "core.utils.atcom.ATCom.send_at_comm_once"
+        send_at_comm_once_patch = "pico_lte.utils.atcom.ATCom.send_at_comm_once"
         mocker.patch(send_at_comm_once_patch)
         response_sequence = [
             {"status": Status.SUCCESS, "response": ["OK", ">"]},

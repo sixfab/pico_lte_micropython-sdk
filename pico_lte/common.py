@@ -3,7 +3,7 @@ Basic module for using purpose of provining temporary memory
 for sharing data by different modules.
 """
 
-from core.utils.debug import Debug
+from pico_lte.utils.debug import Debug
 
 
 class StateCache:
