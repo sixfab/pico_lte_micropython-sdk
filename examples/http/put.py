@@ -18,9 +18,8 @@ config.json
 
 import json
 import time
-from pico_lte.utils.status import Status
 from pico_lte.core import PicoLTE
-from pico_lte.common import debug
+from pico_lte.common import debug, Status
 
 picoLTE = PicoLTE()
 

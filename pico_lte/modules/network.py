@@ -3,10 +3,9 @@ Module for including network functions of PicoLTE module.
 """
 import time
 
-from pico_lte.common import config
+from pico_lte.common import config, Status
 from pico_lte.utils.helpers import get_desired_data
 from pico_lte.utils.manager import StateManager, Step
-from pico_lte.utils.status import Status
 
 
 class Network:

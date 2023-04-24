@@ -6,8 +6,7 @@ For example; power control of modem, basic communication check etc.
 import time
 
 from machine import Pin
-from pico_lte.common import debug
-from pico_lte.utils.status import Status
+from pico_lte.common import debug, Status
 from pico_lte.utils.helpers import get_desired_data
 
 

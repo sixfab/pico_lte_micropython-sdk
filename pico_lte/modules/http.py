@@ -49,9 +49,8 @@ HTTP Server Response Codes
 ---------------------------
 """
 
-from pico_lte.utils.status import Status
 from pico_lte.utils.helpers import get_parameter
-from pico_lte.common import debug
+from pico_lte.common import debug, Status
 
 
 class HTTP:

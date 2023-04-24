@@ -2,7 +2,7 @@
 Module for including file functions of PicoLTE module.
 """
 
-from pico_lte.utils.status import Status
+from pico_lte.common import Status
 
 
 class File:

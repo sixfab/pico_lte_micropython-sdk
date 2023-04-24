@@ -4,8 +4,7 @@ Module for including authentication functions of PicoLTE module.
 
 import os
 
-from pico_lte.common import debug
-from pico_lte.utils.status import Status
+from pico_lte.common import debug, Status
 from pico_lte.utils.helpers import read_file
 from pico_lte.modules.file import File
 

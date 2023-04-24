@@ -22,7 +22,7 @@ config.json
 """
 import time
 
-from pico_lte.utils.status import Status
+from pico_lte.common import Status
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.core import PicoLTE
 

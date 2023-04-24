@@ -18,9 +18,8 @@ config.json
 
 import json
 import time
-from pico_lte.utils.status import Status
 from pico_lte.core import PicoLTE
-from pico_lte.common import debug
+from pico_lte.common import debug, Status
 from pico_lte.utils.helpers import get_parameter
 
 # Prepare HTTP connection.

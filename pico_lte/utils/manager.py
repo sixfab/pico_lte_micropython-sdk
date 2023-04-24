@@ -2,8 +2,7 @@
 Module for managing processes on modem step by step.
 """
 
-from pico_lte.common import config, debug
-from pico_lte.utils.status import Status
+from pico_lte.common import config, debug, Status
 
 
 class Step:

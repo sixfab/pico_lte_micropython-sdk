@@ -4,7 +4,7 @@ Module for including functions of ThingSpeak for PicoLTE module.
 import time
 
 from pico_lte.utils.manager import StateManager, Step
-from pico_lte.utils.status import Status
+from pico_lte.common import Status
 from pico_lte.utils.helpers import get_parameter
 
 
