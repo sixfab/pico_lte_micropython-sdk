@@ -100,3 +100,100 @@ class GoogleSheets:
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
+
+    # https://sheets.googleapis.com/v4/spreadsheets/1FJ5vb7XiS51bhn0sUpDS8bTd9OC4nV533j1vkSRuN3s/values/deneme1?dateTimeRenderOption=FORMATTED_STRING&majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key=AIzaSyB0qf0SYVt6haocNwEOY6xn7O7f0B0UnCE
+
+    def get_data(self, sheet_name=None, data_range=None):
+        if sheet_name is None:
+            sheet_name = get_parameter(["google_sheets", "sheet_name"])
+
+        if not sheet_name:
+            return {"status": Status.ERROR, "response": "Missing arguments!"}
+
+        if data_range is None:
+            data_range = get_parameter(["google_sheets", "data_range"])
+
+        if not data_range:
+            return {"status": Status.ERROR, "response": "Missing arguments!"}
+
+        spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
+        dateTimeRenderOption = get_parameter(["google_sheets", "dateTimeRenderOption"])
+        majorDimension = get_parameter(["google_sheets", "majorDimension"])
+        valueRenderOption = get_parameter(["google_sheets", "valueRenderOption"])
+        api_key = get_parameter(["google_sheets", "api_key"])
+
+        if data_range:
+            url = f"http://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet_name}!{data_range}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+
+        step_network_reg = Step(
+            function=self.network.register_network,
+            name="register_network",
+            success="pdp_ready",
+            fail="failure",
+        )
+        step_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="pdp_ready",
+            success="http_ssl_configuration",
+            fail="failure",
+        )
+
+        step_http_ssl_configuration = Step(
+            function=self.http.set_ssl_context_id,
+            name="http_ssl_configuration",
+            success="set_server_url",
+            fail="failure",
+        )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+            interval=2,
+        )
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="get_request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_get_request = Step(
+            function=self.http.get,
+            name="get_request",
+            success="read_response",
+            fail="failure",
+            cachable=True,
+            interval=5,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+        )
+
+        function_name = "google_sheets.get_data"
+
+        sm = StateManager(first_step=step_network_reg, function_name=function_name)
+
+        sm.add_step(step_network_reg)
+        sm.add_step(step_pdp_ready)
+        sm.add_step(step_http_ssl_configuration)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_get_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
