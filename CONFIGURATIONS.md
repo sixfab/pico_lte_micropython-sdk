@@ -102,29 +102,31 @@ Within this level of configurations, you can use ThingSpeak directly. Subscripti
 {
     "thingspeak": {
         "channel_id": "[YOUR_CHANNEL_ID]",
-        "mqtts": {
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "username": "[DEVICE_MQTT_USERNAME]",
-            "password": "[DEVICE_MQTT_PASSWORD]"
-        }
+        "username": "[DEVICE_MQTT_USERNAME]",
+        "password": "[DEVICE_MQTT_PASSWORD]",
+        "pub_field": [FIELD_NO_INTEGER],
+        "sub_fields": [FIELD_NO_INTEGER, FIELD_NO_INTEGER_2, ...]
     }
 }
 ```
-For better control on which fields to subscribe or publish, you may want to add extra attributes. Also, please note that host and port address can be change by its own attributes.
+For better control on which fields to subscribe or publish, you may want to add extra attributes. Also, please note that host and port address can be change by its own attributes. Note that FIELD_NO_INTEGER is an integer value which is the number of the field in the channel or "+" string if all the fields are desired.
 ```json
 {
     "thingspeak": {
         "channel_id": "[YOUR_CHANNEL_ID]",
-        "mqtts": {
-            "host": "[THINGSPEAK_HOST_ADDRESS]",
-            "port": "[THINGSPEAK_PORT_ADDRESS]",
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "username": "[DEVICE_MQTT_USERNAME]",
-            "password": "[DEVICE_MQTT_PASSWORD]",
-            "sub_topics": [
-                ["[YOUR_MQTT_TOPIC]", [QOS]]
-            ],
-            "pub_topic": "[YOUR_MQTT_TOPIC]"
+        "host": "[THINGSPEAK_HOST_ADDRESS]",
+        "port": "[THINGSPEAK_PORT_ADDRESS]",
+        "client_id": "[DEVICE_MQTT_CLIENT_ID]",
+        "username": "[DEVICE_MQTT_USERNAME]",
+        "password": "[DEVICE_MQTT_PASSWORD]",
+
+        // Use either sub_topics or sub_fields.
+        "sub_topics": [
+            ["[YOUR_MQTT_TOPIC]", [QOS]]
+        ],
+        "sub_fields": [FIELD_NO_INTEGER, FIELD_NO_INTEGER_2, ...],
+
+        "pub_field": [FIELD_NO_INTEGER],
         }
     }
 }
