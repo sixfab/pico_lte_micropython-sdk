@@ -301,7 +301,7 @@ class MQTT:
             result = self.atcom.get_urc_response(desired_response, timeout=60)
         return result
 
-    def connect_broker(self, client_id="PicoLTE", username=None, password=None, cid=0):
+    def connect_broker(self, client_id, username=None, password=None, cid=0):
         """
         Function for connecting to MQTT broker. This function is used when a client requests a
         connection to the MQTT server. When a TCP/IP socket connection is established between
@@ -309,7 +309,7 @@ class MQTT:
 
         Parameters
         ----------
-        client_id : str, default: "PicoLTE"
+        client_id : str
             Client ID string. Maximum length: 23 bytes.
         username : str, default: None
             Username. Maximum length: 23 bytes.
