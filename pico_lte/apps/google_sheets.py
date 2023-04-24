@@ -101,8 +101,6 @@ class GoogleSheets:
                 return result
             time.sleep(result["interval"])
 
-    # https://sheets.googleapis.com/v4/spreadsheets/1FJ5vb7XiS51bhn0sUpDS8bTd9OC4nV533j1vkSRuN3s/values/deneme1?dateTimeRenderOption=FORMATTED_STRING&majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key=AIzaSyB0qf0SYVt6haocNwEOY6xn7O7f0B0UnCE
-
     def get_data(self, sheet_name=None, data_range=None):
         if sheet_name is None:
             sheet_name = get_parameter(["google_sheets", "sheet_name"])
@@ -123,7 +121,7 @@ class GoogleSheets:
         api_key = get_parameter(["google_sheets", "api_key"])
 
         if data_range:
-            url = f"http://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet_name}!{data_range}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet_name}!{data_range}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
 
         step_network_reg = Step(
             function=self.network.register_network,
