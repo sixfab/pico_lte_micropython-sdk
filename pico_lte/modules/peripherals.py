@@ -2,7 +2,7 @@
 Module for incuding periheral hardware functions of PicoLTE module.
 """
 
-from machine import Pin, I2C
+from machine import Pin
 from neopixel import NeoPixel
 
 
@@ -14,8 +14,6 @@ class Periph:
     user_led = Pin(22, Pin.OUT)
     pico_led = Pin("LED", Pin.OUT)
     neopixel = Pin(15, Pin.OUT)
-
-    qwiic = I2C(0, scl=Pin(17), sda=Pin(16), freq=400_000)
 
     def __init__(self):
         """
@@ -49,9 +47,3 @@ class Periph:
         neopixel = NeoPixel(self.neopixel, 8)
         neopixel[0] = (red, green, blue)
         neopixel.write()
-
-    def qwiic_scan(self):
-        """
-        Function for scanning QWIIC devices
-        """
-        return self.qwiic.scan()
