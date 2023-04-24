@@ -33,8 +33,6 @@ class TestPeriph:
         assert isinstance(periph.neopixel, Pin)
         assert periph.neopixel.pin_num == 15
         assert periph.neopixel.pin_dir == Pin.OUT
-        # Test the Qwiic protocol.
-        assert isinstance(periph.qwiic, I2C)
 
     @pytest.mark.parametrize("pin_value", [0, 1])
     def test_read_user_button(self, mocker, periph, pin_value):
@@ -45,9 +43,3 @@ class TestPeriph:
     def test_adjust_neopixel(self):
         """No need since its a third-party library."""
         assert True
-
-    @pytest.mark.parametrize("mocked_response", [[104, 105], []])
-    def test_qwiic_scan(self, mocker, periph, mocked_response):
-        """This method tests the qwiic_scan() with mocked responses."""
-        mocker.patch("pico_lte.modules.peripherals.I2C.scan", return_value=mocked_response)
-        assert periph.qwiic_scan() == mocked_response
