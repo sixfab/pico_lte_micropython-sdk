@@ -4,7 +4,6 @@ Module for including functions of AWS IoT operations of PicoLTE module.
 
 import time
 
-from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.utils.status import Status
 from pico_lte.utils.helpers import get_parameter
@@ -15,16 +14,11 @@ class AWS:
     Class for including functions of AWS IoT operations of PicoLTE module.
     """
 
-    cache = config["cache"]
+    APP_NAME = "aws"
 
     def __init__(self, base, auth, network, ssl, mqtt, http):
         """
         Constructor of the class.
-
-        Parameters
-        ----------
-        cache : dict
-            Cache of the class.
         """
         self.base = base
         self.auth = auth
@@ -33,7 +27,7 @@ class AWS:
         self.mqtt = mqtt
         self.http = http
 
-    def publish_message(self, payload, host=None, port=None, topic=None):
+    def publish_message(self, payload, host=None, port=None, topic=None, client_id=None):
         """
         Function for publishing a message to AWS IoT by using MQTT.
 
@@ -54,13 +48,16 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["aws", "mqtts", "host"])
+            host = get_parameter([self.APP_NAME, "host"])
 
         if port is None:
-            port = get_parameter(["aws", "mqtts", "port"], 8883)
+            port = get_parameter([self.APP_NAME, "port"], 8883)
 
         if topic is None:
-            topic = get_parameter(["aws", "mqtts", "pub_topic"])
+            topic = get_parameter([self.APP_NAME, "pub_topic"])
+
+        if client_id is None:
+            client_id = get_parameter([self.APP_NAME, "client_id"], "PicoLTE")
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -139,6 +136,7 @@ class AWS:
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
+            function_params={"client_id": client_id},
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
@@ -154,9 +152,11 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "aws.publish_message"
+        function_name = self.APP_NAME + ".publish_message"
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        sm = StateManager(
+            first_step=step_check_mqtt_connected, function_name=function_name
+        )
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
@@ -180,7 +180,7 @@ class AWS:
                 return result
             time.sleep(result["interval"])
 
-    def subscribe_topics(self, host=None, port=None, topics=None):
+    def subscribe_topics(self, host=None, port=None, topics=None, client_id=None):
         """
         Function for subscribing to topics of AWS.
 
@@ -195,13 +195,16 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if topics is None:
-            topics = get_parameter(["aws", "mqtts", "sub_topics"])
+            topics = get_parameter([self.APP_NAME, "sub_topics"])
 
         if host is None:
-            host = get_parameter(["aws", "mqtts", "host"])
+            host = get_parameter([self.APP_NAME, "host"])
 
         if port is None:
-            port = get_parameter(["aws", "mqtts", "port"], 8883)
+            port = get_parameter([self.APP_NAME, "port"], 8883)
+
+        if client_id is None:
+            client_id = get_parameter([self.APP_NAME, "client_id"], "PicoLTE")
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -282,6 +285,7 @@ class AWS:
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
+            function_params={"client_id": client_id},
             name="connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
@@ -297,9 +301,11 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "aws.subscribe_message"
+        function_name = self.APP_NAME + ".subscribe_message"
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        sm = StateManager(
+            first_step=step_check_mqtt_connected, function_name=function_name
+        )
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
@@ -346,11 +352,11 @@ class AWS:
             Result that includes "status" and "response" keys
         """
         if url is None:
-            endpoint = get_parameter(["aws", "https", "endpoint"])
-            topic = get_parameter(["aws", "https", "topic"])
+            host = get_parameter([self.APP_NAME, "host"])
+            topic = get_parameter([self.APP_NAME, "pub_topic"])
 
-            if endpoint and topic:
-                url = f"https://{endpoint}:8443/topics/{topic}?qos=1"
+            if host and topic:
+                url = f"https://{host}:8443/topics/{topic}?qos=1"
 
         step_load_certificates = Step(
             function=self.auth.load_certificates,
@@ -414,9 +420,11 @@ class AWS:
         )
 
         # Add cache if it is not already existed
-        function_name = "aws.post_message"
+        function_name = self.APP_NAME + ".post_message"
 
-        sm = StateManager(first_step=step_load_certificates, function_name=function_name)
+        sm = StateManager(
+            first_step=step_load_certificates, function_name=function_name
+        )
 
         sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
