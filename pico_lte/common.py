@@ -4,6 +4,7 @@ for sharing data by different modules.
 """
 
 from pico_lte.utils.debug import Debug
+from pico_lte.utils.status import Status
 
 
 class StateCache:
