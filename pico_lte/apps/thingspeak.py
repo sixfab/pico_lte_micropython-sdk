@@ -137,7 +137,7 @@ class ThingSpeak:
             success="publish_message",
             fail="failure",
             function_params={
-                "client_id_string": client_id,
+                "client_id": client_id,
                 "username": username,
                 "password": password,
             },
@@ -301,7 +301,7 @@ class ThingSpeak:
             success="subscribe_topics",
             fail="failure",
             function_params={
-                "client_id_string": client_id,
+                "client_id": client_id,
                 "username": username,
                 "password": password,
             },
