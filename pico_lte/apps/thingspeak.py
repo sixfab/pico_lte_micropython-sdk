@@ -67,7 +67,7 @@ class ThingSpeak:
         """
         # Get the parameters from the config file if they are not provided.
         if field_no is None:
-            field_no = get_parameter([self.APP_NAME, "field_no"])
+            field_no = get_parameter([self.APP_NAME, "pub_field"])
         if channel_id is None:
             channel_id = get_parameter([self.APP_NAME, "channel_id"])
         if username is None:

@@ -12,7 +12,7 @@ config.json
         "channel_id": "[YOUR_CHANNEL_ID]",
         "username": "[DEVICE_MQTT_USERNAME]",
         "password": "[DEVICE_MQTT_PASSWORD]",
-        "field_no": [FIELD_NO_INTEGER],
+        "pub_field": [FIELD_NO_INTEGER],
     }
 }
 """
