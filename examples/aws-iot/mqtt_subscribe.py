@@ -10,14 +10,11 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "aws":{
-        "mqtts":{
-            "host":"[YOUR_AWSIOT_ENDPOINT]",
-            "port":"[YOUR_AWSIOT_MQTT_PORT]",
-            "sub_topics":[
-                "[YOUR_MQTT_TOPIC/1]",
-                "[YOUR_MQTT_TOPIC/2]"
-            ]
-        }
+        "host":"[YOUR_AWSIOT_ENDPOINT]",
+        "sub_topics":[
+            "[YOUR_MQTT_TOPIC/1]",
+            "[YOUR_MQTT_TOPIC/2]"
+        ]
     }
 }
 """

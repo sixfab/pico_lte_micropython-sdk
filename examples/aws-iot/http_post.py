@@ -9,10 +9,8 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "aws":{
-        "https":{
-            "endpoint":"[YOUR_AWS_IOT_ENDPOINT]"
-            "topic":"[YOUR_DEVICE_TOPIC]"
-        }
+        "host": "[YOUR_AWS_IOT_ENDPOINT]",
+        "pub_topic": "[YOUR_DEVICE_TOPIC]"
     }
 }
 """
@@ -23,8 +21,8 @@ from pico_lte.common import debug
 picoLTE = PicoLTE()
 
 payload_json = {"state": {"reported": {"App": "AWS HTTP Example"}}}
+payload = json.dumps(payload_json)
 
 debug.info("Publishing data to AWS IoT...")
-payload = json.dumps(payload_json)
 result = picoLTE.aws.post_message(payload)
 debug.info("Result", result)

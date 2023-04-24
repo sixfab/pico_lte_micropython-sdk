@@ -9,11 +9,8 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "aws":{
-        "mqtts":{
-            "host":"[YOUR_AWSIOT_ENDPOINT]",
-            "port":"[YOUR_AWSIOT_MQTT_PORT]",
-            "pub_topic":"[YOUR_MQTT_TOPIC]",
-        }
+        "host": "[YOUR_AWS_IOT_ENDPOINT]",
+        "pub_topic": "[YOUR_DEVICE_TOPIC]"
     }
 }
 """
@@ -24,8 +21,8 @@ from pico_lte.common import debug
 picoLTE = PicoLTE()
 
 payload_json = {"state": {"reported": {"App": "AWS MQTT Example"}}}
+payload = json.dumps(payload_json)
 
 debug.info("Publishing data to AWS IoT...")
-payload = json.dumps(payload_json)
 result = picoLTE.aws.publish_message(payload)
 debug.info("Result", result)

@@ -21,20 +21,13 @@ You can select MQTTS or HTTPS protocol and delete the other attribute.
 ```json
 {
     "aws": {
-        "mqtts": {
-            "host": "[YOUR_AWSIOT_ENDPOINT]",
-            "port": "[YOUR_AWSIOT_MQTT_PORT]",
-            "pub_topic": "[YOUR_MQTT_TOPIC]",
-            "sub_topics": [
+        "host": "[YOUR_AWSIOT_ENDPOINT]",
+        "port": "[YOUR_AWSIOT_MQTT_PORT]",
+        "pub_topic": "[YOUR_MQTT_TOPIC]",
+        "sub_topics": [
                 "[YOUR_MQTT_TOPIC/1]",
                 "[YOUR_MQTT_TOPIC/2]"
-            ]
-        },
-
-        "https": {
-            "endpoint": "[YOUR_AWS_IOT_ENDPOINT]",
-            "topic": "[YOUR_DEVICE_TOPIC]"
-        }
+        ],
     }
 }
 ```
