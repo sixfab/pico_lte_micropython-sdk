@@ -3,7 +3,6 @@ Module for including functions of Telegram bot for PicoLTE module.
 """
 import time
 
-from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.common import Status
 from pico_lte.utils.helpers import get_parameter
@@ -15,7 +14,7 @@ class Telegram:
     connections to your Telegram bot easily.
     """
 
-    cache = config["cache"]
+    APP_NAME = "telegram"
 
     def __init__(self, base, network, http):
         """Constructor of the class.
@@ -38,14 +37,16 @@ class Telegram:
 
         Parameters
         ----------
-        payload : str
+        payload : str, required
             Payload of the message.
-        host : str
+        host : str, optional
             Telegram's server endpoint address.
-        bot_token : str
-            Bot's private token.
-        chat_id : str
-            Chat ID of where the bot lives.
+        bot_token : str, required
+            Bot's private token. It will be read
+            from the config file if not provided.
+        chat_id : str, required
+            Chat ID of where the bot lives. It will be read
+            from the config file if not provided.
 
         Returns
         -------
@@ -53,13 +54,13 @@ class Telegram:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["telegram", "server"], "api.telegram.org/bot")
+            host = get_parameter([self.APP_NAME, "server"], "api.telegram.org/bot")
 
         if bot_token is None:
-            bot_token = get_parameter(["telegram", "token"])
+            bot_token = get_parameter([self.APP_NAME, "token"])
 
         if chat_id is None:
-            chat_id = get_parameter(["telegram", "chat_id"])
+            chat_id = get_parameter([self.APP_NAME, "chat_id"])
 
         publish_url = (
             f"https://{host}{bot_token}/" + f"sendMessage?chat_id={chat_id}&text={payload}"
@@ -116,7 +117,7 @@ class Telegram:
         )
 
         # Add cache if it is not already existed
-        function_name = "telegram.send_message"
+        function_name = self.APP_NAME + ".send_message"
 
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
