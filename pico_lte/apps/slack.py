@@ -5,7 +5,6 @@ Module for including functions of Slack API operations
 import time
 import json
 
-from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.common import Status
 from pico_lte.utils.helpers import get_parameter
@@ -16,7 +15,7 @@ class Slack:
     Class for including Slack API functions.
     """
 
-    cache = config["cache"]
+    APP_NAME = "slack"
 
     def __init__(self, base, network, http):
         """
@@ -48,7 +47,7 @@ class Slack:
         payload = json.dumps(payload_json)
 
         if webhook_url is None:
-            webhook_url = get_parameter(["slack", "webhook_url"])
+            webhook_url = get_parameter([self.APP_NAME, "webhook_url"])
 
         if not webhook_url:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
@@ -102,7 +101,7 @@ class Slack:
         )
 
         # Add cache if it is not already existed
-        function_name = "slack.send_message"
+        function_name = self.APP_NAME + ".send_message"
 
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
