@@ -4,7 +4,6 @@ Module for including functions of Azure IoT operations of PicoLTE module.
 
 import time
 
-from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.common import Status
 from pico_lte.utils.helpers import get_parameter
@@ -15,16 +14,11 @@ class Azure:
     Class for including functions of Azure IoT operations of PicoLTE module.
     """
 
-    cache = config["cache"]
+    APP_NAME = "azure"
 
-    def __init__(self, base, auth, network, ssl, mqtt, http, device_id=None, hub_name=None):
+    def __init__(self, base, auth, network, ssl, mqtt, http):
         """
         Constructor of the class.
-
-        Parameters
-        ----------
-        cache : dict
-            Cache of the class.
         """
         self.base = base
         self.auth = auth
@@ -33,61 +27,71 @@ class Azure:
         self.mqtt = mqtt
         self.http = http
 
-        self.device_id = get_parameter(["azure", "device_id"]) if (device_id is None) else device_id
-        self.hub_name = get_parameter(["azure", "hub_name"]) if (hub_name is None) else hub_name
-
     def publish_message(
-        self, payload, host=None, port=None, topic=None, client_id=None, username=None
+        self,
+        payload,
+        host=None,
+        port=None,
+        topic=None,
+        client_id=None,
+        username=None,
+        device_id=None,
+        hub_name=None,
     ):
         """
         Function for publishing a message to Azure IoT Hub by using MQTT.
 
         Parameters
         ----------
-        payload : str
+        payload : str, required
             Payload of the message.
-        host : str
+        device_id : str, required
+            Device ID of the Azure IoT Hub. If not provided,
+            it will be read from the configuration file.
+        hub_name : str, required
+            Name of the Azure IoT Hub. If not provided,
+            it will be read from the configuration file.
+        host : str, optional
             Host of the MQTT broker.
-        port : int
+        port : int, optional
             Port of the MQTT broker.
-        topic : str
-            Topic of the message.
+        topic : str, optional
+            Topic of the message. If not provided,
+            all reported fields will be updated.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
-        host = (
-            get_parameter(["azure", "mqtts", "host"], f"{self.hub_name}.azure-devices.net")
-            if (host is None)
-            else host
-        )
+        if device_id is None:
+            device_id = get_parameter([self.APP_NAME, "device_id"])
 
-        port = get_parameter(["azure", "mqtts", "port"], 8883) if (port is None) else port
+        if hub_name is None:
+            hub_name = get_parameter([self.APP_NAME, "hub_name"])
 
-        topic = (
-            get_parameter(
-                ["azure", "mqtts", "pub_topic"], "$iothub/twin/PATCH/properties/reported/?$rid=1"
+        if host is None:
+            host = get_parameter(
+                [self.APP_NAME, "host"], f"{hub_name}.azure-devices.net"
             )
-            if (topic is None)
-            else topic
-        )
 
-        client_id = (
-            get_parameter(["azure", "mqtts", "client_id"], self.device_id)
-            if (client_id is None)
-            else client_id
-        )
+        if port is None:
+            port = get_parameter([self.APP_NAME, "port"], 8883)
 
-        username = (
-            get_parameter(
-                ["azure", "mqtts", "username"],
-                f"{self.hub_name}.azure-devices.net/{self.device_id}/?api-version=2021-04-12",
+        if topic is None:
+            topic = get_parameter(
+                [self.APP_NAME, "pub_topic"],
+                "$iothub/twin/PATCH/properties/reported/?$rid=1",
             )
-            if (username is None)
-            else username
-        )
+
+        if client_id is None:
+            client_id = get_parameter([self.APP_NAME, "client_id"], device_id)
+
+        if username is None:
+            username = get_parameter(
+                [self.APP_NAME, "username"],
+                f"{hub_name}.azure-devices.net/{device_id}/?api-version=2021-04-12",
+            )
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -186,9 +190,11 @@ class Azure:
         )
 
         # Add cache if it is not already existed
-        function_name = "azure.publish_message"
+        function_name = self.APP_NAME + "..publish_message"
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        sm = StateManager(
+            first_step=step_check_mqtt_connected, function_name=function_name
+        )
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
@@ -212,44 +218,69 @@ class Azure:
                 return result
             time.sleep(result["interval"])
 
-    def subscribe_topics(self, host=None, port=None, topics=None, client_id=None, username=None):
+    def subscribe_topics(
+        self,
+        host=None,
+        port=None,
+        topics=None,
+        client_id=None,
+        username=None,
+        device_id=None,
+        hub_name=None,
+    ):
         """
         Function for subscribing to topics of Azure IoT Hub.
 
         Parameters
         ----------
-        topics : list
-            List of topics.
+        device_id : str, required
+            Device ID of the device. If not provided,
+            it will be taken from the config file.
+        hub_name : str, required
+            Hub name of the devie. If not provided,
+            it will be taken from the config file.
+        topics : list, required
+            List of topics to subscribe. If not provided,
+            it will be taken from the config file.
+        host : str, optional
+            Host of the broker.
+        port : int, optional
+            Port of the broker.
+        client_id : str, optional
+            Client ID of the device.
+        username : str, optional
+            Username of the device.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
-        host = (
-            get_parameter(["azure", "mqtts", "host"], f"{self.hub_name}.azure-devices.net")
-            if (host is None)
-            else host
-        )
+        if device_id is None:
+            device_id = get_parameter([self.APP_NAME, "device_id"])
 
-        port = get_parameter(["azure", "mqtts", "port"], 8883) if (port is None) else port
+        if hub_name is None:
+            hub_name = get_parameter([self.APP_NAME, "hub_name"])
 
-        topics = get_parameter(["azure", "mqtts", "sub_topics"]) if (topics is None) else topics
+        if topics is None:
+            topics = get_parameter([self.APP_NAME, "sub_topics"])
 
-        client_id = (
-            get_parameter(["azure", "mqtts", "client_id"], self.device_id)
-            if (client_id is None)
-            else client_id
-        )
-
-        username = (
-            get_parameter(
-                ["azure", "mqtts", "username"],
-                f"{self.hub_name}.azure-devices.net/{self.device_id}/?api-version=2021-04-12",
+        if host is None:
+            host = get_parameter(
+                [self.APP_NAME, "host"], f"{hub_name}.azure-devices.net"
             )
-            if (username is None)
-            else username
-        )
+
+        if port is None:
+            port = get_parameter([self.APP_NAME, "port"], 8883)
+
+        if client_id is None:
+            client_id = get_parameter([self.APP_NAME, "client_id"], device_id)
+
+        if username is None:
+            username = get_parameter(
+                [self.APP_NAME, "username"],
+                f"{hub_name}.azure-devices.net/{device_id}/?api-version=2021-04-30-preview",
+            )
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
@@ -350,9 +381,11 @@ class Azure:
         )
 
         # Add cache if it is not already existed
-        function_name = "azure.subscribe_message"
+        function_name = self.APP_NAME + "..subscribe_message"
 
-        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
+        sm = StateManager(
+            first_step=step_check_mqtt_connected, function_name=function_name
+        )
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
@@ -382,16 +415,25 @@ class Azure:
         """
         return self.mqtt.read_messages()
 
-    def subscribe_to_device_commands(self):
+    def subscribe_to_device_commands(self, device_id=None):
         """Subscribe to the device commands from Azure IoT Hub
+
+        Parameters
+        ----------
+        device_id : str, required
+            Device ID, if not provided, it will
+            be read from the configuration file.
 
         Returns
         -------
         dict
             Result that includes "status" and "response" keys
         """
+        if device_id is None:
+            device_id = get_parameter([self.APP_NAME, "device_id"])
+
         return self.subscribe_topics(
-            topics=[(f"devices/{self.device_id}/messages/devicebound/#", 1)]
+            topics=[(f"devices/{device_id}/messages/devicebound/#", 1)]
         )
 
     def retrieve_device_twin_status(self):
