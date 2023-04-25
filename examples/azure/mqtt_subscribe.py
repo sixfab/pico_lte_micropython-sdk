@@ -11,21 +11,12 @@ config.json
     "azure":{
         "hub_name": "[YOUR_AZURE_IOT_HUB_NAME]",
         "device_id": "[YOUR_DEVICE_ID]",
-        "mqtts": {
-            "host": "[YOUR_AZURE_ENDPOINT]",
-            "port": 8883,
-            "sub_topics": [
-                ["[SUB_TOPIC/1]", [QOS]],
-                ["[SUB_TOPIC/2]", [QOS]],
-            ],
-            "username": "[YOUR_HUB_NAME].azure-devices.net/[YOUR_DEVICE_ID]/?api-version=2021-04-12",
-            "client_id": "[YOUR_DEVICE_ID]"
-        }
+        "sub_topics": [
+            ["[SUB_TOPIC/1]", [QOS]],
+            ["[SUB_TOPIC/2]", [QOS]],
+        ],
     }
 }
-
-Note that "mqtts" attribute is optional. To connect your IoT Hub, "hub_name" and
-"device_id" is the only ones needed.
 """
 import time
 from pico_lte.core import PicoLTE

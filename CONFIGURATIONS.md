@@ -48,17 +48,15 @@ For more detailed configuration, you may want to use extra MQTTS parameters. Eac
     "azure": {
         "hub_name": "[YOUR_IOT_HUB_NAME]",
         "device_id": "[YOUR_DEVICE_ID]",
-        "mqtts": {
-            "host":"[YOUR_MQTT_HOST]",
-            "port":"[YOUR_MQTT_PORT]",
-            "pub_topic":"[YOUR_MQTT_PUB_TOPIC]",
-            "sub_topics":[
-                ["[YOUR_MQTT_TOPIC/1]",[QOS]],
-                ["[YOUR_MQTT_TOPIC/2]",[QOS]]
-            ],
-            "username":"[YOUR_MQTT_USERNAME]",
-            "password":"[YOUR_MQTT_PASSWORD]"
-        }
+        "host":"[YOUR_MQTT_HOST]",
+        "port":"[YOUR_MQTT_PORT]",
+        "pub_topic":"[YOUR_MQTT_PUB_TOPIC]",
+        "sub_topics":[
+            ["[YOUR_MQTT_TOPIC/1]",[QOS]],
+            ["[YOUR_MQTT_TOPIC/2]",[QOS]]
+        ],
+        "username":"[YOUR_MQTT_USERNAME]",
+        "password":"[YOUR_MQTT_PASSWORD]"
     }
 }
 ```
