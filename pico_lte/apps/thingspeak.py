@@ -47,17 +47,25 @@ class ThingSpeak:
 
         Parameters
         ----------
-        payload : str
+        payload : str, required
             Message to be published.
-        channel_id : str
-            Channel ID of ThingSpeak.
-        field_no : str
-            The field number to be updated.
-        host : str
+        channel_id : str, required
+            Channel ID of ThingSpeak. It will be read
+            from the config file if not provided.
+        field_no : str, required
+            The field number to be updated. It will be
+            read from the config file if not provided.
+        username : str, required
+            Username of the ThingSpeak account. It will
+            be read from the config file if not provided.
+        password : str, required
+            Password of the ThingSpeak account. It will
+            be read from the config file if not provided.
+        host : str, optional
             Host name of the broker. Default is mqtt3.thingspeak.com.
-        port : int
+        port : int, optional
             Port number of the broker. Default is 1883.
-        client_id : str
+        client_id : str, optional
             Client ID of the client. If not provided, then the username is used.
 
         Returns
@@ -192,20 +200,24 @@ class ThingSpeak:
 
         Parameters
         ----------
-        topics : list
+        topics : list, required
             List of topics to be subscribed. Default is all topics.
-        host : str
+            If not provided, then the topics from the config file are used.
+        username : str, required
+            Username of the broker. If not provided, then the username from the
+            config file is used.
+        channel_id : str, required
+            Channel ID of the channel. If not provided, then the channel ID from
+            the config file is used.
+        password : str, required
+            Password of the broker. If not provided, then the password from the
+            config file is used.
+        host : str, optional
             Host name of the broker. Default is mqtt3.thingspeak.com.
-        port : int
+        port : int, optional
             Port number of the broker. Default is 1883.
-        username : str
-            Username of the broker.
-        password : str
-            Password of the broker.
-        client_id : str
+        client_id : str, optional
             Client ID of the client. If not provided, then the username is used.
-        channel_id : str
-            Channel ID of the channel.
 
         Returns
         -------
