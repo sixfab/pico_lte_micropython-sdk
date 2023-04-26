@@ -14,6 +14,10 @@ class Auth:
     Class for including authentication functions of PicoLTE module.
     """
 
+    PRIVATE_FILE = "private_key.pem"
+    DEVICE_CERT_FILE = "device_cert.pem"
+    ROOT_CA_CERT_FILE = "root_ca.pem"
+
     def __init__(self, atcom):
         """
         Constructor for Auth class.
@@ -30,28 +34,37 @@ class Auth:
         dict
             Result that includes "status" and "response" keys
         """
-        cacert = read_file("../cert/cacert.pem")
-        client_cert = read_file("../cert/client.pem")
-        client_key = read_file("../cert/user_key.pem")
+        root_ca_cert = read_file(f"../cert/{self.ROOT_CA_CERT_FILE}")
+        device_certificate = read_file(f"../cert/{self.DEVICE_CERT_FILE}")
+        private_key_file = read_file(f"../cert/{self.PRIVATE_FILE}")
 
-        first_run = cacert and client_cert and client_key
+        first_run = root_ca_cert and device_certificate and private_key_file
 
         # If first run, upload the certificates to the modem
         if first_run:
             try:
                 # delete old certificates if existed
-                self.file.delete_file_from_modem("/security/cacert.pem")
-                self.file.delete_file_from_modem("/security/client.pem")
-                self.file.delete_file_from_modem("/security/user_key.pem")
+                self.file.delete_file_from_modem(f"/security/{self.PRIVATE_FILE}")
+                self.file.delete_file_from_modem(f"/security/{self.DEVICE_CERT_FILE}")
+                self.file.delete_file_from_modem(f"/security/{self.ROOT_CA_CERT_FILE}")
+
                 # Upload new certificates
-                self.file.upload_file_to_modem("/security/cacert.pem", cacert)
-                self.file.upload_file_to_modem("/security/client.pem", client_cert)
-                self.file.upload_file_to_modem("/security/user_key.pem", client_key)
+                self.file.upload_file_to_modem(
+                    f"/security/{self.PRIVATE_FILE}", root_ca_cert
+                )
+                self.file.upload_file_to_modem(
+                    f"/security/{self.DEVICE_CERT_FILE}", device_certificate
+                )
+                self.file.upload_file_to_modem(
+                    f"/security/{self.ROOT_CA_CERT_FILE}", private_key_file
+                )
             except Exception as error:
                 debug.error("Error occured while uploading certificates", error)
                 return {"status": Status.ERROR, "response": str(error)}
 
-            debug.info("Certificates uploaded secure storage. Deleting from file system...")
+            debug.info(
+                "Certificates uploaded secure storage. Deleting from file system..."
+            )
             try:
                 os.remove("../cert/cacert.pem")
                 os.remove("../cert/client.pem")
@@ -72,19 +85,25 @@ class Auth:
 
         if result["status"] == Status.SUCCESS:
             for line in response:
-                if "cacert.pem" in line:
+                if self.ROOT_CA_CERT_FILE in line:
                     cacert_in_modem = True
-                if "client.pem" in line:
+                if self.DEVICE_CERT_FILE in line:
                     client_cert_in_modem = True
-                if "user_key.pem" in line:
+                if self.PRIVATE_FILE in line:
                     client_key_in_modem = True
 
             if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
                 debug.info("Certificates found in PicoLTE.")
-                return {"status": Status.SUCCESS, "response": "Certificates found in PicoLTE."}
+                return {
+                    "status": Status.SUCCESS,
+                    "response": "Certificates found in PicoLTE.",
+                }
             else:
                 debug.error("Certificates couldn't find in modem!")
-                return {"status": Status.ERROR, "response": "Certificates couldn't find in modem!"}
+                return {
+                    "status": Status.ERROR,
+                    "response": "Certificates couldn't find in modem!",
+                }
         else:
             debug.error("Error occured while getting certificates from modem!")
             return {
