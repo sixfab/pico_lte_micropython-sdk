@@ -66,9 +66,9 @@ class Auth:
                 "Certificates uploaded secure storage. Deleting from file system..."
             )
             try:
-                os.remove("../cert/cacert.pem")
-                os.remove("../cert/client.pem")
-                os.remove("../cert/user_key.pem")
+                os.remove(f"../cert/{self.ROOT_CA_CERT_FILE}")
+                os.remove(f"../cert/{self.DEVICE_CERT_FILE}")
+                os.remove(f"../cert/{self.PRIVATE_FILE}")
             except Exception as error:
                 debug.error("Error occured while deleting certificates", error)
                 return {"status": Status.ERROR, "response": str(error)}
