@@ -115,15 +115,14 @@ class GoogleSheets:
         host = get_parameter(["google_sheets", "host"])
         token = get_parameter(["google_sheets", "token"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
-        dateTimeRenderOption = get_parameter(["google_sheets", "dateTimeRenderOption"])
         majorDimension = get_parameter(["google_sheets", "majorDimension"])
         valueRenderOption = get_parameter(["google_sheets", "valueRenderOption"])
         api_key = get_parameter(["google_sheets", "api_key"])
 
         if data_range == None:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}?majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
         else:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
 
         HEADER = "\n".join(
             [
