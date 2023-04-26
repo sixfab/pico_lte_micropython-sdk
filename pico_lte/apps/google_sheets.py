@@ -2,6 +2,7 @@
 Module for including functions of Google Sheets for Picocell module.
 """
 import time
+import json
 
 from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
@@ -101,27 +102,37 @@ class GoogleSheets:
                 return result
             time.sleep(result["interval"])
 
-    def get_data(self, sheet_name=None, data_range=None):
-        if sheet_name is None:
-            sheet_name = get_parameter(["google_sheets", "sheet_name"])
+    def get_data(self, sheet=None, data_range=None):
+        if sheet is None:
+            sheet = get_parameter(["google_sheets", "sheet"])
 
-        if not sheet_name:
+        if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         if data_range is None:
             data_range = get_parameter(["google_sheets", "data_range"])
 
-        if not data_range:
-            return {"status": Status.ERROR, "response": "Missing arguments!"}
-
+        host = get_parameter(["google_sheets", "host"])
+        token = get_parameter(["google_sheets", "token"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
         dateTimeRenderOption = get_parameter(["google_sheets", "dateTimeRenderOption"])
         majorDimension = get_parameter(["google_sheets", "majorDimension"])
         valueRenderOption = get_parameter(["google_sheets", "valueRenderOption"])
         api_key = get_parameter(["google_sheets", "api_key"])
 
-        if data_range:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet_name}!{data_range}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+        if data_range == None:
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+        else:
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?dateTimeRenderOption={dateTimeRenderOption}&majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+
+        HEADER = "\n".join(
+            [
+                f"GET {url} HTTP/1.1",
+                f"Host: {host}",
+                f"Authorization: {token}",
+                "\n\n",
+            ]
+        )
 
         step_network_reg = Step(
             function=self.network.register_network,
@@ -166,6 +177,7 @@ class GoogleSheets:
             fail="failure",
             cachable=True,
             interval=5,
+            function_params={"header_mode": 1, "data": HEADER},
         )
 
         step_read_response = Step(
@@ -191,7 +203,7 @@ class GoogleSheets:
             result = sm.run()
 
             if result["status"] == Status.SUCCESS:
-                return result
+                return json.loads(result["response"][0])["values"]
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
