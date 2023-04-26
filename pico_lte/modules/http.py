@@ -293,7 +293,8 @@ class HTTP:
             ]
 
         if fault_response is None:
-            fault_response = [str(error_code) for error_code in range(701, 731, 1)]
+            fault_codes = list(range(701, 731, 1)) + list(range(400, 410))
+            fault_response = [str(error_code) for error_code in fault_codes]
 
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
@@ -313,7 +314,7 @@ class HTTP:
                     return self.atcom.send_at_comm(
                         data,
                         desired=[f"+QHTTPGET: 0,{desired}" for desired in desired_response],
-                        fault=[f"+QHTTPGET: {fault}" for fault in fault_response] + ["+CME ERROR:"],
+                        fault=[f"+QHTTPGET: 0,{fault}" for fault in fault_response] + ["+CME ERROR:"],
                         urc=True,
                         line_end=False,
                         timeout=timeout,
@@ -375,7 +376,8 @@ class HTTP:
             ]
 
         if fault_response is None:
-            fault_response = [str(error_code) for error_code in range(701, 731, 1)]
+            fault_codes = list(range(701, 731, 1)) + list(range(400, 410))
+            fault_response = [str(error_code) for error_code in fault_codes]
 
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
@@ -394,7 +396,7 @@ class HTTP:
                 result = self.atcom.send_at_comm(
                     data,
                     desired=[f"+QHTTPPOST: 0,{desired}" for desired in desired_response],
-                    fault=[f"+QHTTPPOST: {fault}" for fault in fault_response] + ["+CME ERROR:"],
+                    fault=[f"+QHTTPPOST: 0,{fault}" for fault in fault_response] + ["+CME ERROR:"],
                     urc=True,
                     line_end=False,
                     timeout=timeout,
@@ -480,7 +482,8 @@ class HTTP:
             ]
 
         if fault_response is None:
-            fault_response = [str(error_code) for error_code in range(701, 731, 1)]
+            fault_codes = list(range(701, 731, 1)) + list(range(400, 410))
+            fault_response = [str(error_code) for error_code in fault_codes]
 
         # Set the request header config.
         result = self.set_request_header_status(status=header_mode)
@@ -499,7 +502,7 @@ class HTTP:
                 result = self.atcom.send_at_comm(
                     data,
                     desired=[f"+QHTTPPUT: 0,{desired}" for desired in desired_response],
-                    fault=[f"+QHTTPPUT: {fault}" for fault in fault_response] + ["+CME ERROR:"],
+                    fault=[f"+QHTTPPUT: 0,{fault}" for fault in fault_response] + ["+CME ERROR:"],
                     urc=True,
                     line_end=False,
                     timeout=timeout,
