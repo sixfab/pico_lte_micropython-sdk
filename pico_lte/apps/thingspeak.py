@@ -97,6 +97,8 @@ class ThingSpeak:
         # Create message from dictionary if needed.
         if isinstance(payload, dict):
             payload = self.create_message(payload)
+        if isinstance(payload, int):
+            payload = str(payload)
 
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
