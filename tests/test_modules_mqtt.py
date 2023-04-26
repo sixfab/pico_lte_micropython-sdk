@@ -367,7 +367,7 @@ class TestMQTT:
             "pico_lte.utils.atcom.ATCom.get_urc_response",
         )
         mocking = TestMQTT.mock_send_at_comm(mocker, mocked_response)
-        mqtt.connect_broker()
+        mqtt.connect_broker(client_id="PicoLTE")
 
         mocking.assert_called_once_with('AT+QMTCONN=0,"PicoLTE"')
 
@@ -407,9 +407,9 @@ class TestMQTT:
         urc_response_patch = "pico_lte.utils.atcom.ATCom.get_urc_response"
         mocker.patch(urc_response_patch, return_value=mocked_response)
         mocking = TestMQTT.mock_send_at_comm(mocker, default_response_types()[0])
-        result = mqtt.connect_broker()
+        result = mqtt.connect_broker(client_id="Test")
 
-        mocking.assert_called_once_with('AT+QMTCONN=0,"PicoLTE","john","doe123"')
+        mocking.assert_called_once_with('AT+QMTCONN=0,"Test","john","doe123"')
         assert result == mocked_response
 
     def test_connect_broker_when_send_at_comm_return_error(self, mocker, mqtt):
@@ -418,7 +418,7 @@ class TestMQTT:
         """
         mocked_response = {"status": Status.ERROR, "response": ["some", "error"]}
         TestMQTT.mock_send_at_comm(mocker, mocked_response)
-        result = mqtt.connect_broker()
+        result = mqtt.connect_broker(client_id="Test")
 
         assert result == mocked_response
 
