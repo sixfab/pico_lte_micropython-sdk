@@ -96,7 +96,7 @@ class Azure:
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
             function=self.mqtt.is_connected_to_broker,
-            name="check_connected",
+            name=self.APP_NAME + "_check_connected",
             success="publish_message",
             fail="check_opened",
         )
@@ -104,7 +104,7 @@ class Azure:
         # Check if client connected to AWS IoT
         step_check_mqtt_opened = Step(
             function=self.mqtt.has_opened_connection,
-            name="check_opened",
+            name=self.APP_NAME + "_check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
         )
@@ -113,34 +113,34 @@ class Azure:
         # Deactivate PDP and begin first step of the state machine
         step_deactivate_pdp_context = Step(
             function=self.network.deactivate_pdp_context,
-            name="deactivate_pdp_context",
+            name=self.APP_NAME + "_deactivate_pdp_context",
             success="load_certificates",
             fail="failure",
         )
 
         step_load_certificates = Step(
             function=self.auth.load_certificates,
-            name="load_certificates",
+            name=self.APP_NAME + "_load_certificates",
             success="register_network",
             fail="failure",
         )
         step_network_reg = Step(
             function=self.network.register_network,
-            name="register_network",
+            name=self.APP_NAME + "_register_network",
             success="get_ready_pdp",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="get_ready_pdp",
+            name=self.APP_NAME + "_get_ready_pdp",
             success="ssl_configuration",
             fail="failure",
         )
 
         step_ssl_configuration = Step(
             function=self.ssl.configure_for_x509_certification,
-            name="ssl_configuration",
+            name=self.APP_NAME + "_ssl_configuration",
             success="set_mqtt_version",
             fail="failure",
             cachable=True,
@@ -148,21 +148,21 @@ class Azure:
 
         step_set_mqtt_version = Step(
             function=self.mqtt.set_version_config,
-            name="set_mqtt_version",
+            name=self.APP_NAME + "_set_mqtt_version",
             success="set_mqtt_ssl_mode",
             fail="failure",
         )
 
         step_set_mqtt_ssl_mode = Step(
             function=self.mqtt.set_ssl_mode_config,
-            name="set_mqtt_ssl_mode",
+            name=self.APP_NAME + "_set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
             function=self.mqtt.open_connection,
-            name="open_mqtt_connection",
+            name=self.APP_NAME + "_open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
@@ -170,7 +170,7 @@ class Azure:
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
-            name="connect_mqtt_broker",
+            name=self.APP_NAME + "_connect_mqtt_broker",
             success="publish_message",
             fail="failure",
             function_params={
@@ -182,7 +182,7 @@ class Azure:
 
         step_publish_message = Step(
             function=self.mqtt.publish_message,
-            name="publish_message",
+            name=self.APP_NAME + "_publish_message",
             success="success",
             fail="failure",
             function_params={"payload": payload, "topic": topic},
@@ -285,7 +285,7 @@ class Azure:
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
             function=self.mqtt.is_connected_to_broker,
-            name="check_connected",
+            name=self.APP_NAME + "_check_connected",
             success="subscribe_topics",
             fail="check_opened",
             retry=2,
@@ -294,7 +294,7 @@ class Azure:
         # Check if client connected to AWS IoT
         step_check_mqtt_opened = Step(
             function=self.mqtt.has_opened_connection,
-            name="check_opened",
+            name=self.APP_NAME + "_check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
             retry=2,
@@ -304,56 +304,56 @@ class Azure:
         # Deactivate PDP and begin first step of the state machine
         step_deactivate_pdp_context = Step(
             function=self.network.deactivate_pdp_context,
-            name="deactivate_pdp_context",
+            name=self.APP_NAME + "_deactivate_pdp_context",
             success="load_certificates",
             fail="failure",
         )
 
         step_load_certificates = Step(
             function=self.auth.load_certificates,
-            name="load_certificates",
+            name=self.APP_NAME + "_load_certificates",
             success="register_network",
             fail="failure",
         )
 
         step_network_reg = Step(
             function=self.network.register_network,
-            name="register_network",
+            name=self.APP_NAME + "_register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
+            name=self.APP_NAME + "_get_pdp_ready",
             success="ssl_configuration",
             fail="failure",
         )
 
         step_ssl_configuration = Step(
             function=self.ssl.configure_for_x509_certification,
-            name="ssl_configuration",
+            name=self.APP_NAME + "_ssl_configuration",
             success="set_mqtt_version",
             fail="failure",
         )
 
         step_set_mqtt_version = Step(
             function=self.mqtt.set_version_config,
-            name="set_mqtt_version",
+            name=self.APP_NAME + "_set_mqtt_version",
             success="set_mqtt_ssl_mode",
             fail="failure",
         )
 
         step_set_mqtt_ssl_mode = Step(
             function=self.mqtt.set_ssl_mode_config,
-            name="set_mqtt_ssl_mode",
+            name=self.APP_NAME + "_set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
             function=self.mqtt.open_connection,
-            name="open_mqtt_connection",
+            name=self.APP_NAME + "_open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
@@ -361,7 +361,7 @@ class Azure:
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
-            name="connect_mqtt_broker",
+            name=self.APP_NAME + "_connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
             function_params={
@@ -373,7 +373,7 @@ class Azure:
 
         step_subscribe_topics = Step(
             function=self.mqtt.subscribe_topics,
-            name="subscribe_topics",
+            name=self.APP_NAME + "_subscribe_topics",
             success="success",
             fail="failure",
             function_params={"topics": topics},

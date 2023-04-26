@@ -90,21 +90,21 @@ class Scriptr:
 
         step_network_reg = Step(
             function=self.network.register_network,
-            name="register_network",
+            name=self.APP_NAME + "_register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_get_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
+            name=self.APP_NAME + "_get_pdp_ready",
             success="set_server_url",
             fail="failure",
         )
 
         step_set_server_url = Step(
             function=self.http.set_server_url,
-            name="set_server_url",
+            name=self.APP_NAME + "_set_server_url",
             success="post_request",
             fail="failure",
             function_params={"url": host},
@@ -112,7 +112,7 @@ class Scriptr:
 
         step_post_request = Step(
             function=self.http.post,
-            name="post_request",
+            name=self.APP_NAME + "_post_request",
             success="read_response",
             fail="failure",
             function_params={"data": header + data, "header_mode": "1"},
@@ -120,7 +120,7 @@ class Scriptr:
 
         step_read_response = Step(
             function=self.http.read_response,
-            name="read_response",
+            name=self.APP_NAME + "_read_response",
             success="success",
             fail="failure",
             retry=3,

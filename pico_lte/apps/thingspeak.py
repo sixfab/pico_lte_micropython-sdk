@@ -103,7 +103,7 @@ class ThingSpeak:
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
             function=self.mqtt.is_connected_to_broker,
-            name="check_connected",
+            name=self.APP_NAME + "_check_connected",
             success="publish_message",
             fail="check_opened",
         )
@@ -111,7 +111,7 @@ class ThingSpeak:
         # Check if client connected to Google Cloud IoT
         step_check_mqtt_opened = Step(
             function=self.mqtt.has_opened_connection,
-            name="check_opened",
+            name=self.APP_NAME + "_check_opened",
             success="connect_mqtt_broker",
             fail="register_network",
         )
@@ -120,21 +120,21 @@ class ThingSpeak:
         # ThingSpeak, begin the first step of the state machine.
         step_network_reg = Step(
             function=self.network.register_network,
-            name="register_network",
+            name=self.APP_NAME + "_register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
+            name=self.APP_NAME + "_get_pdp_ready",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
             function=self.mqtt.open_connection,
-            name="open_mqtt_connection",
+            name=self.APP_NAME + "_open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
@@ -143,7 +143,7 @@ class ThingSpeak:
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
-            name="connect_mqtt_broker",
+            name=self.APP_NAME + "_connect_mqtt_broker",
             success="publish_message",
             fail="failure",
             function_params={
@@ -155,7 +155,7 @@ class ThingSpeak:
 
         step_publish_message = Step(
             function=self.mqtt.publish_message,
-            name="publish_message",
+            name=self.APP_NAME + "_publish_message",
             success="success",
             fail="failure",
             function_params={"payload": payload, "topic": topic, "qos": 1},
@@ -271,7 +271,7 @@ class ThingSpeak:
         # Check if client is connected to the broker
         step_check_mqtt_connected = Step(
             function=self.mqtt.is_connected_to_broker,
-            name="check_connected",
+            name=self.APP_NAME + "_check_connected",
             success="subscribe_topics",
             fail="check_opened",
         )
@@ -279,7 +279,7 @@ class ThingSpeak:
         # Check if client connected to Google Cloud IoT
         step_check_mqtt_opened = Step(
             function=self.mqtt.has_opened_connection,
-            name="check_opened",
+            name=self.APP_NAME + "_check_opened",
             success="connect_mqtt_broker",
             fail="register_network",
         )
@@ -288,21 +288,21 @@ class ThingSpeak:
         # ThingSpeak, begin the first step of the state machine.
         step_network_reg = Step(
             function=self.network.register_network,
-            name="register_network",
+            name=self.APP_NAME + "_register_network",
             success="get_pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
+            name=self.APP_NAME + "_get_pdp_ready",
             success="open_mqtt_connection",
             fail="failure",
         )
 
         step_open_mqtt_connection = Step(
             function=self.mqtt.open_connection,
-            name="open_mqtt_connection",
+            name=self.APP_NAME + "_open_mqtt_connection",
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
@@ -311,7 +311,7 @@ class ThingSpeak:
 
         step_connect_mqtt_broker = Step(
             function=self.mqtt.connect_broker,
-            name="connect_mqtt_broker",
+            name=self.APP_NAME + "_connect_mqtt_broker",
             success="subscribe_topics",
             fail="failure",
             function_params={
@@ -323,7 +323,7 @@ class ThingSpeak:
 
         step_subscribe_topics = Step(
             function=self.mqtt.subscribe_topics,
-            name="subscribe_topics",
+            name=self.APP_NAME + "_subscribe_topics",
             success="success",
             fail="failure",
             function_params={"topics": topics},

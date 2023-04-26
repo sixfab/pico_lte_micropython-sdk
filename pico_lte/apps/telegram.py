@@ -68,21 +68,21 @@ class Telegram:
 
         step_network_reg = Step(
             function=self.network.register_network,
-            name="register_network",
+            name=self.APP_NAME + "_register_network",
             success="pdp_ready",
             fail="failure",
         )
 
         step_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="pdp_ready",
+            name=self.APP_NAME + "_pdp_ready",
             success="http_ssl_configuration",
             fail="failure",
         )
 
         step_http_ssl_configuration = Step(
             function=self.http.set_ssl_context_id,
-            name="http_ssl_configuration",
+            name=self.APP_NAME + "_http_ssl_configuration",
             success="set_server_url",
             fail="failure",
             function_params={"cid": 2},
@@ -90,7 +90,7 @@ class Telegram:
 
         step_set_server_url = Step(
             function=self.http.set_server_url,
-            name="set_server_url",
+            name=self.APP_NAME + "_set_server_url",
             success="get_request",
             fail="failure",
             function_params={"url": publish_url},
@@ -99,7 +99,7 @@ class Telegram:
 
         step_get_request = Step(
             function=self.http.get,
-            name="get_request",
+            name=self.APP_NAME + "_get_request",
             success="read_response",
             fail="failure",
             cachable=True,
@@ -108,7 +108,7 @@ class Telegram:
 
         step_read_response = Step(
             function=self.http.read_response,
-            name="read_response",
+            name=self.APP_NAME + "_read_response",
             success="success",
             fail="failure",
             function_params={"desired_response": '"ok":true'},
