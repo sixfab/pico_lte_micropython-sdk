@@ -383,7 +383,7 @@ class TestHTTP:
         mocking.assert_any_call(
             params[0],
             desired=[f"+QHTTPGET: 0,{desired}" for desired in params[3]],
-            fault=[f"+QHTTPGET: {fault}" for fault in params[4]] + ["+CME ERROR:"],
+            fault=[f"+QHTTPGET: 0,{fault}" for fault in params[4]] + ["+CME ERROR:"],
             urc=True,
             line_end=False,
             timeout=params[2],
@@ -482,7 +482,7 @@ class TestHTTP:
         mocking.assert_any_call(
             params[0],
             desired=[f"+QHTTPPOST: 0,{desired}" for desired in params[4]],
-            fault=[f"+QHTTPPOST: {fault}" for fault in params[5]] + ["+CME ERROR:"],
+            fault=[f"+QHTTPPOST: 0,{fault}" for fault in params[5]] + ["+CME ERROR:"],
             urc=True,
             line_end=False,
             timeout=params[3],
@@ -581,7 +581,7 @@ class TestHTTP:
         mocking.assert_any_call(
             params[0],
             desired=[f"+QHTTPPUT: 0,{desired}" for desired in params[4]],
-            fault=[f"+QHTTPPUT: {fault}" for fault in params[5]] + ["+CME ERROR:"],
+            fault=[f"+QHTTPPUT: 0,{fault}" for fault in params[5]] + ["+CME ERROR:"],
             urc=True,
             line_end=False,
             timeout=params[3],
