@@ -40,8 +40,8 @@ class PicoLTE:
         self.atcom = ATCom()
 
         self.base = Base(self.atcom)
-        self.auth = Auth(self.atcom)
         self.file = File(self.atcom)
+        self.auth = Auth(self.atcom, self.file)
         self.network = Network(self.atcom, self.base)
         self.ssl = SSL(self.atcom)
         self.http = HTTP(self.atcom)
