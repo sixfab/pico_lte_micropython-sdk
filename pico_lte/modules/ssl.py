@@ -13,13 +13,14 @@ class SSL:
     Class for including functions of ssl operations of PicoLTE module.
     """
 
-    def __init__(self, atcom):
+    def __init__(self, atcom, auth):
         """
         Initialization of the class.
         """
         self.atcom = atcom
+        self.auth = auth
 
-    def set_ca_cert(self, ssl_context_id=2, file_path="/security/cacert.pem"):
+    def set_ca_cert(self, ssl_context_id=2, file_path=None):
         """
         Function for setting modem CA certificate
 
@@ -28,7 +29,7 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str, default: "/security/cacert.pem"
+        file_path : str
             Path to the CA certificate file
 
         Returns
@@ -36,10 +37,12 @@ class SSL:
         dict
             Result that includes "status" and "response" keys
         """
+        if file_path is None:
+            file_path = "/security/" + self.auth.ROOT_CA_CERT_FILE
         command = f'AT+QSSLCFG="cacert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
 
-    def set_client_cert(self, ssl_context_id=2, file_path="/security/client.pem"):
+    def set_client_cert(self, ssl_context_id=2, file_path=None):
         """
         Function for setting modem client certificate
 
@@ -48,7 +51,7 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str, default: "/security/client.pem"
+        file_path : str
             Path to the client certificate file
 
         Returns
@@ -56,10 +59,12 @@ class SSL:
         dict
             Result that includes "status" and "response" keys
         """
+        if file_path is None:
+            file_path = "/security/" + self.auth.DEVICE_CERT_FILE
         command = f'AT+QSSLCFG="clientcert",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
 
-    def set_client_key(self, ssl_context_id=2, file_path="/security/user_key.pem"):
+    def set_client_key(self, ssl_context_id=2, file_path=None):
         """
         Function for setting modem client key
 
@@ -68,7 +73,7 @@ class SSL:
         ssl_context_id : int
             SSL context identifier
 
-        file_path : str, default: "/security/user_key.pem"
+        file_path : str
             Path to the client key file
 
         Returns
@@ -76,6 +81,8 @@ class SSL:
         dict
             Result that includes "status" and "response" keys
         """
+        if file_path is None:
+            file_path = "/security/" + self.auth.PRIVATE_FILE
         command = f'AT+QSSLCFG="clientkey",{ssl_context_id},"{file_path}"'
         return self.atcom.send_at_comm(command)
 
