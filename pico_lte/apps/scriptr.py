@@ -4,7 +4,6 @@ Module for including functions of scripter.io operations
 
 import time
 
-from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.common import Status
 from pico_lte.utils.helpers import get_parameter
@@ -15,7 +14,8 @@ class Scriptr:
     Class for including Scriptr.io functions.
     """
 
-    cache = config["cache"]
+    APP_NAME = "scriptr"
+    DEFAULT_API_ENDPOINT = "https://api.scriptrapps.io"
 
     def __init__(self, base, network, http):
         """Constructor of the class.
@@ -33,39 +33,57 @@ class Scriptr:
         self.network = network
         self.http = http
 
-    def send_data(self, data, query=None, authorization=None):
+    def post_json(self, data, endpoint=None, device_token=None, host=None):
         """
-        Function for sending data to script.
+        Function for posting a JSON to the Scriptr API endpoint.
 
         Parameters
         ----------
         data: str
-            Json for sending data to the script
-        query: str
-            Query of script
+            JSON for sending data to the script
+        endpoint: str
+            Scriptr API endpoint
         authorization: str
-            Authorization token
+            Authorization token for the device.
         """
 
-        if query is None:
-            query = get_parameter(["scriptr", "query"])
+        if endpoint is None:
+            endpoint = get_parameter([self.APP_NAME, "endpoint"])
 
-        if authorization is None:
-            authorization = get_parameter(["scriptr", "authorization"])
+        if device_token is None:
+            device_token = get_parameter([self.APP_NAME, "device_token"])
+
+        if host is None:
+            host = get_parameter([self.APP_NAME, "host"], self.DEFAULT_API_ENDPOINT)
+
+        if (
+            not isinstance(endpoint, str)
+            or not isinstance(device_token, str)
+            or not isinstance(host, str)
+        ):
+            return {"status": Status.ERROR, "message": "Missing parameters."}
+
+        # Remove leading and trailing slashes from endpoint and host.
+        endpoint = "/" + endpoint if endpoint[0] != "/" else endpoint
+        host = host[:-1] if host[-1] == "/" else host
+        if host[:7] == "https:/":
+            host_protocolless = host[8:]
+        elif host[:7] == "http://":
+            host_protocolless = host[7:]
 
         header = (
             "POST "
-            + query
+            + endpoint
             + " HTTP/1.1\n"
             + "Host: "
-            + "api.scriptrapps.io"
+            + host_protocolless
             + "\n"
             + "Content-Type: application/json\n"
             + "Content-Length: "
             + str(len(data) + 1)
             + "\n"
             + "Authorization: Bearer "
-            + authorization
+            + device_token
             + "\n"
             + "\n\n"
         )
@@ -89,7 +107,7 @@ class Scriptr:
             name="set_server_url",
             success="post_request",
             fail="failure",
-            function_params={"url": "https://api.scriptrapps.io"},
+            function_params={"url": host},
         )
 
         step_post_request = Step(
@@ -98,8 +116,6 @@ class Scriptr:
             success="read_response",
             fail="failure",
             function_params={"data": header + data, "header_mode": "1"},
-            cachable=True,
-            interval=2,
         )
 
         step_read_response = Step(
@@ -107,17 +123,18 @@ class Scriptr:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok"},
+            retry=3,
+            interval=1,
+            function_params={"desired_response": '"status": "success"'},
         )
 
-        function_name = "scriptr_io.send_data"
+        function_name = self.APP_NAME + ".post_json"
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
         sm.add_step(step_network_reg)
         sm.add_step(step_get_pdp_ready)
         sm.add_step(step_set_server_url)
         sm.add_step(step_post_request)
-        time.sleep(4)
         sm.add_step(step_read_response)
 
         while True:
