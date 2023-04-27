@@ -9,13 +9,16 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "google_sheets":{
-        "host": "[YOUR_HOST_URL]",
+        "host": "[HOST_URL]",
         "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
         "token": "[AUTHORIZATION_TOKEN]",
-        "majorDimension": "[MAJOR_DIMENSION_OPTION]",
-        "valueRenderOption": "[VALUE_RENDER_OPTION]",
-        "data_range": [DATA_RANGE_OF_TABLE],
-        "sheet": [SHEET_NAME]
+        "spreadsheetId": "[SPREAD_SHEET_ID]",
+        "get":{
+            "data_range": "[DATA_RANGE_OF_TABLE]",
+            "majorDimension": "[MAJOR_DIMENSION_OPTION]",
+            "sheet": "[SHEET_NAME]",
+            "valueRenderOption": "FORMATTED_VALUE"
+        }
     }
 }
 
