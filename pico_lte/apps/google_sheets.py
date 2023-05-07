@@ -429,3 +429,103 @@ class GoogleSheets:
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
+
+    def delete_data(self, sheet=None, data_range=None):
+        if sheet is None:
+            sheet = get_parameter(["google_sheets", "sheet"])
+
+        if not sheet:
+            return {"status": Status.ERROR, "response": "Missing arguments!"}
+
+        api_key = get_parameter(["google_sheets", "api_key"])
+        oauth_token = get_parameter(["google_sheets", "OAuthToken"])
+        spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
+
+        if data_range == None:
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}:clear?key={api_key}"
+        else:
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}:clear?key={api_key}"
+
+        HEADER = "\n".join(
+            [
+                f"Post {url} HTTP/1.1",
+                f"Host: sheets.googleapis.com",
+                f"Authorization: Bearer {oauth_token}",
+                "\n\n",
+            ]
+        )
+
+        step_network_reg = Step(
+            function=self.network.register_network,
+            name="register_network",
+            success="get_pdp_ready",
+            fail="failure",
+        )
+
+        step_get_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_pdp_ready",
+            success="http_ssl_configuration",
+            fail="failure",
+        )
+        step_http_ssl_configuration = Step(
+            function=self.http.set_ssl_context_id,
+            name="http_ssl_configuration",
+            success="set_server_url",
+            fail="failure",
+        )
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="post_request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_post_request = Step(
+            function=self.http.post,
+            name="post_request",
+            success="read_response",
+            fail="failure",
+            function_params={"header_mode": 1, "data": HEADER},
+            cachable=True,
+            interval=2,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": "ok", "timeout": 15},
+            retry=3,
+            interval=1,
+        )
+
+        function_name = "google_sheets.delete_data"
+
+        sm = StateManager(first_step=step_network_reg, function_name=function_name)
+
+        sm.add_step(step_network_reg)
+        sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_http_ssl_configuration)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_post_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
