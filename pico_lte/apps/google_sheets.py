@@ -29,26 +29,20 @@ class GoogleSheets:
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
-        if data_range is None:
-            data_range = get_parameter(["google_sheets", "data_range"])
-
-        host = get_parameter(["google_sheets", "host"])
-        token = get_parameter(["google_sheets", "token"])
+        oauth_token = get_parameter(["google_sheets", "OAuthToken"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
-        majorDimension = get_parameter(["google_sheets", "majorDimension"])
-        valueRenderOption = get_parameter(["google_sheets", "valueRenderOption"])
         api_key = get_parameter(["google_sheets", "api_key"])
 
         if data_range == None:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}?majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
         else:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?majorDimension={majorDimension}&valueRenderOption={valueRenderOption}&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
 
         HEADER = "\n".join(
             [
                 f"GET {url} HTTP/1.1",
-                f"Host: {host}",
-                f"Authorization: {token}",
+                f"Host: sheets.googleapis.com",
+                f"Authorization: Bearer {oauth_token}",
                 "\n\n",
             ]
         )
@@ -104,6 +98,7 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
+            retry=3,
         )
 
         function_name = "google_sheets.get_data"
