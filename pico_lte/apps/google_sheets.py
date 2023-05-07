@@ -224,33 +224,29 @@ class GoogleSheets:
             time.sleep(result["interval"])
 
     def post_data(self, data=None, data_range=None, sheet=None):
-        if data_range is None:
-            data_range = get_parameter(["google_sheets", "post", "data_range"])
-
         if not data_range:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         if sheet is None:
-            sheet = get_parameter(["google_sheets", "post", "sheet"])
+            sheet = get_parameter(["google_sheets", "sheet"])
 
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         api_key = get_parameter(["google_sheets", "api_key"])
-        host = get_parameter(["google_sheets", "host"])
-        token = get_parameter(["google_sheets", "token"])
+        oauth_token = get_parameter(["google_sheets", "OAuthToken"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
-        valueInputOption = get_parameter(["google_sheets", "post", "valueInputOption"])
-        majorDimension = get_parameter(["google_sheets", "post", "majorDimension"])
 
-        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}:append?valueInputOption={valueInputOption}&key={api_key}"
-        payload = {"majorDimension": majorDimension, "values": data}
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}:append?valueInputOption=RAW&key={api_key}"
+
+        payload = {"values": data}
         payload = json.dumps(payload)
+
         HEADER = "\n".join(
             [
                 f"Post {url} HTTP/1.1",
-                f"Host: {host}",
-                f"Authorization: {token}",
+                f"Host: sheets.googleapis.com",
+                f"Authorization: Bearer {oauth_token}",
                 f"Content-Length: {len(payload)+1}",
                 "\n\n",
             ]
@@ -306,10 +302,12 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok"},
+            function_params={"desired_response": "ok", "timeout": 20},
+            retry=3,
+            interval=1,
         )
 
-        function_name = "google_sheets.post_data"
+        function_name = "google_sheets.add_row"
 
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
