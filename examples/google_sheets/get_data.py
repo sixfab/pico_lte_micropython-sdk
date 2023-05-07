@@ -9,16 +9,9 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "google_sheets":{
-        "host": "[HOST_URL]",
         "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
-        "token": "[AUTHORIZATION_TOKEN]",
-        "spreadsheetId": "[SPREAD_SHEET_ID]",
-        "get":{
-            "data_range": "[DATA_RANGE_OF_TABLE]",
-            "majorDimension": "[MAJOR_DIMENSION_OPTION]",
-            "sheet": "[SHEET_NAME]",
-            "valueRenderOption": "FORMATTED_VALUE"
-        }
+        "OAuthToken": "[AUTHORIZATION_TOKEN]",
+        "spreadsheetId": "[SPREAD_SHEET_ID]"
     }
 }
 
@@ -28,6 +21,6 @@ from pico_lte.common import debug
 
 picoLTE = PicoLTE()
 
-debug.info("Getting data from the google sheet...")
+debug.info("Getting data from the Google Sheet document...")
 result = picoLTE.google_sheets.get_data()
 debug.info("Result:", result)
