@@ -19,7 +19,7 @@ from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
 picoLTE = PicoLTE()
-debug.set_level(0)
+
 debug.info("Posting data to the google sheet...")
 result = picoLTE.google_sheets.create_sheet(sheets=["SHEET1", "SHEET2"])
 debug.info("Result:", result)
