@@ -1,5 +1,5 @@
 """
-Example code for posting data to a Google Sheets table with using its API.
+Example code for data adding or updating operations of a Google Sheets document with using its API.
 
 Example Configuration
 ---------------------
@@ -21,8 +21,6 @@ from pico_lte.common import debug
 
 picoLTE = PicoLTE()
 
-debug.info("Posting data to the Google Sheets table...")
-result = picoLTE.google_sheets.post_data(
-    data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2"
-)
+debug.info("Adding data to the Google Sheets table...")
+result = picoLTE.google_sheets.add_data(data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2")
 debug.info("Result:", result)
