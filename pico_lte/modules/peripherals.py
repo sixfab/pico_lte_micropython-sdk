@@ -10,12 +10,13 @@ class Periph:
     """
     Class for inculding periheral hardware functions of PicoLTE module.
     """
+
     user_button = Pin(21, Pin.IN)
     user_led = Pin(22, Pin.OUT)
     pico_led = Pin("LED", Pin.OUT)
     neopixel = Pin(15, Pin.OUT)
 
-    qwiic = I2C(0, scl=Pin(17), sda=Pin(16), freq=400_000)
+    qwiic = I2C(0, scl=Pin(13), sda=Pin(12), freq=400_000)
 
     def __init__(self):
         """
