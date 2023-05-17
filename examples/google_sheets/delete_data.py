@@ -20,6 +20,6 @@ from pico_lte.common import debug
 
 picoLTE = PicoLTE()
 
-debug.info("Posting data to the google sheet...")
-result = picoLTE.google_sheets.clean_sheet(sheet="SHEET_NAME", data_range="A1:C3")
+debug.info("Cleaning data from the google sheet...")
+result = picoLTE.google_sheets.delete_data(sheet="SHEET_NAME", data_range="A1:C3")
 debug.info("Result:", result)
