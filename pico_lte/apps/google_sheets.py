@@ -46,7 +46,6 @@ class GoogleSheets:
                 "\n\n",
             ]
         )
-
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
@@ -97,8 +96,9 @@ class GoogleSheets:
             function=self.http.read_response,
             name="read_response",
             success="success",
+            function_params={"desired_response": "range"},
             fail="failure",
-            retry=3,
+            retry=2,
         )
 
         function_name = "google_sheets.get_data"
@@ -117,9 +117,10 @@ class GoogleSheets:
             result = sm.run()
 
             if result["status"] == Status.SUCCESS:
-                return json.loads(result["response"][0])["values"]
+                return result  # json.loads(result["response"][0])["values"]
             elif result["status"] == Status.ERROR:
                 return result
+
             time.sleep(result["interval"])
 
     def add_row(self, data=None, sheet=None):
@@ -198,8 +199,8 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok", "timeout": 20},
-            retry=3,
+            function_params={"desired_response": "updatedRange"},
+            retry=2,
             interval=1,
         )
 
@@ -223,7 +224,7 @@ class GoogleSheets:
                 return result
             time.sleep(result["interval"])
 
-    def post_data(self, data=None, data_range=None, sheet=None):
+    def add_data(self, data=None, data_range=None, sheet=None):
         if not data_range:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
@@ -237,14 +238,14 @@ class GoogleSheets:
         oauth_token = get_parameter(["google_sheets", "OAuthToken"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
-        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}:append?valueInputOption=RAW&key={api_key}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?valueInputOption=RAW&key={api_key}"
 
         payload = {"values": data}
         payload = json.dumps(payload)
 
         HEADER = "\n".join(
             [
-                f"Post {url} HTTP/1.1",
+                f"PUT {url} HTTP/1.1",
                 f"Host: sheets.googleapis.com",
                 f"Authorization: Bearer {oauth_token}",
                 f"Content-Length: {len(payload)+1}",
@@ -282,14 +283,14 @@ class GoogleSheets:
         step_set_content_type = Step(
             function=self.http.set_content_type,
             name="set_content_type",
-            success="post_request",
+            success="put_request",
             fail="failure",
             function_params={"content_type": 4},
         )
 
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
+        step_put_request = Step(
+            function=self.http.put,
+            name="put_request",
             success="read_response",
             fail="failure",
             function_params={"header_mode": 1, "data": HEADER + payload},
@@ -302,12 +303,12 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok", "timeout": 20},
-            retry=3,
+            function_params={"desired_response": "updatedRange"},
+            retry=2,
             interval=1,
         )
 
-        function_name = "google_sheets.add_row"
+        function_name = "google_sheets.add_data"
 
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
@@ -316,7 +317,7 @@ class GoogleSheets:
         sm.add_step(step_set_content_type)
         sm.add_step(step_http_ssl_configuration)
         sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
+        sm.add_step(step_put_request)
         sm.add_step(step_read_response)
 
         while True:
@@ -405,8 +406,8 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok", "timeout": 12},
-            retry=3,
+            function_params={"desired_response": "properties"},
+            retry=2,
             interval=1,
         )
 
@@ -505,8 +506,8 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok", "timeout": 15},
-            retry=3,
+            function_params={"desired_response": "clearedRange"},
+            retry=2,
             interval=1,
         )
 
