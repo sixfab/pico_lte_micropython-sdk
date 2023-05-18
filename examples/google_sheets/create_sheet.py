@@ -10,8 +10,10 @@ config.json
 {
     "google_sheets":{
         "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
-        "OAuthToken": "[AUTHORIZATION_TOKEN]",
-        "spreadsheetId": "[SPREAD_SHEET_ID]"
+        "spreadsheetId": "[SPREAD_SHEET_ID]",
+        "client_id": "[CLIENT_ID]",
+        "client_secret": "[CLIENT_SECRET]",
+        "refresh_token": "[REFRESH_TOKEN]"
     }
 }
 """
