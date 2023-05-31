@@ -1,5 +1,5 @@
 """
-Module for including functions of Google Sheets for Picocell module.
+Module for including functions of Google Sheets for for PicoLTE module.
 """
 import time
 import json
@@ -12,26 +12,38 @@ from pico_lte.utils.helpers import get_parameter
 
 class GoogleSheets:
     """
-    Class for including functions of Google Sheets operations for Picocell module.
+    Class for including functions of Google Sheets operations for PicoLTE module.
     """
 
     cache = config["cache"]
     __oauth_token = ""
 
     def __init__(self, base, network, http):
+        """Constructor of the class.
+
+        Parameters
+        ----------
+        base : Base
+            PicoLTE Base class
+        network : Network
+            PicoLTE Network class
+        http : HTTP
+            PicoLTE HTTP class
+        """
         self.base = base
         self.network = network
         self.http = http
 
-    def __set__state_manager(
-        self,
-        url="",
-        header="",
-        payload="",
-        desired_response="",
-        function_name="",
-        request_type="",
-    ):
+    def set_network(self):
+        """
+        Function includes network configurations for tcp/ip connection
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status and ""response" keys.
+        """
+
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
@@ -48,80 +60,44 @@ class GoogleSheets:
         step_http_ssl_configuration = Step(
             function=self.http.set_ssl_context_id,
             name="http_ssl_configuration",
-            success="set_server_url",
-            fail="failure",
-        )
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="set_content_type",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_set_content_type = Step(
-            function=self.http.set_content_type,
-            name="set_content_type",
-            success="request",
-            fail="failure",
-            function_params={"content_type": 4},
-        )
-
-        if request_type == "post":
-            request_function = self.http.post
-        elif request_type == "get":
-            request_function = self.http.get
-        elif request_type == "put":
-            request_function = self.http.put
-
-        step_request = Step(
-            function=request_function,
-            name="request",
-            success="read_response",
-            fail="generate_access_token",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-                "fault_response": "401",
-            },
-            cachable=True,
-            interval=2,
-        )
-
-        step_generate_access_token = Step(
-            function=self.generate_access_token,
-            name="generate_access_token",
-            success="failure",
-            fail="failure",
-            interval=1,
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": desired_response},
-            retry=2,
-            interval=1,
         )
 
-        function_name = "google_sheets.{function_name}"
+        function_name = "set_network"
 
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
 
         sm.add_step(step_network_reg)
         sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_content_type)
         sm.add_step(step_http_ssl_configuration)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_request)
-        sm.add_step(step_generate_access_token)
-        sm.add_step(step_read_response)
 
-        return sm
+        while True:
+            result = sm.run()
+
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
 
     def get_data(self, sheet=None, data_range=None):
+        """
+        Function for getting data from a Google Sheets document.
+
+        Parameters
+        ----------
+        sheet: str
+            Name of the target sheet
+        data_range: str
+            Data cell range of the sheet
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains the target data.
+        """
+
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
 
@@ -146,13 +122,71 @@ class GoogleSheets:
             ]
         )
 
-        sm = self.__set__state_manager(
-            url=url,
-            header=header,
-            desired_response="range",
-            function_name="get_data",
-            request_type="get",
+        step_set_network = Step(
+            function=self.set_network,
+            name="set_network",
+            success="set_server_url",
+            fail="failure",
         )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_request = Step(
+            function=self.http.get,
+            name="request",
+            success="read_response",
+            fail="generate_access_token",
+            function_params={
+                "header_mode": 1,
+                "data": header,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        step_generate_access_token = Step(
+            function=self.generate_access_token,
+            name="generate_access_token",
+            success="failure",
+            fail="failure",
+            interval=1,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": "range"},
+            retry=2,
+            interval=1,
+        )
+
+        function_name = "google_sheets.get_data"
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_generate_access_token)
+        sm.add_step(step_read_response)
 
         while True:
             result = sm.run()
@@ -170,7 +204,23 @@ class GoogleSheets:
 
             time.sleep(result["interval"])
 
-    def add_row(self, data=None, sheet=None):
+    def add_row(self, sheet=None, data=None):
+        """
+        Function for adding a row data to a Google Sheets document
+
+        Parameters
+        ----------
+        sheet: str
+            Name of the target sheet
+        data: list
+            Data list to add
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status and ""response" keys.
+        """
+
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
 
@@ -196,14 +246,71 @@ class GoogleSheets:
             ]
         )
 
-        sm = self.__set__state_manager(
-            url=url,
-            header=header,
-            payload=payload,
-            desired_response="updatedRange",
-            function_name="add_row",
-            request_type="post",
+        step_set_network = Step(
+            function=self.set_network,
+            name="set_network",
+            success="set_server_url",
+            fail="failure",
         )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_request = Step(
+            function=self.http.post,
+            name="request",
+            success="read_response",
+            fail="generate_access_token",
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        step_generate_access_token = Step(
+            function=self.generate_access_token,
+            name="generate_access_token",
+            success="failure",
+            fail="failure",
+            interval=1,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": "updatedRange"},
+            retry=2,
+            interval=1,
+        )
+
+        function_name = "google_sheets.add_row"
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_generate_access_token)
+        sm.add_step(step_read_response)
 
         while True:
             result = sm.run()
@@ -213,7 +320,25 @@ class GoogleSheets:
                 return result
             time.sleep(result["interval"])
 
-    def add_data(self, data=None, data_range=None, sheet=None):
+    def add_data(self, sheet=None, data=None, data_range=None):
+        """
+        Function for adding data to a Google Sheets document
+
+        Parameters
+        ----------
+        sheet: str
+            Name of the target sheet
+        data: list
+            Data list to add
+        data_range: str
+            Data cell range to add data
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status and ""response" keys.
+        """
+
         if not data_range:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
@@ -242,14 +367,71 @@ class GoogleSheets:
             ]
         )
 
-        sm = self.__set__state_manager(
-            url=url,
-            header=header,
-            payload=payload,
-            desired_response="updatedRange",
-            function_name="add_data",
-            request_type="put",
+        step_set_network = Step(
+            function=self.set_network,
+            name="set_network",
+            success="set_server_url",
+            fail="failure",
         )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_request = Step(
+            function=self.http.put,
+            name="request",
+            success="read_response",
+            fail="generate_access_token",
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        step_generate_access_token = Step(
+            function=self.generate_access_token,
+            name="generate_access_token",
+            success="failure",
+            fail="failure",
+            interval=1,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": "updatedRange"},
+            retry=2,
+            interval=1,
+        )
+
+        function_name = "google_sheets.add_data"
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_generate_access_token)
+        sm.add_step(step_read_response)
 
         while True:
             result = sm.run()
@@ -260,6 +442,20 @@ class GoogleSheets:
             time.sleep(result["interval"])
 
     def create_sheet(self, sheets=None):
+        """
+        Function for creating new sheet(s) in Google Sheets
+
+        Parameters
+        ----------
+        sheets: list
+            Names of the target sheets
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status and ""response" keys.
+        """
+
         if sheets is None:
             sheets = [get_parameter(["google_sheets", "sheet"])]
 
@@ -287,14 +483,71 @@ class GoogleSheets:
             ]
         )
 
-        sm = self.__set__state_manager(
-            url=url,
-            header=header,
-            payload=payload,
-            desired_response="create_sheet",
-            function_name="create_sheet",
-            request_type="post",
+        step_set_network = Step(
+            function=self.set_network,
+            name="set_network",
+            success="set_server_url",
+            fail="failure",
         )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_request = Step(
+            function=self.http.post,
+            name="request",
+            success="read_response",
+            fail="generate_access_token",
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        step_generate_access_token = Step(
+            function=self.generate_access_token,
+            name="generate_access_token",
+            success="failure",
+            fail="failure",
+            interval=1,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": "create_sheet"},
+            retry=2,
+            interval=1,
+        )
+
+        function_name = "google_sheets.create_sheet"
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_generate_access_token)
+        sm.add_step(step_read_response)
 
         while True:
             result = sm.run()
@@ -305,6 +558,22 @@ class GoogleSheets:
             time.sleep(result["interval"])
 
     def delete_data(self, sheet=None, data_range=None):
+        """
+        Function for deleting data from a Google Sheets document
+
+        Parameters
+        ----------
+        sheet: str
+            Name of the target sheet
+        data_range: str
+            Data cell range to delete
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status and ""response" keys.
+        """
+
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
 
@@ -329,13 +598,71 @@ class GoogleSheets:
             ]
         )
 
-        sm = self.__set__state_manager(
-            url=url,
-            header=header,
-            desired_response="clearedRange",
-            function_name="delete_data",
-            request_type="post",
+        step_set_network = Step(
+            function=self.set_network,
+            name="set_network",
+            success="set_server_url",
+            fail="failure",
         )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success="set_content_type",
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_content_type = Step(
+            function=self.http.set_content_type,
+            name="set_content_type",
+            success="request",
+            fail="failure",
+            function_params={"content_type": 4},
+        )
+
+        step_request = Step(
+            function=self.http.post,
+            name="request",
+            success="read_response",
+            fail="generate_access_token",
+            function_params={
+                "header_mode": 1,
+                "data": header,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        step_generate_access_token = Step(
+            function=self.generate_access_token,
+            name="generate_access_token",
+            success="failure",
+            fail="failure",
+            interval=1,
+        )
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": "clearedRange"},
+            retry=2,
+            interval=1,
+        )
+
+        function_name = "google_sheets.delete_data"
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_generate_access_token)
+        sm.add_step(step_read_response)
 
         while True:
             result = sm.run()
@@ -346,6 +673,15 @@ class GoogleSheets:
             time.sleep(result["interval"])
 
     def generate_access_token(self):
+        """
+        Function for generating new access token for authorization to Google Sheets
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status and ""response" keys.
+        """
+
         client_secret = get_parameter(["google_sheets", "client_secret"])
         refresh_token = get_parameter(["google_sheets", "refresh_token"])
         client_id = get_parameter(["google_sheets", "client_id"])
@@ -361,25 +697,13 @@ class GoogleSheets:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
-        )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="http_ssl_configuration",
-            fail="failure",
-        )
-        step_http_ssl_configuration = Step(
-            function=self.http.set_ssl_context_id,
-            name="http_ssl_configuration",
+        step_set_network = Step(
+            function=self.set_network,
+            name="set_network",
             success="set_server_url",
             fail="failure",
         )
+
         step_set_server_url = Step(
             function=self.http.set_server_url,
             name="set_server_url",
@@ -417,13 +741,11 @@ class GoogleSheets:
 
         function_name = "google_sheets.generate_access_token"
 
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
 
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_content_type)
-        sm.add_step(step_http_ssl_configuration)
+        sm.add_step(step_set_network)
         sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
         sm.add_step(step_post_request)
         sm.add_step(step_read_response)
 
