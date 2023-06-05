@@ -95,7 +95,7 @@ class GoogleSheets:
         Returns
         -------
         dict
-            Result dictionary that contains the target data.
+            Result dictionary that contains "status" and "response" keys.
         """
 
         if sheet is None:
@@ -192,10 +192,14 @@ class GoogleSheets:
             result = sm.run()
 
             if result["status"] == Status.SUCCESS:
-                return result
+                response = result
+                del response["interval"]
+                return response
 
             elif result["status"] == Status.ERROR:
-                return result
+                response = result
+                del response["interval"]
+                return response
 
             time.sleep(result["interval"])
 
@@ -213,7 +217,7 @@ class GoogleSheets:
         Returns
         -------
         dict
-            Result dictionary that contains "status and ""response" keys.
+            Result dictionary that contains "status" and "response" keys.
         """
 
         if sheet is None:
@@ -310,9 +314,13 @@ class GoogleSheets:
         while True:
             result = sm.run()
             if result["status"] == Status.SUCCESS:
-                return result
+                response = result
+                del response["interval"]
+                return response
             elif result["status"] == Status.ERROR:
-                return result
+                response = result
+                del response["interval"]
+                return response
             time.sleep(result["interval"])
 
     def add_data(self, sheet=None, data=None, data_range=None):
@@ -331,7 +339,7 @@ class GoogleSheets:
         Returns
         -------
         dict
-            Result dictionary that contains "status and ""response" keys.
+            Result dictionary that contains "status" and "response" keys.
         """
 
         if not data_range:
@@ -431,9 +439,13 @@ class GoogleSheets:
         while True:
             result = sm.run()
             if result["status"] == Status.SUCCESS:
-                return result
+                response = result
+                del response["interval"]
+                return response
             elif result["status"] == Status.ERROR:
-                return result
+                response = result
+                del response["interval"]
+                return response
             time.sleep(result["interval"])
 
     def create_sheet(self, sheets=None):
@@ -448,7 +460,7 @@ class GoogleSheets:
         Returns
         -------
         dict
-            Result dictionary that contains "status and ""response" keys.
+            Result dictionary that contains "status" and "response" keys.
         """
 
         if sheets is None:
@@ -547,9 +559,13 @@ class GoogleSheets:
         while True:
             result = sm.run()
             if result["status"] == Status.SUCCESS:
-                return result
+                response = result
+                del response["interval"]
+                return response
             elif result["status"] == Status.ERROR:
-                return result
+                response = result
+                del response["interval"]
+                return response
             time.sleep(result["interval"])
 
     def delete_data(self, sheet=None, data_range=None):
@@ -566,7 +582,7 @@ class GoogleSheets:
         Returns
         -------
         dict
-            Result dictionary that contains "status and ""response" keys.
+            Result dictionary that contains "status" and "response" keys.
         """
 
         if sheet is None:
@@ -662,9 +678,13 @@ class GoogleSheets:
         while True:
             result = sm.run()
             if result["status"] == Status.SUCCESS:
-                return result
+                response = result
+                del response["interval"]
+                return response
             elif result["status"] == Status.ERROR:
-                return result
+                response = result
+                del response["interval"]
+                return response
             time.sleep(result["interval"])
 
     def generate_access_token(self):
