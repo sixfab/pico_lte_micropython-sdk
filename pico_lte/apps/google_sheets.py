@@ -192,12 +192,7 @@ class GoogleSheets:
             result = sm.run()
 
             if result["status"] == Status.SUCCESS:
-                result = result["response"][0].split("\n")
-                values = ""
-                for value in result:
-                    values += value
-                values = json.loads(values + "]]}")["values"]
-                return values
+                return result
 
             elif result["status"] == Status.ERROR:
                 return result
@@ -533,7 +528,7 @@ class GoogleSheets:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "create_sheet"},
+            function_params={"desired_response": "spreadsheetId"},
             retry=2,
             interval=1,
         )
