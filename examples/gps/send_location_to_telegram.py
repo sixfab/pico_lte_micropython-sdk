@@ -10,9 +10,9 @@ config.json file must include the following parameters for this example:
 
 config.json
 {
-    "telegram":{
-        "token": "your_telegram_token"
-        "chat_id": "your_telegram_chat_id"
+    "telegram": {
+        "token": "[YOUR_BOT_TOKEN_ID]",
+        "chat_id": "[YOUR_GROUP_CHAT_ID]"
     }
 }
 """

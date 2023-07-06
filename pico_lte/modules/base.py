@@ -20,7 +20,8 @@ class Base:
         Constructor for Base class
         """
         self.atcom = atcom
-        self.powerkey_pin = Pin(19, Pin.OUT)
+        # self.module_power = Pin(26, Pin.OUT)
+        self.powerkey_pin = Pin(17, Pin.OUT)
         self.status_pin = Pin(20, Pin.IN)
 
     def power_off(self):
@@ -258,7 +259,7 @@ class Base:
         if cell_type not in ["servingcell", "neighbourcell"]:
             return {"status": Status.ERROR, "response": "Invalid cell type"}
 
-        command = f'AT+QENG="{cell_type}"' 
+        command = f'AT+QENG="{cell_type}"'
         return self.atcom.send_at_comm(command)
 
     def get_all_cells(self, technology="eMTC", timeout=60):
@@ -288,5 +289,7 @@ class Base:
             return {"status": Status.ERROR, "response": "Invalid technology"}
 
         # TODO: Get all the information from the URC, not the first one.
-        command = f'AT+QCELLSCAN={technology_no},{timeout}'
-        return self.atcom.send_at_comm(command, timeout=timeout, urc=True, desired='+QCELLSCAN: "{technology}",')
+        command = f"AT+QCELLSCAN={technology_no},{timeout}"
+        return self.atcom.send_at_comm(
+            command, timeout=timeout, urc=True, desired='+QCELLSCAN: "{technology}",'
+        )

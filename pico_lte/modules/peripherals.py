@@ -10,6 +10,7 @@ class Periph:
     """
     Class for inculding periheral hardware functions of PicoLTE module.
     """
+
     user_button = Pin(21, Pin.IN)
     user_led = Pin(22, Pin.OUT)
     pico_led = Pin("LED", Pin.OUT)
