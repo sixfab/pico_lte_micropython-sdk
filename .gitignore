@@ -4,6 +4,16 @@ cert/
 ### Configs
 config.json
 
+### VSCode Config
+.vscode/
+
+### Mock modules
+machine.py
+neopixel.py
+ubinascii.py
+micropython.py
+pyb.py
+
 ### PYTHON
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -57,6 +67,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+test.json
+pytest.ini
 
 # Translations
 *.mo
@@ -127,6 +139,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+bin/
+pyvenv.cfg
 .env
 .venv
 env/
