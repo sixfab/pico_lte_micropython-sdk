@@ -10,7 +10,7 @@ config.json
 {
     "google_sheets":{
         "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
-        "spreadsheetId": "[SPREAD_SHEET_ID]",
+        "spreadsheetId": "[SPREAD_SHEET_ ID]",
         "client_id": "[CLIENT_ID]",
         "client_secret": "[CLIENT_SECRET]",
         "refresh_token": "[REFRESH_TOKEN]"
@@ -25,5 +25,10 @@ debug.set_level(0)
 picoLTE = PicoLTE()
 
 debug.info("Getting data from the Google Sheet document...")
-result = picoLTE.google_sheets.get_data(sheet = "Sayfa1", data_range = "A1:C3")
+
+while True:
+    result = picoLTE.google_sheets.get_data(sheet = "Sayfa1", data_range = "A1:C3")
+    if result["response"] != "Access token is generated.":
+        break
+
 debug.info("Result:", result)
