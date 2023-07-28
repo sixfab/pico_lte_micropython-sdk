@@ -17,6 +17,7 @@ class GoogleSheets:
 
     cache = config["cache"]
     __oauth_token = ""
+    header_new = ""
 
     def __init__(self, base, network, http):
         """Constructor of the class.
@@ -113,6 +114,7 @@ class GoogleSheets:
         else:
             url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
 
+        """
         header = "\n".join(
             [
                 f"GET {url} HTTP/1.1",
@@ -121,7 +123,7 @@ class GoogleSheets:
                 "\n\n",
             ]
         )
-
+        """
         step_set_network = Step(
             function=self.set_network,
             name="set_network",
@@ -140,9 +142,19 @@ class GoogleSheets:
         step_set_content_type = Step(
             function=self.http.set_content_type,
             name="set_content_type",
-            success="request",
+            success="generate_header",
             fail="failure",
             function_params={"content_type": 4},
+        )
+
+        step_generate_header = Step(
+            function=self.generate_header,
+            name="generate_header",
+            function_params={
+                "url": url,
+            },
+            success="request",
+            fail="failure",
         )
 
         step_request = Step(
@@ -152,7 +164,7 @@ class GoogleSheets:
             fail="generate_access_token",
             function_params={
                 "header_mode": 1,
-                "data": header,
+                "data": self.header_new,
                 "fault_response": "401",
             },
             cachable=True,
@@ -162,7 +174,7 @@ class GoogleSheets:
         step_generate_access_token = Step(
             function=self.generate_access_token,
             name="generate_access_token",
-            success="failure",
+            success="generate_header",
             fail="failure",
             interval=1,
         )
@@ -184,6 +196,7 @@ class GoogleSheets:
         sm.add_step(step_set_network)
         sm.add_step(step_set_server_url)
         sm.add_step(step_set_content_type)
+        sm.add_step(step_generate_header)
         sm.add_step(step_request)
         sm.add_step(step_generate_access_token)
         sm.add_step(step_read_response)
@@ -686,6 +699,21 @@ class GoogleSheets:
                 del response["interval"]
                 return response
             time.sleep(result["interval"])
+
+    def generate_header(self, url=""):
+        self.header_new = "\n".join(
+            [
+                f"GET {url} HTTP/1.1",
+                "Host: sheets.googleapis.com",
+                f"Authorization: Bearer {self.__oauth_token}",
+                "\n\n",
+            ]
+        )
+
+        return {
+            "status": Status.SUCCESS,
+            "response": "Header is generated.",
+        }
 
     def generate_access_token(self):
         """

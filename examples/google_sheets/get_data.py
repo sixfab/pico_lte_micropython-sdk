@@ -21,8 +21,9 @@ config.json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
+debug.set_level(0)
 picoLTE = PicoLTE()
 
 debug.info("Getting data from the Google Sheet document...")
-result = picoLTE.google_sheets.get_data()
+result = picoLTE.google_sheets.get_data(sheet = "Sayfa1", data_range = "A1:C3")
 debug.info("Result:", result)
