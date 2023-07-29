@@ -298,7 +298,7 @@ class GoogleSheets:
         step_generate_access_token = Step(
             function=self.generate_access_token,
             name="generate_access_token",
-            success="failure",
+            success="success",
             fail="failure",
             interval=1,
         )
@@ -423,7 +423,7 @@ class GoogleSheets:
         step_generate_access_token = Step(
             function=self.generate_access_token,
             name="generate_access_token",
-            success="failure",
+            success="success",
             fail="failure",
             interval=1,
         )
@@ -543,7 +543,7 @@ class GoogleSheets:
         step_generate_access_token = Step(
             function=self.generate_access_token,
             name="generate_access_token",
-            success="failure",
+            success="success",
             fail="failure",
             interval=1,
         )
@@ -662,7 +662,7 @@ class GoogleSheets:
         step_generate_access_token = Step(
             function=self.generate_access_token,
             name="generate_access_token",
-            success="failure",
+            success="success",
             fail="failure",
             interval=1,
         )
