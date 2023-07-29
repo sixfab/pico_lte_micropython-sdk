@@ -21,14 +21,8 @@ config.json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-debug.set_level(0)
 picoLTE = PicoLTE()
 
 debug.info("Getting data from the Google Sheet document...")
-
-while True:
-    result = picoLTE.google_sheets.get_data(sheet = "Sayfa1", data_range = "A1:C3")
-    if result["response"] != "Access token is generated.":
-        break
-
+result = picoLTE.google_sheets.get_data()
 debug.info("Result:", result)
