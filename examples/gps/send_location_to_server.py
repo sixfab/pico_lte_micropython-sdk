@@ -15,6 +15,7 @@ config.json
         "username": "[YOUR_USERNAME]",
         "password": "[YOUR_PASSWORD]"
     }
+}
 """
 
 import time
