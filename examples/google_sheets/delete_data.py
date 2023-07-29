@@ -23,5 +23,5 @@ from pico_lte.common import debug
 picoLTE = PicoLTE()
 
 debug.info("Cleaning data from the google sheet...")
-result = picoLTE.google_sheets.delete_data(sheet="SHEET_NAME", data_range="A1:C3")
+result = picoLTE.google_sheets.delete_data(sheet="Sheet1", data_range="A1:C3")
 debug.info("Result:", result)

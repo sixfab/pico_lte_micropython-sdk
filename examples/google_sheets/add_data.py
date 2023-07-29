@@ -24,5 +24,7 @@ from pico_lte.common import debug
 picoLTE = PicoLTE()
 
 debug.info("Adding data to the Google Sheets table...")
-result = picoLTE.google_sheets.add_data(data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2")
+result = picoLTE.google_sheets.add_data(
+    sheet="Sheet1", data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2"
+)
 debug.info("Result:", result)

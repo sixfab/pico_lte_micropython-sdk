@@ -24,5 +24,5 @@ from pico_lte.common import debug
 picoLTE = PicoLTE()
 
 debug.info("Getting data from the Google Sheet document...")
-result = picoLTE.google_sheets.get_data()
+result = picoLTE.google_sheets.get_data(sheet="Sheet1", data_range="A1:C3")
 debug.info("Result:", result)
