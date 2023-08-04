@@ -21,8 +21,9 @@ config.json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
+debug.set_level(0)
 picoLTE = PicoLTE()
 
-debug.info("Appending new row to the Google Sheet table...")
-result = picoLTE.google_sheets.add_row(sheet="Sheet1", data=[[1, 2, 3, 4]])
+debug.info("Appending new row to the Google Sheets table...")
+result = picoLTE.google_sheets.add_row(sheet="Sayfa1", data=[[1, 2, 3, 6]])
 debug.info("Result:", result)

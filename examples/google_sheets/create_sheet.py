@@ -19,8 +19,9 @@ config.json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
+debug.set_level(0)
 picoLTE = PicoLTE()
 
-debug.info("Creating a new Google Sheet document...")
+debug.info("Creating a new Google Sheets document...")
 result = picoLTE.google_sheets.create_sheet(sheets=["SHEET1", "SHEET2"])
 debug.info("Result:", result)

@@ -20,11 +20,11 @@ config.json
 """
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
-
+debug.set_level(0)
 picoLTE = PicoLTE()
 
 debug.info("Adding data to the Google Sheets table...")
 result = picoLTE.google_sheets.add_data(
-    sheet="Sheet1", data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2"
+    sheet="Sayfa1", data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2"
 )
 debug.info("Result:", result)
