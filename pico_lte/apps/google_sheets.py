@@ -100,10 +100,8 @@ class GoogleSheets:
 
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
-
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
-
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
@@ -190,12 +188,9 @@ class GoogleSheets:
                 response = result
                 del response["interval"]
                 return response
-
             elif result["status"] == Status.ERROR:
                 break
-
             time.sleep(result["interval"])
-
         self.generate_access_token()
         header = generate_header()
 
@@ -250,10 +245,8 @@ class GoogleSheets:
 
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
-
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
-
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
@@ -343,7 +336,6 @@ class GoogleSheets:
             elif result["status"] == Status.ERROR:
                 break
             time.sleep(result["interval"])
-
         self.generate_access_token()
         header = generate_header()
 
@@ -400,13 +392,10 @@ class GoogleSheets:
 
         if not data_range:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
-
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
-
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
-
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
@@ -497,7 +486,6 @@ class GoogleSheets:
             elif result["status"] == Status.ERROR:
                 break
             time.sleep(result["interval"])
-
         self.generate_access_token()
         header = generate_header()
 
@@ -551,7 +539,6 @@ class GoogleSheets:
 
         if sheets is None:
             sheets = [get_parameter(["google_sheets", "sheet"])]
-
         api_key = get_parameter(["google_sheets", "api_key"])
 
         url = f"https://sheets.googleapis.com/v4/spreadsheets?key={api_key}"
@@ -562,7 +549,6 @@ class GoogleSheets:
             payload = {"sheets": []}
             for sheet in sheets:
                 payload["sheets"].append({"properties": {"title": sheet}})
-
         payload = json.dumps(payload)
 
         def generate_header():
@@ -646,7 +632,6 @@ class GoogleSheets:
             elif result["status"] == Status.ERROR:
                 break
             time.sleep(result["interval"])
-
         self.generate_access_token()
         header = generate_header()
 
@@ -701,10 +686,8 @@ class GoogleSheets:
 
         if sheet is None:
             sheet = get_parameter(["google_sheets", "sheet"])
-
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
-
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
@@ -793,7 +776,6 @@ class GoogleSheets:
             elif result["status"] == Status.ERROR:
                 break
             time.sleep(result["interval"])
-
         self.generate_access_token()
         header = generate_header()
 
