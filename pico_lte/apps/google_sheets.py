@@ -16,8 +16,7 @@ class GoogleSheets:
     """
 
     cache = config["cache"]
-    __oauth_token = ""
-    header_new = ""
+    access_token = ""
 
     def __init__(self, base, network, http):
         """Constructor of the class.
@@ -105,25 +104,28 @@ class GoogleSheets:
         if not sheet:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
-        oauth_token = self.__oauth_token
-        spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
         api_key = get_parameter(["google_sheets", "api_key"])
+        spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
         if data_range == None:
             url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
         else:
             url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
 
-        """
-        header = "\n".join(
-            [
-                f"GET {url} HTTP/1.1",
-                "Host: sheets.googleapis.com",
-                f"Authorization: Bearer {oauth_token}",
-                "\n\n",
-            ]
-        )
-        """
+        def generate_header():
+            header = "\n".join(
+                [
+                    f"GET {url} HTTP/1.1",
+                    "Host: sheets.googleapis.com",
+                    f"Authorization: Bearer {self.access_token}",
+                    "\n\n",
+                ]
+            )
+
+            return header
+
+        header = generate_header()
+
         step_set_network = Step(
             function=self.set_network,
             name="set_network",
@@ -142,41 +144,23 @@ class GoogleSheets:
         step_set_content_type = Step(
             function=self.http.set_content_type,
             name="set_content_type",
-            success="generate_header",
-            fail="failure",
-            function_params={"content_type": 4},
-        )
-
-        step_generate_header = Step(
-            function=self.generate_header,
-            name="generate_header",
-            function_params={
-                "url": url,
-            },
             success="request",
             fail="failure",
+            function_params={"content_type": 4},
         )
 
         step_request = Step(
             function=self.http.get,
             name="request",
             success="read_response",
-            fail="generate_access_token",
+            fail="failure",
             function_params={
                 "header_mode": 1,
-                "data": self.header_new,
+                "data": header,
                 "fault_response": "401",
             },
             cachable=True,
             interval=2,
-        )
-
-        step_generate_access_token = Step(
-            function=self.generate_access_token,
-            name="generate_access_token",
-            success="generate_header",
-            fail="failure",
-            interval=1,
         )
 
         step_read_response = Step(
@@ -196,9 +180,7 @@ class GoogleSheets:
         sm.add_step(step_set_network)
         sm.add_step(step_set_server_url)
         sm.add_step(step_set_content_type)
-        sm.add_step(step_generate_header)
         sm.add_step(step_request)
-        sm.add_step(step_generate_access_token)
         sm.add_step(step_read_response)
 
         while True:
@@ -210,10 +192,43 @@ class GoogleSheets:
                 return response
 
             elif result["status"] == Status.ERROR:
+                break
+
+            time.sleep(result["interval"])
+
+        self.generate_access_token()
+        header = generate_header()
+
+        step_request = Step(
+            function=self.http.get,
+            name="request",
+            success="read_response",
+            fail="failure",
+            function_params={
+                "header_mode": 1,
+                "data": header,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
                 response = result
                 del response["interval"]
                 return response
-
+            elif result["status"] == Status.ERROR:
+                break
             time.sleep(result["interval"])
 
     def add_row(self, sheet=None, data=None):
@@ -240,7 +255,6 @@ class GoogleSheets:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         api_key = get_parameter(["google_sheets", "api_key"])
-        oauth_token = self.__oauth_token
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
         url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!A1:append?valueInputOption=RAW&key={api_key}"
@@ -248,15 +262,20 @@ class GoogleSheets:
         payload = {"values": data}
         payload = json.dumps(payload)
 
-        header = "\n".join(
-            [
-                f"Post {url} HTTP/1.1",
-                "Host: sheets.googleapis.com",
-                f"Authorization: Bearer {oauth_token}",
-                f"Content-Length: {len(payload)+1}",
-                "\n\n",
-            ]
-        )
+        def generate_header():
+            header = "\n".join(
+                [
+                    f"Post {url} HTTP/1.1",
+                    "Host: sheets.googleapis.com",
+                    f"Authorization: Bearer {self.access_token}",
+                    f"Content-Length: {len(payload)+1}",
+                    "\n\n",
+                ]
+            )
+
+            return header
+
+        header = generate_header()
 
         step_set_network = Step(
             function=self.set_network,
@@ -285,7 +304,7 @@ class GoogleSheets:
             function=self.http.post,
             name="request",
             success="read_response",
-            fail="generate_access_token",
+            fail="failure",
             function_params={
                 "header_mode": 1,
                 "data": header + payload,
@@ -293,14 +312,6 @@ class GoogleSheets:
             },
             cachable=True,
             interval=2,
-        )
-
-        step_generate_access_token = Step(
-            function=self.generate_access_token,
-            name="generate_access_token",
-            success="success",
-            fail="failure",
-            interval=1,
         )
 
         step_read_response = Step(
@@ -321,7 +332,6 @@ class GoogleSheets:
         sm.add_step(step_set_server_url)
         sm.add_step(step_set_content_type)
         sm.add_step(step_request)
-        sm.add_step(step_generate_access_token)
         sm.add_step(step_read_response)
 
         while True:
@@ -331,9 +341,42 @@ class GoogleSheets:
                 del response["interval"]
                 return response
             elif result["status"] == Status.ERROR:
+                break
+            time.sleep(result["interval"])
+
+        self.generate_access_token()
+        header = generate_header()
+
+        step_request = Step(
+            function=self.http.post,
+            name="request",
+            success="read_response",
+            fail="generate_access_token",
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
                 response = result
                 del response["interval"]
                 return response
+            elif result["status"] == Status.ERROR:
+                break
             time.sleep(result["interval"])
 
     def add_data(self, sheet=None, data=None, data_range=None):
@@ -365,7 +408,6 @@ class GoogleSheets:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         api_key = get_parameter(["google_sheets", "api_key"])
-        oauth_token = self.__oauth_token
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
         url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}?valueInputOption=RAW&key={api_key}"
@@ -373,15 +415,20 @@ class GoogleSheets:
         payload = {"values": data}
         payload = json.dumps(payload)
 
-        header = "\n".join(
-            [
-                f"PUT {url} HTTP/1.1",
-                "Host: sheets.googleapis.com",
-                f"Authorization: Bearer {oauth_token}",
-                f"Content-Length: {len(payload)+1}",
-                "\n\n",
-            ]
-        )
+        def generate_header():
+            header = "\n".join(
+                [
+                    f"PUT {url} HTTP/1.1",
+                    "Host: sheets.googleapis.com",
+                    f"Authorization: Bearer {self.access_token}",
+                    f"Content-Length: {len(payload)+1}",
+                    "\n\n",
+                ]
+            )
+
+            return header
+
+        header = generate_header()
 
         step_set_network = Step(
             function=self.set_network,
@@ -410,22 +457,15 @@ class GoogleSheets:
             function=self.http.put,
             name="request",
             success="read_response",
-            fail="generate_access_token",
+            fail="failure",
             function_params={
                 "header_mode": 1,
                 "data": header + payload,
                 "fault_response": "401",
+                "timeout": 5,
             },
             cachable=True,
             interval=2,
-        )
-
-        step_generate_access_token = Step(
-            function=self.generate_access_token,
-            name="generate_access_token",
-            success="success",
-            fail="failure",
-            interval=1,
         )
 
         step_read_response = Step(
@@ -446,7 +486,6 @@ class GoogleSheets:
         sm.add_step(step_set_server_url)
         sm.add_step(step_set_content_type)
         sm.add_step(step_request)
-        sm.add_step(step_generate_access_token)
         sm.add_step(step_read_response)
 
         while True:
@@ -456,9 +495,43 @@ class GoogleSheets:
                 del response["interval"]
                 return response
             elif result["status"] == Status.ERROR:
+                break
+            time.sleep(result["interval"])
+
+        self.generate_access_token()
+        header = generate_header()
+
+        step_request = Step(
+            function=self.http.put,
+            name="request",
+            success="read_response",
+            fail="failure",
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+                "fault_response": "401",
+                "timeout": 5,
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
                 response = result
                 del response["interval"]
                 return response
+            elif result["status"] == Status.ERROR:
+                break
             time.sleep(result["interval"])
 
     def create_sheet(self, sheets=None):
@@ -480,7 +553,6 @@ class GoogleSheets:
             sheets = [get_parameter(["google_sheets", "sheet"])]
 
         api_key = get_parameter(["google_sheets", "api_key"])
-        oauth_token = self.__oauth_token
 
         url = f"https://sheets.googleapis.com/v4/spreadsheets?key={api_key}"
 
@@ -493,15 +565,20 @@ class GoogleSheets:
 
         payload = json.dumps(payload)
 
-        header = "\n".join(
-            [
-                f"Post {url} HTTP/1.1",
-                "Host: sheets.googleapis.com",
-                f"Authorization: Bearer {oauth_token}",
-                f"Content-Length: {len(payload)+1}",
-                "\n\n",
-            ]
-        )
+        def generate_header():
+            header = "\n".join(
+                [
+                    f"Post {url} HTTP/1.1",
+                    "Host: sheets.googleapis.com",
+                    f"Authorization: Bearer {self.access_token}",
+                    f"Content-Length: {len(payload)+1}",
+                    "\n\n",
+                ]
+            )
+
+            return header
+
+        header = generate_header()
 
         step_set_network = Step(
             function=self.set_network,
@@ -530,7 +607,7 @@ class GoogleSheets:
             function=self.http.post,
             name="request",
             success="read_response",
-            fail="generate_access_token",
+            fail="failure",
             function_params={
                 "header_mode": 1,
                 "data": header + payload,
@@ -538,14 +615,6 @@ class GoogleSheets:
             },
             cachable=True,
             interval=2,
-        )
-
-        step_generate_access_token = Step(
-            function=self.generate_access_token,
-            name="generate_access_token",
-            success="success",
-            fail="failure",
-            interval=1,
         )
 
         step_read_response = Step(
@@ -566,7 +635,6 @@ class GoogleSheets:
         sm.add_step(step_set_server_url)
         sm.add_step(step_set_content_type)
         sm.add_step(step_request)
-        sm.add_step(step_generate_access_token)
         sm.add_step(step_read_response)
 
         while True:
@@ -576,9 +644,42 @@ class GoogleSheets:
                 del response["interval"]
                 return response
             elif result["status"] == Status.ERROR:
+                break
+            time.sleep(result["interval"])
+
+        self.generate_access_token()
+        header = generate_header()
+
+        step_request = Step(
+            function=self.http.post,
+            name="request",
+            success="read_response",
+            fail="failure",
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
                 response = result
                 del response["interval"]
                 return response
+            elif result["status"] == Status.ERROR:
+                break
             time.sleep(result["interval"])
 
     def delete_data(self, sheet=None, data_range=None):
@@ -605,7 +706,6 @@ class GoogleSheets:
             return {"status": Status.ERROR, "response": "Missing arguments!"}
 
         api_key = get_parameter(["google_sheets", "api_key"])
-        oauth_token = self.__oauth_token
         spreadsheetId = get_parameter(["google_sheets", "spreadsheetId"])
 
         if data_range == None:
@@ -613,14 +713,19 @@ class GoogleSheets:
         else:
             url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{sheet}!{data_range}:clear?key={api_key}"
 
-        header = "\n".join(
-            [
-                f"Post {url} HTTP/1.1",
-                "Host: sheets.googleapis.com",
-                f"Authorization: Bearer {oauth_token}",
-                "\n\n",
-            ]
-        )
+        def generate_header():
+            header = "\n".join(
+                [
+                    f"Post {url} HTTP/1.1",
+                    "Host: sheets.googleapis.com",
+                    f"Authorization: Bearer {self.access_token}",
+                    "\n\n",
+                ]
+            )
+
+            return header
+
+        header = generate_header()
 
         step_set_network = Step(
             function=self.set_network,
@@ -649,7 +754,7 @@ class GoogleSheets:
             function=self.http.post,
             name="request",
             success="read_response",
-            fail="generate_access_token",
+            fail="failure",
             function_params={
                 "header_mode": 1,
                 "data": header,
@@ -657,14 +762,6 @@ class GoogleSheets:
             },
             cachable=True,
             interval=2,
-        )
-
-        step_generate_access_token = Step(
-            function=self.generate_access_token,
-            name="generate_access_token",
-            success="success",
-            fail="failure",
-            interval=1,
         )
 
         step_read_response = Step(
@@ -685,7 +782,6 @@ class GoogleSheets:
         sm.add_step(step_set_server_url)
         sm.add_step(step_set_content_type)
         sm.add_step(step_request)
-        sm.add_step(step_generate_access_token)
         sm.add_step(step_read_response)
 
         while True:
@@ -695,25 +791,43 @@ class GoogleSheets:
                 del response["interval"]
                 return response
             elif result["status"] == Status.ERROR:
+                break
+            time.sleep(result["interval"])
+
+        self.generate_access_token()
+        header = generate_header()
+
+        step_request = Step(
+            function=self.http.post,
+            name="request",
+            success="read_response",
+            fail="failure",
+            function_params={
+                "header_mode": 1,
+                "data": header,
+                "fault_response": "401",
+            },
+            cachable=True,
+            interval=2,
+        )
+
+        sm = StateManager(first_step=step_set_network, function_name=function_name)
+
+        sm.add_step(step_set_network)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_content_type)
+        sm.add_step(step_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
                 response = result
                 del response["interval"]
                 return response
+            elif result["status"] == Status.ERROR:
+                break
             time.sleep(result["interval"])
-
-    def generate_header(self, url=""):
-        self.header_new = "\n".join(
-            [
-                f"GET {url} HTTP/1.1",
-                "Host: sheets.googleapis.com",
-                f"Authorization: Bearer {self.__oauth_token}",
-                "\n\n",
-            ]
-        )
-
-        return {
-            "status": Status.SUCCESS,
-            "response": "Header is generated.",
-        }
 
     def generate_access_token(self):
         """
@@ -795,7 +909,7 @@ class GoogleSheets:
         while True:
             result = sm.run()
             if result["status"] == Status.SUCCESS:
-                self.__oauth_token = json.loads(result["response"][0] + '"}')[
+                self.access_token = json.loads(result["response"][0] + '"}')[
                     "access_token"
                 ]
                 return {
