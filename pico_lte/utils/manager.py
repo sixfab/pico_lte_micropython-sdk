@@ -34,6 +34,11 @@ class Step:
         self.final_step = final_step
         self.cachable = cachable
 
+    def update_function_params(self, **args):
+        """Method for updating function_params key of the step."""
+        for key, value in args.items():
+            self.function_params[key] = value
+
 
 class StateManager:
     """Class for managing states"""
@@ -93,6 +98,10 @@ class StateManager:
 
     def add_step(self, step):
         """Adds step to steps dictionary"""
+        self.steps[step.name] = step
+
+    def update_step(self, step):
+        """Updates step in steps dictionary"""
         self.steps[step.name] = step
 
     def get_step(self, name):
