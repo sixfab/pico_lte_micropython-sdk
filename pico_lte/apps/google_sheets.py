@@ -240,7 +240,7 @@ class GoogleSheets:
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheet_id = get_parameter(["google_sheets", "spreadsheetId"])
 
-        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!A1:append?valueInputOption=RAW&key={api_key}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}:append?valueInputOption=RAW&key={api_key}"
 
         payload = {"values": data}
         payload = json.dumps(payload)
