@@ -205,7 +205,9 @@ class GoogleSheets:
                         sm.add_step(step_read_response)
                         step_request.update_function_params(data=header)
                         sm.update_step(step_request)
-
+                    else:
+                        del result["interval"]
+                        return result
                 except:
                     del result["interval"]
                     return result
