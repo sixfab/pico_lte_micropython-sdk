@@ -108,9 +108,9 @@ class GoogleSheets:
         spreadsheet_id = get_parameter(["google_sheets", "spreadsheetId"])
 
         if data_range is None:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}?majorDimension=ROWS&prettyPrint=false&valueRenderOption=FORMATTED_VALUE&key={api_key}"
         else:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!{data_range}?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE&key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!{data_range}?majorDimension=ROWS&prettyPrint=false&valueRenderOption=FORMATTED_VALUE&key={api_key}"
 
         def generate_header():
             header = "\n".join(
@@ -240,7 +240,7 @@ class GoogleSheets:
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheet_id = get_parameter(["google_sheets", "spreadsheetId"])
 
-        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}:append?valueInputOption=RAW&key={api_key}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}:append?valueInputOption=RAW&prettyPrint=false&key={api_key}"
 
         payload = {"values": data}
         payload = json.dumps(payload)
@@ -379,7 +379,7 @@ class GoogleSheets:
         api_key = get_parameter(["google_sheets", "api_key"])
         spreadsheet_id = get_parameter(["google_sheets", "spreadsheetId"])
 
-        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!{data_range}?valueInputOption=RAW&key={api_key}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!{data_range}?valueInputOption=RAW&prettyPrint=false&key={api_key}"
 
         payload = {"values": data}
         payload = json.dumps(payload)
@@ -508,7 +508,7 @@ class GoogleSheets:
 
         api_key = get_parameter(["google_sheets", "api_key"])
 
-        url = f"https://sheets.googleapis.com/v4/spreadsheets?key={api_key}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets?prettyPrint=false&key={api_key}"
 
         if sheets is None:
             payload = {}
@@ -650,9 +650,9 @@ class GoogleSheets:
         spreadsheet_id = get_parameter(["google_sheets", "spreadsheetId"])
 
         if data_range is None:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}:clear?key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}:clear?prettyPrint=false&key={api_key}"
         else:
-            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!{data_range}:clear?key={api_key}"
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{sheet}!{data_range}:clear?prettyPrint=false&key={api_key}"
 
         def generate_header():
             header = "\n".join(
