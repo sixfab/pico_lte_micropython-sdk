@@ -23,5 +23,5 @@ debug.set_level(0)
 picoLTE = PicoLTE()
 
 debug.info("Creating a new Google Sheets document...")
-result = picoLTE.google_sheets.create_sheet(sheets=["SHEET1", "SHEET2"])
+result = picoLTE.google_sheets.create_sheet(sheets=["Sheet1", "Sheet2"])
 debug.info("Result:", result)

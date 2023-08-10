@@ -25,6 +25,6 @@ picoLTE = PicoLTE()
 
 debug.info("Adding data to the Google Sheets table...")
 result = picoLTE.google_sheets.add_data(
-    sheet="Sheet11", data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2"
+    sheet="Sheet1", data=[[1, 2, 3], [4, 5, 6]], data_range="A1:C2"
 )
 debug.info("Result:", result)
