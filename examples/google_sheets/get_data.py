@@ -26,3 +26,5 @@ picoLTE = PicoLTE()
 debug.info("Getting data from the Google Sheets table...")
 result = picoLTE.google_sheets.get_data(sheet="Sheet1", data_range="A1:C2")
 debug.info("Result:", result)
+
+# Values can be accessed as a list with "response" key of "result" dictionary: values = result["response"]
