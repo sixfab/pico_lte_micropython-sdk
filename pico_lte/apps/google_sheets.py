@@ -4,10 +4,11 @@ Module for including functions of Google Sheets for for PicoLTE module.
 import time
 import json
 
-from pico_lte.common import config
+from pico_lte.common import config, debug
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.utils.status import Status
-from pico_lte.utils.helpers import get_parameter
+from pico_lte.utils.helpers import get_parameter, read_json_file, write_json_file
+from pico_lte.modules.config import Config
 
 
 class GoogleSheets:
@@ -16,6 +17,7 @@ class GoogleSheets:
     """
 
     cache = config["cache"]
+    config_object = Config()
     access_token = ""
 
     def __init__(self, base, network, http):
@@ -189,6 +191,11 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                try:
+                    response = json.loads(result["response"][0])["values"]
+                    result["response"] = response
+                except:
+                    pass
                 return result
 
             elif result["status"] == Status.ERROR:
@@ -323,6 +330,11 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                try:
+                    response = json.loads(result["response"][0])
+                    result["response"] = response
+                except:
+                    pass
                 return result
 
             elif result["status"] == Status.ERROR:
@@ -462,6 +474,11 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                try:
+                    response = json.loads(result["response"][0])
+                    result["response"] = response
+                except:
+                    pass
                 return result
 
             elif result["status"] == Status.ERROR:
@@ -592,11 +609,24 @@ class GoogleSheets:
         sm.add_step(step_request)
         sm.add_step(step_read_response)
 
+        def update_config_file(spreadsheet_id=""):
+            config = read_json_file("../config.json")
+            config["google_sheets"]["spreadsheetId"] = spreadsheet_id
+            write_json_file("../config.json", config)
+            self.config_object.read_parameters_from_json_file("../config.json")
+
         while True:
             result = sm.run()
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                try:
+                    response = json.loads(result["response"][0][:-2] + "}}}}")
+                    result["response"] = response
+                    spreadsheet_id = result["response"]["spreadsheetId"]
+                    update_config_file(spreadsheet_id)
+                except:
+                    debug.warning("Spreadsheet ID can not be added to config.json!")
                 return result
 
             elif result["status"] == Status.ERROR:
@@ -731,6 +761,11 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                try:
+                    response = json.loads(result["response"][0])
+                    result["response"] = response
+                except:
+                    pass
                 return result
 
             elif result["status"] == Status.ERROR:
