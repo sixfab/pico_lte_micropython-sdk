@@ -1,5 +1,5 @@
 """
-Example code for creating new spreadsheet and sheets with using its API.
+Example code for creating a new Google Sheets spreadsheet and its sheets with using its API.
 
 Example Configuration
 ---------------------
@@ -9,7 +9,7 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "google_sheets":{
-        "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
+        "api_key": "[API_KEY]",
         "client_id": "[CLIENT_ID]",
         "client_secret": "[CLIENT_SECRET]",
         "refresh_token": "[REFRESH_TOKEN]"
@@ -21,6 +21,6 @@ from pico_lte.common import debug
 
 picoLTE = PicoLTE()
 
-debug.info("Creating a new Google Sheets document...")
+debug.info("Creating a new Google Sheets spreadsheet and its sheets...")
 result = picoLTE.google_sheets.create_sheet(sheets=["Sheet1", "Sheet2"])
 debug.info("Result:", result)

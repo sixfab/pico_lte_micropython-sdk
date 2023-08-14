@@ -1,5 +1,5 @@
 """
-Example code for getting data from a Google Sheets document with using its API.
+Example code for getting data from a Google Sheets table with using its API.
 
 Example Configuration
 ---------------------
@@ -9,8 +9,8 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "google_sheets":{
-        "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
-        "spreadsheetId": "[SPREAD_SHEET_ ID]",
+        "api_key": "[API_KEY]",
+        "spreadsheetId": "[SPREAD_SHEET_ID]",
         "client_id": "[CLIENT_ID]",
         "client_secret": "[CLIENT_SECRET]",
         "refresh_token": "[REFRESH_TOKEN]"
@@ -23,6 +23,6 @@ from pico_lte.common import debug
 
 picoLTE = PicoLTE()
 
-debug.info("Getting data from the Google Sheets document...")
+debug.info("Getting data from the Google Sheets table...")
 result = picoLTE.google_sheets.get_data(sheet="Sheet1", data_range="A1:C2")
 debug.info("Result:", result)

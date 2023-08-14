@@ -1,5 +1,5 @@
 """
-Example code for appending new row to a Google Sheets document with using its API.
+Example code for appending new row to a Google Sheets table with using its API.
 
 Example Configuration
 ---------------------
@@ -9,7 +9,7 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "google_sheets":{
-        "api_key": "[API_KEY_OF_GOOGLE_SHEETS_DOCUMENT]",
+        "api_key": "[API_KEY]",
         "spreadsheetId": "[SPREAD_SHEET_ID]",
         "client_id": "[CLIENT_ID]",
         "client_secret": "[CLIENT_SECRET]",
