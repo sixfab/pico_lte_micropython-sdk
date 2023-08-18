@@ -19,6 +19,7 @@ class GoogleSheets:
     cache = config["cache"]
     config_object = Config()
     access_token = ""
+    new_access_token_generated = False
 
     def __init__(self, base, network, http):
         """Constructor of the class.
@@ -191,6 +192,7 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                self.new_access_token_generated = False
                 try:
                     response = json.loads(result["response"][0])["values"]
                     result["response"] = response
@@ -200,7 +202,10 @@ class GoogleSheets:
 
             elif result["status"] == Status.ERROR:
                 try:
-                    if "403" in result["response"][1]:
+                    if (
+                        "403" in result["response"][1]
+                        and not self.new_access_token_generated
+                    ):
                         self.generate_access_token()
                         header = generate_header()
                         sm = StateManager(
@@ -213,6 +218,7 @@ class GoogleSheets:
                         sm.add_step(step_read_response)
                         step_request.update_function_params(data=header)
                         sm.update_step(step_request)
+                        self.new_access_token_generated = True
                     else:
                         del result["interval"]
                         return result
@@ -330,6 +336,7 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                self.new_access_token_generated = False
                 try:
                     response = json.loads(result["response"][0])
                     result["response"] = response
@@ -339,7 +346,10 @@ class GoogleSheets:
 
             elif result["status"] == Status.ERROR:
                 try:
-                    if "401" in result["response"][1]:
+                    if (
+                        "401" in result["response"][1]
+                        and not self.new_access_token_generated
+                    ):
                         self.generate_access_token()
                         header = generate_header()
                         sm = StateManager(
@@ -352,6 +362,7 @@ class GoogleSheets:
                         sm.add_step(step_read_response)
                         step_request.update_function_params(data=header + payload)
                         sm.update_step(step_request)
+                        self.new_access_token_generated = True
                     else:
                         del result["interval"]
                         return result
@@ -474,6 +485,7 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                self.new_access_token_generated = False
                 try:
                     response = json.loads(result["response"][0])
                     result["response"] = response
@@ -483,7 +495,10 @@ class GoogleSheets:
 
             elif result["status"] == Status.ERROR:
                 try:
-                    if "401" in result["response"][1]:
+                    if (
+                        "401" in result["response"][1]
+                        and not self.new_access_token_generated
+                    ):
                         self.generate_access_token()
                         header = generate_header()
                         sm = StateManager(
@@ -496,6 +511,7 @@ class GoogleSheets:
                         sm.add_step(step_read_response)
                         step_request.update_function_params(data=header + payload)
                         sm.update_step(step_request)
+                        self.new_access_token_generated = True
                     else:
                         del result["interval"]
                         return result
@@ -620,6 +636,7 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                self.new_access_token_generated = False
                 try:
                     response = json.loads(result["response"][0][:-2] + "}}}}")
                     result["response"] = response
@@ -631,7 +648,10 @@ class GoogleSheets:
 
             elif result["status"] == Status.ERROR:
                 try:
-                    if "401" in result["response"][1]:
+                    if (
+                        "401" in result["response"][1]
+                        and not self.new_access_token_generated
+                    ):
                         self.generate_access_token()
                         header = generate_header()
                         sm = StateManager(
@@ -644,6 +664,7 @@ class GoogleSheets:
                         sm.add_step(step_read_response)
                         step_request.update_function_params(data=header + payload)
                         sm.update_step(step_request)
+                        self.new_access_token_generated = True
                     else:
                         del result["interval"]
                         return result
@@ -761,6 +782,7 @@ class GoogleSheets:
 
             if result["status"] == Status.SUCCESS:
                 del result["interval"]
+                self.new_access_token_generated = False
                 try:
                     response = json.loads(result["response"][0])
                     result["response"] = response
@@ -770,7 +792,10 @@ class GoogleSheets:
 
             elif result["status"] == Status.ERROR:
                 try:
-                    if "401" in result["response"][1]:
+                    if (
+                        "401" in result["response"][1]
+                        and not self.new_access_token_generated
+                    ):
                         self.generate_access_token()
                         header = generate_header()
                         sm = StateManager(
@@ -783,6 +808,7 @@ class GoogleSheets:
                         sm.add_step(step_read_response)
                         step_request.update_function_params(data=header)
                         sm.update_step(step_request)
+                        self.new_access_token_generated = True
                     else:
                         del result["interval"]
                         return result
