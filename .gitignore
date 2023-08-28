@@ -4,6 +4,10 @@ cert/
 ### Configs
 config.json
 
+### MacOS
+pico_lte/.DS_Store
+.DS_Store
+
 ### VSCode Config
 .vscode/
 
