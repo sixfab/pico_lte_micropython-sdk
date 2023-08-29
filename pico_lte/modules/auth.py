@@ -39,7 +39,6 @@ class Auth:
 
         # If first run, upload the certificates to the modem
         if first_run:
-            del first_run
             try:
                 # delete old certificates if existed
                 self.file.delete_file_from_modem("/security/cacert.pem")
