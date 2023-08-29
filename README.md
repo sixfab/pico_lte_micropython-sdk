@@ -29,6 +29,8 @@ One of the standout features of Pico LTE SDK is its comprehensive compatibility 
 
 ## Installation
 
+The installation of the SDK is provided in detail and step-by-step on the ["Pico LTE SDK for MicroPython"](https://docs.sixfab.com/docs/sixfab-pico-lte-micropython-sdk) page.
+
 - Clone the repository to your local machine or download the repository as a zip and extract it on your local machine.
 
 - After that, upload the "[pico_lte](./pico_lte/)" folder to the root directory of your Pico LTE device. That's all.
@@ -39,7 +41,7 @@ Using the SDK is pretty straightforward.
 
 Import the SDK with `from pico_lte.core import PicoLTE` line, and code your IoT project!
 
-For more references on installation or usage, please refer to our documentation page. By examining the [example codes](./examples/) provided on the platforms, you can delve into further details. You can connect various sensors to the Pico LTE, collect data on temperature, humidity, and air quality, and transmit this data over the cellular network using the Pico LTE SDK. 
+For more references on installation or usage, please refer to our [documentation page](https://docs.sixfab.com/docs/sixfab-pico-lte-micropython-sdk). By examining the [example codes](./examples/) provided on the platforms, you can delve into further details. You can connect various sensors to the Pico LTE, collect data on temperature, humidity, and air quality, and transmit this data over the cellular network using the Pico LTE SDK. 
 
 Additionally, the Sixfab Community is available for any questions or suggestions you may have.
 
@@ -47,7 +49,7 @@ Additionally, the Sixfab Community is available for any questions or suggestions
   <a aria-label="Documentation on Sixfab.com" href="https://docs.sixfab.com/docs/sixfab-pico-lte-introduction" target="_blank">
     <img alt="" src="https://img.shields.io/badge/Documentation-blue.svg?style=for-the-badge">
   </a>
-  <a aria-label="Community on Sixfab.com" href="https://community.sixfab.com/" target="_blank">
+  <a aria-label="Community on Sixfab.com" href="https://community.sixfab.com/c/sixfab-pico-lte/36" target="_blank">
     <img alt="" src="https://img.shields.io/badge/Community-blue.svg?style=for-the-badge">
   </a>
 </p>
