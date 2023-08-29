@@ -14,29 +14,42 @@ an embedded framework to make easier cellular connections
 
 </div>
 
-## Description
-PicoLTE SDK is a framework that you can use in your embedded systems projects and **takes care of cellular communication** processes for you. It provides built-in application support for popular back-end services such as Amazon Web Services, Azure, ThingSpeak, Slack, and Telegram.
 
-* Less than 40 lines when making a connection to a built-in application.
-* Support for SSL/TLS certification and their secure storage.
-* Easy-to-use GPS, HTTPS and MQTTS interfaces.
-* Chance to create your own application module with state machines.
+Pico LTE SDK is an innovative framework that enables developers to integrate cellular communication capabilities into their embedded systems projects seamlessly. Pico LTE SDK simplifies the complexities of wireless connectivity, allowing developers to focus on their applications rather than the intricacies of cellular communication processes.
+
+This powerful SDK empowers developers to seamlessly integrate cellular capabilities into their projects, allowing your projects to communicate over wide areas using cellular networks.
+
+One of the standout features of Pico LTE SDK is its comprehensive compatibility with popular backend services provided by Amazon Web Services (AWS), Azure, ThingSpeak, Slack, Scriptr.io and Telegram. This integration opens up a world of possibilities for leveraging the power of cloud-based services and enables seamless communication between embedded systems and the wider Internet ecosystem.  Pico LTE SDK is a game-changer for developers seeking to integrate cellular communication capabilities into their Raspberry Pi Pico-based projects.
+
+- **Easy Integration:** Enables seamless integration of cellular communication capabilities into embedded systems projects, specifically designed for the Sixfab Pico LTE board.
+- **Minimalistic Code:** Connecting to a built-in application requires less than 40 lines of code, reducing complexity and allowing for quick and efficient development.
+- **GPS Integration:** Easy-to-use GPS integration, enabling developers to incorporate location-based functionalities into their applications, leveraging cellular network-based positioning.
+- **Custom Application Modules:** With the Pico LTE SDK, developers have the flexibility to create their own application modules using the SDK. This feature allows for custom functionality tailored to specific project requirements.
+- **Versatile Protocols:** Pico LTE SDK simplifies the implementation of various protocols such as GPS, HTTPS, and MQTT. Developers can easily leverage these protocols for location-based services, secure web communication, and efficient machine-to-machine communication in IoT applications.
 
 ## Installation
-You can install the framework by cloning the repository to your local machine. You can also download the repository as a zip file and extract it to your local machine. After that, you can upload the `pico_lte` folder to your PicoLTE device's file system.
+
+The installation of the SDK is provided in detail and step-by-step on the ["Pico LTE SDK for MicroPython"](https://docs.sixfab.com/docs/sixfab-pico-lte-micropython-sdk) page.
+
+- Clone the repository to your local machine or download the repository as a zip and extract it on your local machine.
+
+- After that, upload the "[pico_lte](./pico_lte/)" folder to the root directory of your Pico LTE device. That's all.
+
 
 ## Usage
-Using the framework is pretty straightforward. A `main.py` file is needed to run in a MicroPython environment, therefore, please create a `main.py` script in your PicoLTE's file system. Import the framework with `from pico_lte.core import PicoLTE` line, and code your embedded project!
+Using the SDK is pretty straightforward. 
 
-**Note**: It is a must to have a tool to upload your `main.py` file or any example from our repository to your PicoLTE device. [Thonny IDE](https://thonny.org/) is a very common tool that has an easy GUI to perform this kind of operation. For a more compact and smaller size tool, we can recommend [Adafruit's Ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy) to you.
+Import the SDK with `from pico_lte.core import PicoLTE` line, and code your IoT project!
 
-For further reference about installing or usage, please refer to our documentation page. Also, Sixfab Community Portal is available for your questions and recommendations.
+For more references on installation or usage, please refer to our [documentation page](https://docs.sixfab.com/docs/sixfab-pico-lte-micropython-sdk). By examining the [example codes](./examples/) provided on the platforms, you can delve into further details. You can connect various sensors to the Pico LTE, collect data on temperature, humidity, and air quality, and transmit this data over the cellular network using the Pico LTE SDK. 
+
+Additionally, the Sixfab Community is available for any questions or suggestions you may have.
 
 <p align="center">
-  <a aria-label="Documentation on Sixfab.com" href="https://docs.sixfab.com/" target="_blank">
+  <a aria-label="Documentation on Sixfab.com" href="https://docs.sixfab.com/docs/sixfab-pico-lte-introduction" target="_blank">
     <img alt="" src="https://img.shields.io/badge/Documentation-blue.svg?style=for-the-badge">
   </a>
-  <a aria-label="Community on Sixfab.com" href="https://community.sixfab.com/" target="_blank">
+  <a aria-label="Community on Sixfab.com" href="https://community.sixfab.com/c/sixfab-pico-lte/36" target="_blank">
     <img alt="" src="https://img.shields.io/badge/Community-blue.svg?style=for-the-badge">
   </a>
 </p>
@@ -44,7 +57,9 @@ For further reference about installing or usage, please refer to our documentati
 ## Configuration Files
 You can use a configuration file to increase maintainability of your embedded code. This file is named as `config.json` and stores necessary connection parameters which are designed for you to easily connect to the applications. You can find example files for each application and module in [CONFIGURATIONS.md](./CONFIGURATIONS.md) page.
 
-This file has to be in the root directory of the PicoLTE device's file system.
+This file has to be in the root directory of the Pico LTE device's file system.
+
+Please see the [Configure the Pico LTE SDK](https://docs.sixfab.com/docs/sixfab-pico-lte-micropython-sdk) page for more details.
 
 ## Contributing
 All contributions are welcome. You can find the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
