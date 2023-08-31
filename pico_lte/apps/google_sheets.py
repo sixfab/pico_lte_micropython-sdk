@@ -160,7 +160,6 @@ class GoogleSheets:
             function_params={
                 "header_mode": 1,
                 "data": header,
-                "fault_response": "403",
                 "timeout": 15,
             },
             cachable=True,
@@ -304,7 +303,6 @@ class GoogleSheets:
             function_params={
                 "header_mode": 1,
                 "data": header + payload,
-                "fault_response": "401",
                 "timeout": 15,
             },
             cachable=True,
@@ -453,7 +451,6 @@ class GoogleSheets:
             function_params={
                 "header_mode": 1,
                 "data": header + payload,
-                "fault_response": "401",
                 "timeout": 15,
             },
             cachable=True,
@@ -598,7 +595,6 @@ class GoogleSheets:
             function_params={
                 "header_mode": 1,
                 "data": header + payload,
-                "fault_response": "401",
                 "timeout": 15,
             },
             cachable=True,
@@ -750,7 +746,6 @@ class GoogleSheets:
             function_params={
                 "header_mode": 1,
                 "data": header,
-                "fault_response": "401",
                 "timeout": 15,
             },
             cachable=True,
