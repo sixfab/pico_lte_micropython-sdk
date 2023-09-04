@@ -40,19 +40,23 @@ class PicoLTE:
         self.atcom = ATCom()
 
         self.base = Base(self.atcom)
-        self.auth = Auth(self.atcom)
         self.file = File(self.atcom)
+        self.auth = Auth(self.atcom, self.file)
         self.network = Network(self.atcom, self.base)
         self.ssl = SSL(self.atcom)
         self.http = HTTP(self.atcom)
         self.mqtt = MQTT(self.atcom)
         self.gps = GPS(self.atcom)
 
-        self.aws = AWS(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
+        self.aws = AWS(
+            self.base, self.auth, self.network, self.ssl, self.mqtt, self.http
+        )
         self.telegram = Telegram(self.base, self.network, self.http)
         self.thingspeak = ThingSpeak(self.base, self.network, self.mqtt)
         self.slack = Slack(self.base, self.network, self.http)
-        self.azure = Azure(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
+        self.azure = Azure(
+            self.base, self.auth, self.network, self.ssl, self.mqtt, self.http
+        )
         self.scriptr = Scriptr(self.base, self.network, self.http)
 
         # Power up modem

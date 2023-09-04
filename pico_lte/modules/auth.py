@@ -15,12 +15,12 @@ class Auth:
     Class for including authentication functions of PicoLTE module.
     """
 
-    def __init__(self, atcom):
+    def __init__(self, atcom, file):
         """
         Constructor for Auth class.
         """
         self.atcom = atcom
-        self.file = File(atcom)
+        self.file = file
 
     def load_certificates(self):
         """
