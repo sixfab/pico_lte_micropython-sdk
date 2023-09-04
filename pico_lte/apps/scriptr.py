@@ -99,7 +99,7 @@ class Scriptr:
             fail="failure",
             function_params={"data": header + data, "header_mode": "1"},
             cachable=True,
-            interval=2,
+            interval=1,
         )
 
         step_read_response = Step(
@@ -107,7 +107,9 @@ class Scriptr:
             name="read_response",
             success="success",
             fail="failure",
-            function_params={"desired_response": "ok"},
+            function_params={"desired_response": '"status": "success"'},
+            retry=3,
+            interval=1,
         )
 
         function_name = "scriptr_io.send_data"
@@ -117,7 +119,6 @@ class Scriptr:
         sm.add_step(step_get_pdp_ready)
         sm.add_step(step_set_server_url)
         sm.add_step(step_post_request)
-        time.sleep(4)
         sm.add_step(step_read_response)
 
         while True:
