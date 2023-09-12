@@ -15,12 +15,12 @@ class Auth:
     Class for including authentication functions of PicoLTE module.
     """
 
-    def __init__(self, atcom):
+    def __init__(self, atcom, file):
         """
         Constructor for Auth class.
         """
         self.atcom = atcom
-        self.file = File(atcom)
+        self.file = file
 
     def load_certificates(self):
         """
@@ -39,6 +39,7 @@ class Auth:
 
         # If first run, upload the certificates to the modem
         if first_run:
+            del first_run
             try:
                 # delete old certificates if existed
                 self.file.delete_file_from_modem("/security/cacert.pem")
@@ -46,13 +47,18 @@ class Auth:
                 self.file.delete_file_from_modem("/security/user_key.pem")
                 # Upload new certificates
                 self.file.upload_file_to_modem("/security/cacert.pem", cacert)
+                del cacert
                 self.file.upload_file_to_modem("/security/client.pem", client_cert)
+                del client_cert
                 self.file.upload_file_to_modem("/security/user_key.pem", client_key)
+                del client_key
             except Exception as error:
                 debug.error("Error occured while uploading certificates", error)
                 return {"status": Status.ERROR, "response": str(error)}
 
-            debug.info("Certificates uploaded secure storage. Deleting from file system...")
+            debug.info(
+                "Certificates uploaded secure storage. Deleting from file system..."
+            )
             try:
                 os.remove("../cert/cacert.pem")
                 os.remove("../cert/client.pem")
@@ -82,10 +88,16 @@ class Auth:
 
             if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
                 debug.info("Certificates found in PicoLTE.")
-                return {"status": Status.SUCCESS, "response": "Certificates found in PicoLTE."}
+                return {
+                    "status": Status.SUCCESS,
+                    "response": "Certificates found in PicoLTE.",
+                }
             else:
                 debug.error("Certificates couldn't find in modem!")
-                return {"status": Status.ERROR, "response": "Certificates couldn't find in modem!"}
+                return {
+                    "status": Status.ERROR,
+                    "response": "Certificates couldn't find in modem!",
+                }
         else:
             debug.error("Error occured while getting certificates from modem!")
             return {
