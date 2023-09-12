@@ -22,4 +22,4 @@
 - Fix response related error of Scriptr app.
 - Fix memory allocation error while using Azure app.
 
-[0.2.1]: https://github.com/sixfab/pico_lte_micropython-sdk)https://github.com/sixfab/pico_lte_micropython-sdk
+[0.2.1]: https://github.com/sixfab/pico_lte_micropython-sdk/tree/0.2.1
