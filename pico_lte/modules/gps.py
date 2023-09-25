@@ -106,5 +106,35 @@ class GPS:
         result = self.atcom.send_at_comm(command, desired)
 
         if result["status"] == Status.SUCCESS:
-            return get_desired_data(result, desired, data_index=[1, 2])
+            data = get_desired_data(result, desired, data_index=[1, 2])
+            data["value"]["Lat-Lon"][0] = self.nmea_to_decimal(
+                data["value"]["Lat-Lon"][0]
+            )
+            data["value"]["Lat-Lon"][1] = self.nmea_to_decimal(
+                data["value"]["Lat-Lon"][1]
+            )
+            return data
         return result
+
+    def nmea_to_decimal(self, nmea_data):
+        """
+        Convert NMEA data to decimal.
+
+        Parameters
+        ----------
+        nmea_data : str
+            NMEA data to be converted to decimal.
+
+        Returns
+        -------
+        str
+            Converted decimal data in string format.
+        """
+        value = float(nmea_data[0:-1])
+        integer = int(value * 0.01)
+        degree = integer + ((value - (integer * 100)) / 60)
+
+        if nmea_data[-1] == "S" or nmea_data[-1] == "W":
+            degree *= -1.0
+
+        return str(degree)
