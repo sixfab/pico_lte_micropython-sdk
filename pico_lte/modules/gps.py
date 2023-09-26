@@ -107,12 +107,8 @@ class GPS:
 
         if result["status"] == Status.SUCCESS:
             data = get_desired_data(result, desired, data_index=[1, 2])
-            data["value"]["Lat-Lon"][0] = self.nmea_to_decimal(
-                data["value"]["Lat-Lon"][0]
-            )
-            data["value"]["Lat-Lon"][1] = self.nmea_to_decimal(
-                data["value"]["Lat-Lon"][1]
-            )
+            data["value"][0] = self.nmea_to_decimal(data["value"][0])
+            data["value"][1] = self.nmea_to_decimal(data["value"][1])
             return data
         return result
 
