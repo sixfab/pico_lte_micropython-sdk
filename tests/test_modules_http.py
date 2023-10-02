@@ -167,7 +167,9 @@ class TestHTTP:
 
     def test_set_auth_when_none_but_config_ok(self, mocker, http):
         """This method tests set_auth() with parameter from config."""
-        mocker.patch("pico_lte.modules.http.get_parameter", side_effect=["user", "pass"])
+        mocker.patch(
+            "pico_lte.modules.http.get_parameter", side_effect=["user", "pass"]
+        )
         mocking = TestHTTP.mock_send_at_comm(mocker, None)
         http.set_auth()
 
@@ -302,7 +304,9 @@ class TestHTTP:
         assert result == response_sequence[-1]
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_get_default_parameters_error_at_header(self, mocker, http, mocked_response):
+    def test_get_default_parameters_error_at_header(
+        self, mocker, http, mocked_response
+    ):
         """This method tests get() with its default parameters but with
         an ERROR return from the set_request_header_status() call.
         """
@@ -324,7 +328,11 @@ class TestHTTP:
 
         mocking.assert_any_call('AT+QHTTPCFG="requestheader",1')
         mocking.assert_any_call(
-            "AT+QHTTPGET=60,0,5", desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=60
+            "AT+QHTTPGET=60,0,5",
+            desired="CONNECT",
+            fault="+CME ERROR:",
+            urc=True,
+            timeout=60,
         )
         assert mocking.call_count == 3
         assert result == response_sequence[-1]
@@ -342,7 +350,11 @@ class TestHTTP:
 
         mocking.assert_any_call('AT+QHTTPCFG="requestheader",1')
         mocking.assert_any_call(
-            "AT+QHTTPGET=60,0,5", desired="CONNECT", fault="+CME ERROR:", urc=True, timeout=60
+            "AT+QHTTPGET=60,0,5",
+            desired="CONNECT",
+            fault="+CME ERROR:",
+            urc=True,
+            timeout=60,
         )
         assert mocking.call_count == 2
         assert result == response_sequence[-1]
@@ -383,7 +395,7 @@ class TestHTTP:
         mocking.assert_any_call(
             params[0],
             desired=[f"+QHTTPGET: 0,{desired}" for desired in params[3]],
-            fault=[f"+QHTTPGET: {fault}" for fault in params[4]] + ["+CME ERROR:"],
+            fault=[f"+QHTTPGET: 0,{fault}" for fault in params[4]] + ["+CME ERROR:"],
             urc=True,
             line_end=False,
             timeout=params[2],
@@ -482,7 +494,7 @@ class TestHTTP:
         mocking.assert_any_call(
             params[0],
             desired=[f"+QHTTPPOST: 0,{desired}" for desired in params[4]],
-            fault=[f"+QHTTPPOST: {fault}" for fault in params[5]] + ["+CME ERROR:"],
+            fault=[f"+QHTTPPOST: 0,{fault}" for fault in params[5]] + ["+CME ERROR:"],
             urc=True,
             line_end=False,
             timeout=params[3],
@@ -581,7 +593,7 @@ class TestHTTP:
         mocking.assert_any_call(
             params[0],
             desired=[f"+QHTTPPUT: 0,{desired}" for desired in params[4]],
-            fault=[f"+QHTTPPUT: {fault}" for fault in params[5]] + ["+CME ERROR:"],
+            fault=[f"+QHTTPPUT: 0,{fault}" for fault in params[5]] + ["+CME ERROR:"],
             urc=True,
             line_end=False,
             timeout=params[3],
@@ -622,8 +634,14 @@ class TestHTTP:
     @pytest.mark.parametrize(
         "response, expected",
         [
-            (["CONNECT", "answer", "OK", "+QHTTPREAD: 0"], ["answer", "OK", "+QHTTPREAD: 0"]),
-            (["CONNECT", "some", "OK", "+QHTTPREAD: 0"], ["some", "OK", "+QHTTPREAD: 0"]),
+            (
+                ["CONNECT", "answer", "OK", "+QHTTPREAD: 0"],
+                ["answer", "OK", "+QHTTPREAD: 0"],
+            ),
+            (
+                ["CONNECT", "some", "OK", "+QHTTPREAD: 0"],
+                ["some", "OK", "+QHTTPREAD: 0"],
+            ),
             (["OK", "+QHTTPREAD: 0"], ["OK", "+QHTTPREAD: 0"]),
         ],
     )
@@ -636,7 +654,9 @@ class TestHTTP:
         mocking.assert_called_once_with(
             "AT+QHTTPREAD=5",
             desired="+QHTTPREAD: 0",
-            fault=[f"+QHTTPREAD: {str(error_code)}" for error_code in range(701, 731, 1)],
+            fault=[
+                f"+QHTTPREAD: {str(error_code)}" for error_code in range(701, 731, 1)
+            ],
             urc=True,
             timeout=5,
         )
