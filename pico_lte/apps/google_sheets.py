@@ -894,9 +894,7 @@ class GoogleSheets:
         while True:
             result = sm.run()
             if result["status"] == Status.SUCCESS:
-                self.access_token = json.loads(result["response"][0] + '"}')[
-                    "access_token"
-                ]
+                self.access_token = json.loads(result["response"][0])["access_token"]
                 return {
                     "status": Status.SUCCESS,
                     "response": "Access token is generated.",
