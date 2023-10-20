@@ -101,7 +101,7 @@ class GPS:
             * "response" --> Response of the command
             * "value" --> [lat,lon] Location of the device
         """
-        command = "AT+QGPSLOC?"
+        command = "AT+QGPSLOC=2"
         desired = "+QGPSLOC: "
         result = self.atcom.send_at_comm(command, desired)
 
