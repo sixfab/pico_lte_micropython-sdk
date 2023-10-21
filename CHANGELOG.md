@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0] - 2023-10-21
+
+### Added
+
+- Add google sheets app.
+
+### Changed
+
+- Update gps output format as decimal.
+
+
 ## [0.2.1] - 2023-09-13
 
 ### Added
@@ -23,3 +34,4 @@
 - Fix memory allocation error while using Azure app.
 
 [0.2.1]: https://github.com/sixfab/pico_lte_micropython-sdk/tree/0.2.1
+[0.3.0]: https://github.com/sixfab/pico_lte_micropython-sdk/tree/0.3.0
