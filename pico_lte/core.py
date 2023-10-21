@@ -23,6 +23,7 @@ from pico_lte.apps.telegram import Telegram
 from pico_lte.apps.thingspeak import ThingSpeak
 from pico_lte.apps.azure import Azure
 from pico_lte.apps.scriptr import Scriptr
+from pico_lte.apps.google_sheets import GoogleSheets
 
 
 class PicoLTE:
@@ -58,6 +59,7 @@ class PicoLTE:
             self.base, self.auth, self.network, self.ssl, self.mqtt, self.http
         )
         self.scriptr = Scriptr(self.base, self.network, self.http)
+        self.google_sheets = GoogleSheets(self.base, self.network, self.http)
 
         # Power up modem
         if self.base.power_status() != 0:
