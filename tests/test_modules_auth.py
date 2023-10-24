@@ -17,7 +17,8 @@ class TestAuth:
     def auth(self):
         """It returns an Auth instance."""
         atcom = ATCom()
-        return Auth(atcom)
+        file = File(atcom)
+        return Auth(atcom, file)
 
     @staticmethod
     def prepare_mocked_functions(
@@ -36,7 +37,10 @@ class TestAuth:
             "response": simulation_data["file_name"],
         }
 
-        mocker.patch("pico_lte.modules.auth.read_file", side_effect=simulation_data["file_inside"])
+        mocker.patch(
+            "pico_lte.modules.auth.read_file",
+            side_effect=simulation_data["file_inside"],
+        )
         mocker.patch(
             "pico_lte.modules.file.File.delete_file_from_modem",
             return_value=None,
@@ -151,7 +155,9 @@ class TestAuth:
         result = auth.load_certificates()
 
         assert result["status"] == Status.ERROR
-        assert result["response"] == "Error occured while getting certificates from modem!"
+        assert (
+            result["response"] == "Error occured while getting certificates from modem!"
+        )
 
     def test_load_certificates_with_error_on_os_remove(self, mocker, auth):
         """This method tests load_certificates() method when it is the first try,

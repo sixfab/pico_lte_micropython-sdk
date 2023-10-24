@@ -4,6 +4,10 @@ cert/
 ### Configs
 config.json
 
+### MacOS
+pico_lte/.DS_Store
+.DS_Store
+
 ### VSCode Config
 .vscode/
 
@@ -180,3 +184,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+package-lock.json

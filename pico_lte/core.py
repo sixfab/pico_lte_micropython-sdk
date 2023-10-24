@@ -23,6 +23,7 @@ from pico_lte.apps.telegram import Telegram
 from pico_lte.apps.thingspeak import ThingSpeak
 from pico_lte.apps.azure import Azure
 from pico_lte.apps.scriptr import Scriptr
+from pico_lte.apps.google_sheets import GoogleSheets
 
 
 class PicoLTE:
@@ -40,20 +41,25 @@ class PicoLTE:
         self.atcom = ATCom()
 
         self.base = Base(self.atcom)
-        self.auth = Auth(self.atcom)
         self.file = File(self.atcom)
+        self.auth = Auth(self.atcom, self.file)
         self.network = Network(self.atcom, self.base)
         self.ssl = SSL(self.atcom)
         self.http = HTTP(self.atcom)
         self.mqtt = MQTT(self.atcom)
         self.gps = GPS(self.atcom)
 
-        self.aws = AWS(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
+        self.aws = AWS(
+            self.base, self.auth, self.network, self.ssl, self.mqtt, self.http
+        )
         self.telegram = Telegram(self.base, self.network, self.http)
         self.thingspeak = ThingSpeak(self.base, self.network, self.mqtt)
         self.slack = Slack(self.base, self.network, self.http)
-        self.azure = Azure(self.base, self.auth, self.network, self.ssl, self.mqtt, self.http)
+        self.azure = Azure(
+            self.base, self.auth, self.network, self.ssl, self.mqtt, self.http
+        )
         self.scriptr = Scriptr(self.base, self.network, self.http)
+        self.google_sheets = GoogleSheets(self.base, self.network, self.http)
 
         # Power up modem
         if self.base.power_status() != 0:
