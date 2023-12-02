@@ -257,7 +257,9 @@ class MQTT:
             ]
 
             if result["status"] == Status.SUCCESS:
-                result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
+                result = self.atcom.get_urc_response(
+                    desired_response, fault_responses, timeout=60
+                )
             return result
         return {"status": Status.ERROR, "response": "Missing parameters : host"}
 
@@ -301,7 +303,9 @@ class MQTT:
             result = self.atcom.get_urc_response(desired_response, timeout=60)
         return result
 
-    def connect_broker(self, client_id_string="PicoLTE", username=None, password=None, cid=0):
+    def connect_broker(
+        self, client_id_string=None, username=None, password=None, cid=0
+    ):
         """
         Function for connecting to MQTT broker. This function is used when a client requests a
         connection to the MQTT server. When a TCP/IP socket connection is established between
@@ -309,7 +313,7 @@ class MQTT:
 
         Parameters
         ----------
-        client_id_string : str, default: "PicoLTE"
+        client_id_string : str, default: None
             Client ID string. Maximum length: 23 bytes.
         username : str, default: None
             Username. Maximum length: 23 bytes.
@@ -327,6 +331,9 @@ class MQTT:
             username = get_parameter(["mqtts", "username"])
             password = get_parameter(["mqtts", "password"])
 
+        if client_id_string is None:
+            client_id_string = get_parameter(["mqtts", "client_id"], "PicoLTE")
+
         if username and password:
             command = f'AT+QMTCONN={cid},"{client_id_string}","{username}","{password}"'
         else:
@@ -337,7 +344,9 @@ class MQTT:
         if result["status"] == Status.SUCCESS:
             desired_response = f"+QMTCONN: {cid},0,0"
             fault_responses = [f"QMTSTAT: 0,{err_code}" for err_code in range(1, 8)]
-            result = self.atcom.get_urc_response(desired_response, fault_responses, timeout=60)
+            result = self.atcom.get_urc_response(
+                desired_response, fault_responses, timeout=60
+            )
         return result
 
     def is_connected_to_broker(self, cid=0):
@@ -436,7 +445,9 @@ class MQTT:
         command = f'AT+QMTUNS={cid},{message_id},"{topic}"'
         return self.atcom.send_at_comm(command)
 
-    def publish_message(self, payload, topic=None, qos=1, retain=0, message_id=1, cid=0):
+    def publish_message(
+        self, payload, topic=None, qos=None, retain=0, message_id=1, cid=0
+    ):
         """
         Function for publishing MQTT message. This function is used when a client requests
         a message to be published. This method uses data mode of the modem to send the message.
@@ -473,13 +484,18 @@ class MQTT:
         if topic is None:
             topic = get_parameter(["mqtts", "pub_topic"])
 
+        if qos is None:
+            qos = get_parameter(["mqtts", "pub_qos"], 1)
+
         if payload and topic:
             command = f'AT+QMTPUB={cid},{message_id},{qos},{retain},"{topic}"'
             result = self.atcom.send_at_comm(command, ">", urc=True)
 
             if result["status"] == Status.SUCCESS:
                 self.atcom.send_at_comm_once(payload, line_end=False)  # Send message
-                result = self.atcom.send_at_comm(self.CTRL_Z)  # Send end char --> CTRL+Z
+                result = self.atcom.send_at_comm(
+                    self.CTRL_Z
+                )  # Send end char --> CTRL+Z
             return result
         return {"response": "Missing parameter", "status": Status.ERROR}
 
