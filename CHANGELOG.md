@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2024-01-18
+
+### Added
+
+- Add MQTT examples.
+
+### Changed
+
+- Update MQTT module.
+
 ## [0.3.0] - 2023-10-21
 
 ### Added
@@ -35,3 +45,4 @@
 
 [0.2.1]: https://github.com/sixfab/pico_lte_micropython-sdk/tree/0.2.1
 [0.3.0]: https://github.com/sixfab/pico_lte_micropython-sdk/tree/0.3.0
+[0.4.0]: https://github.com/sixfab/pico_lte_micropython-sdk/tree//0.4.0
