@@ -1,5 +1,11 @@
 # Changelog
 
+## [VERSION] - DATE
+
+### Changed
+
+- Update HTTP examples.
+
 ## [0.4.0] - 2024-01-18
 
 ### Added
@@ -20,7 +26,6 @@
 
 - Update gps output format as decimal.
 
-
 ## [0.2.1] - 2023-09-13
 
 ### Added
@@ -36,7 +41,7 @@
 ### Removed
 
 - Delete I2C class initialization.
-- Remove ULP example. 
+- Remove ULP example.
 
 ### Fixed
 
