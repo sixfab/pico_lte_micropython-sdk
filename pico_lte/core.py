@@ -24,6 +24,7 @@ from pico_lte.apps.thingspeak import ThingSpeak
 from pico_lte.apps.azure import Azure
 from pico_lte.apps.scriptr import Scriptr
 from pico_lte.apps.google_sheets import GoogleSheets
+from pico_lte.apps.thingsboard import ThingsBoard
 
 
 class PicoLTE:
@@ -60,6 +61,7 @@ class PicoLTE:
         )
         self.scriptr = Scriptr(self.base, self.network, self.http)
         self.google_sheets = GoogleSheets(self.base, self.network, self.http)
+        self.thingsboard = ThingsBoard(self.base, self.network, self.mqtt)
 
         # Power up modem
         if self.base.power_status() != 0:
