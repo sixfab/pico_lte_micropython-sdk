@@ -17,7 +17,8 @@ class MongoDBAtlas:
     """
 
     def __init__(self, base, network, http):
-        """Constructor of the class.
+        """
+        Constructor of the class.
 
         Parameters
         ----------
@@ -72,6 +73,131 @@ class MongoDBAtlas:
                 return result
             time.sleep(result["interval"])
 
+    def base_http_function(
+        self,
+        function_name,
+        http_method,
+        url,
+        data,
+        desired_response,
+        username=None,
+        password=None,
+    ):
+        """
+        Base function for MongoDB Atlas HTTP requests.
+
+        Parameters
+        ----------
+        function_name: str
+            Name of the function.
+        http_method: str
+            HTTP method for the request.
+        url: str
+            URL for the request.
+        data: str
+            Data for the request.
+        desired_response: str
+            Desired response for the request.
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status" and "response" keys.
+        """
+
+        step_network_reg = Step(
+            function=self.network.register_network,
+            name="register_network",
+            success="get_pdp_ready",
+            fail="failure",
+        )
+
+        step_get_pdp_ready = Step(
+            function=self.network.get_pdp_ready,
+            name="get_pdp_ready",
+            success="set_server_url",
+            fail="failure",
+        )
+
+        step_set_server_url = Step(
+            function=self.http.set_server_url,
+            name="set_server_url",
+            success=(
+                "http_request" if username is None or password is None else "set_auth"
+            ),
+            fail="failure",
+            function_params={"url": url},
+        )
+
+        step_set_auth = Step(
+            function=self.http.set_auth,
+            name="set_auth",
+            success="http_request",
+            fail="failure",
+            function_params={"username": username, "password": password},
+        )
+
+        if http_method == "GET":
+            step_http_request = Step(
+                function=self.http.get,
+                name="http_request",
+                success="read_response",
+                fail="failure",
+                function_params={
+                    "header_mode": 1,
+                    "data": data,
+                },
+            )
+        elif http_method == "POST":
+            step_http_request = Step(
+                function=self.http.post,
+                name="http_request",
+                success="read_response",
+                fail="failure",
+                function_params={
+                    "header_mode": 1,
+                    "data": data,
+                },
+            )
+        elif http_method == "PUT":
+            step_http_request = Step(
+                function=self.http.put,
+                name="http_request",
+                success="read_response",
+                fail="failure",
+                function_params={
+                    "header_mode": 1,
+                    "data": data,
+                },
+            )
+        else:
+            return {"status": Status.ERROR, "response": "Invalid HTTP method."}
+
+        step_read_response = Step(
+            function=self.http.read_response,
+            name="read_response",
+            success="success",
+            fail="failure",
+            function_params={"desired_response": desired_response},
+        )
+
+        sm = StateManager(first_step=step_network_reg, function_name=function_name)
+
+        sm.add_step(step_network_reg)
+        sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_set_server_url)
+        sm.add_step(step_set_auth)
+        sm.add_step(step_http_request)
+        sm.add_step(step_read_response)
+
+        while True:
+            result = sm.run()
+            if result["status"] == Status.SUCCESS:
+                return result
+            elif result["status"] == Status.ERROR:
+                return result
+            time.sleep(result["interval"])
+
     def find_one(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
     ):
@@ -114,8 +240,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -128,65 +252,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.find_one", "POST", url, data, "document"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "document"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.find_one"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def find_many(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -225,12 +295,10 @@ class MongoDBAtlas:
             or api_key is None
         ):
             host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/find"
+            query = f"app/{app_id}/endpoint/data/v1/action/findMany"
             url = f"https://{host}/{query}"
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
-
-        payload = json.dumps(payload)
 
         header = "\n".join(
             [
@@ -244,65 +312,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.find_many", "POST", url, data, "document"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "documents"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.find_many"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def insert_one(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -346,8 +360,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -359,65 +371,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.insert_one", "POST", url, data, "insertedId"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "insertedId"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.insert_one"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def insert_many(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -461,8 +419,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -474,65 +430,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.insert_many", "POST", url, data, "insertedIds"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "insertedIds"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.insert_many"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def update_one(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -576,8 +478,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -589,65 +489,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.update_one", "POST", url, data, "matchedCount"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "matchedCount"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.update_one"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def update_many(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -691,8 +537,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -704,65 +548,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.update_many", "POST", url, data, "matchedCount"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "matchedCount"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.update_one"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def delete_one(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -806,8 +596,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -819,65 +607,11 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.delete_one", "POST", url, data, "deletedCount"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "deletedCount"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.delete_one"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
 
     def delete_many(
         self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
@@ -921,8 +655,6 @@ class MongoDBAtlas:
         else:
             debug.error("There are missing parameters for MongoDB Atlas.")
 
-        payload = json.dumps(payload)
-
         header = "\n".join(
             [
                 f"POST /{query} HTTP/1.1",
@@ -934,62 +666,8 @@ class MongoDBAtlas:
             ]
         )
 
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.delete_many", "POST", url, data, "deletedCount"
         )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="set_server_url",
-            fail="failure",
-        )
-
-        step_set_server_url = Step(
-            function=self.http.set_server_url,
-            name="set_server_url",
-            success="post_request",
-            fail="failure",
-            function_params={"url": url},
-        )
-
-        step_post_request = Step(
-            function=self.http.post,
-            name="post_request",
-            success="read_response",
-            fail="failure",
-            function_params={
-                "header_mode": 1,
-                "data": header + payload,
-            },
-        )
-
-        step_read_response = Step(
-            function=self.http.read_response,
-            name="read_response",
-            success="success",
-            fail="failure",
-            function_params={"desired_response": "deletedCount"},
-        )
-
-        # Add cache if it is not already existed
-        function_name = "mongodb_atlas.delete_many"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-        sm.add_step(step_set_server_url)
-        sm.add_step(step_post_request)
-        sm.add_step(step_read_response)
-
-        while True:
-            result = sm.run()
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
