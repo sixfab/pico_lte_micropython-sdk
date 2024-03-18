@@ -9,18 +9,16 @@ config.json file must include the following parameters for this example:
 
 config.json
 {
-    "hivemq": {
-        "mqtts":{
-            "url":"[YOUR_URL]",
-            "port": [PORT_NUMBER],
+	"hivemq": {
+		"mqtts":{
+			"url":"[YOUR_URL]",
+			"port": [PORT_NUMBER],
             "username": "[HIVEMQ_USERNAME]",
             "password": "[HIVEMQ_PASSWORD]",
-            "sub_topics": [
-                    ["[YOUR_MQTT_TOPIC_1]",
-                    ["[YOUR_MQTT_TOPIC_2]",
-                    ...
-                ]
-         }
+			"sub_topics": [
+					["YOUR_MQTT_TOPIC", QOS]
+			]
+		}
     }
 }
 """
