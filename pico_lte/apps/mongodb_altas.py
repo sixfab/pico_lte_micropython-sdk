@@ -671,3 +671,98 @@ class MongoDBAtlas:
         return self.base_http_function(
             "mongodb_atlas.delete_many", "POST", url, data, "deletedCount"
         )
+
+    def create_cluster(self, payload, groupId=None, username=None, password=None):
+        """
+        Function for creating a cluster in MongoDB Atlas.
+
+        Parameters
+        ----------
+        payload: dict
+            Payload for the request.
+        groupId: str
+            Group ID of the MongoDB Atlas Project.
+        username: str
+            Username of the MongoDB Atlas.
+        password: str
+            Password of the MongoDB Atlas.
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status" and "response" keys.
+        """
+
+        groupId = get_parameter(["mongodb_atlas", "groupId"])
+        username = get_parameter(["mongodb_atlas", "username"])
+        password = get_parameter(["mongodb_atlas", "password"])
+
+        if not (groupId is None or username is None or password is None):
+            host = "cloud.mongodb.com"
+            query = f"api/atlas/v2/groups/{groupId}/clusters"
+            url = f"https://{host}/{query}"
+        else:
+            debug.error("There are missing parameters for MongoDB Atlas.")
+
+        header = "\n".join(
+            [
+                f"POST /{query} HTTP/1.1",
+                f"Host: {host}",
+                "Content-Type: application/json",
+                "Accept: application/vnd.atlas.2023-01-01+json",
+                f"Content-Length: {len(payload)+1}",
+                "\n\n",
+            ]
+        )
+
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.create_cluster", "POST", url, data, "id", username, password
+        )
+
+    def create_project(self, payload, username=None, password=None):
+        """
+        Function for creating a project in MongoDB Atlas.
+
+        Parameters
+        ----------
+        payload: dict
+            Payload for the request.
+        username: str
+            Username of the MongoDB Atlas.
+        password: str
+            Password of the MongoDB Atlas.
+
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status" and "response" keys.
+        """
+
+        username = get_parameter(["mongodb_atlas", "username"])
+        password = get_parameter(["mongodb_atlas", "password"])
+
+        if not (username is None or password is None):
+            host = "cloud.mongodb.com"
+            query = "api/atlas/v2/groups"
+            url = f"https://{host}/{query}"
+        else:
+            debug.error("There are missing parameters for MongoDB Atlas.")
+
+        header = "\n".join(
+            [
+                f"POST /{query} HTTP/1.1",
+                f"Host: {host}",
+                "Content-Type: application/json",
+                "Accept: application/vnd.atlas.2023-01-01+json",
+                f"Content-Length: {len(payload)+1}",
+                "\n\n",
+            ]
+        )
+
+        data = header + json.dumps(payload)
+
+        return self.base_http_function(
+            "mongodb_atlas.create_project", "POST", url, data, "id", username, password
+        )
