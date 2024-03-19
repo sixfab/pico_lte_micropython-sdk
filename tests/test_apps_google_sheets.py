@@ -174,7 +174,7 @@ class TestGoogleSheets:
             "pico_lte.utils.manager.StateManager.run",
             return_value={
                 "status": Status.SUCCESS,
-                "response": ['{"access_token": "[ACCESS_TOKEN]'],
+                "response": ['{"access_token": "[ACCESS_TOKEN]"}'],
             },
         )
 
