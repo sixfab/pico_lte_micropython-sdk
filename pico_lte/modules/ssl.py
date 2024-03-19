@@ -214,7 +214,7 @@ class SSL:
         ssl_context_id : int, default: 2
             SSL context identifier
 
-        sni : int, default: 1
+        sni : int, default: 0
             Server Name Indication
             * 0 --> Disable
             * 1 --> Enable
