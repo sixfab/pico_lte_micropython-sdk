@@ -207,7 +207,7 @@ class SSL:
 
     def set_sni(self, ssl_context_id=2, sni=0):
         """
-        Function for setting Server Name Indication feature as enabled or disabled
+        Function for setting Server Name Indication (SNI) feature as enabled or disabled
 
         Parameters
         ----------
