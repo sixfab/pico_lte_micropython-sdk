@@ -31,9 +31,7 @@ class TestSSL:
     @staticmethod
     def mock_send_at_comm(mocker, responses_to_return):
         """This is a wrapper function to repeated long mocker.patch() statements."""
-        return mocker.patch(
-            "pico_lte.utils.atcom.ATCom.send_at_comm", return_value=responses_to_return
-        )
+        return mocker.patch("pico_lte.utils.atcom.ATCom.send_at_comm", return_value=responses_to_return)
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
     def test_set_ca_cert_with_default_parameters(self, mocker, ssl, mocked_response):
@@ -54,22 +52,16 @@ class TestSSL:
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_client_cert_with_default_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_client_cert_with_default_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_ca_cert() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_client_cert()
 
-        mocking.assert_called_once_with(
-            'AT+QSSLCFG="clientcert",2,"/security/client.pem"'
-        )
+        mocking.assert_called_once_with('AT+QSSLCFG="clientcert",2,"/security/client.pem"')
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_client_cert_with_different_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_client_cert_with_different_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_ca_cert() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_client_cert(1, "some/path.crt")
@@ -83,15 +75,11 @@ class TestSSL:
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_client_key()
 
-        mocking.assert_called_once_with(
-            'AT+QSSLCFG="clientkey",2,"/security/user_key.pem"'
-        )
+        mocking.assert_called_once_with('AT+QSSLCFG="clientkey",2,"/security/user_key.pem"')
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_client_key_with_different_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_client_key_with_different_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_ca_cert() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_client_key(1, "some/path.crt")
@@ -109,9 +97,7 @@ class TestSSL:
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_sec_level_with_different_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_sec_level_with_different_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_sec_level() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_sec_level(1, 3)
@@ -138,9 +124,7 @@ class TestSSL:
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_cipher_suite_with_default_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_cipher_suite_with_default_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_cipher_suite() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_cipher_suite()
@@ -149,9 +133,7 @@ class TestSSL:
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_cipher_suite_with_different_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_cipher_suite_with_different_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_cipher_suite() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_cipher_suite(1, "0X0004")
@@ -160,9 +142,7 @@ class TestSSL:
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_ignore_local_time_with_default_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_ignore_local_time_with_default_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_ignore_local_time() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_ignore_local_time()
@@ -171,9 +151,7 @@ class TestSSL:
         assert result == mocked_response
 
     @pytest.mark.parametrize("mocked_response", default_response_types())
-    def test_set_ignore_local_time_with_different_parameters(
-        self, mocker, ssl, mocked_response
-    ):
+    def test_set_ignore_local_time_with_different_parameters(self, mocker, ssl, mocked_response):
         """This method tests set_ignore_local_time() with its default parameters."""
         mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
         result = ssl.set_ignore_local_time(1, 2)
