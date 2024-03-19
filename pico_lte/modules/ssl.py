@@ -205,6 +205,28 @@ class SSL:
         command = f'AT+QSSLCFG="ignorelocaltime",{ssl_context_id},{ignore_local_time}'
         return self.atcom.send_at_comm(command)
 
+    def set_sni(self, ssl_context_id=2, sni=0):
+        """
+        Function for setting Server Name Indication feature as enabled or disabled
+
+        Parameters
+        ----------
+        ssl_context_id : int, default: 2
+            SSL context identifier
+
+        sni : int, default: 1
+            Server Name Indication
+            * 0 --> Disable
+            * 1 --> Enable
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
+        """
+        command = f'AT+QSSLCFG="sni",{ssl_context_id},{sni}'
+        return self.atcom.send_at_comm(command)
+
     def configure_for_x509_certification(self):
         """
         Function for configuring the modem for X.509 certification.
