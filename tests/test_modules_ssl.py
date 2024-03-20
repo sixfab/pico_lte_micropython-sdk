@@ -159,6 +159,24 @@ class TestSSL:
         mocking.assert_called_once_with('AT+QSSLCFG="ignorelocaltime",1,2')
         assert result == mocked_response
 
+    @pytest.mark.parametrize("mocked_response", default_response_types())
+    def test_set_sni_enable(self, mocker, ssl, mocked_response):
+        """This method tests set_sni() with its default parameters."""
+        mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
+        result = ssl.set_sni(1, 1)
+
+        mocking.assert_called_once_with('AT+QSSLCFG="sni",1,1')
+        assert result == mocked_response
+
+    @pytest.mark.parametrize("mocked_response", default_response_types())
+    def test_set_sni_disable(self, mocker, ssl, mocked_response):
+        """This method tests set_sni() with its default parameters."""
+        mocking = TestSSL.mock_send_at_comm(mocker, mocked_response)
+        result = ssl.set_sni(1, 0)
+
+        mocking.assert_called_once_with('AT+QSSLCFG="sni",1,0')
+        assert result == mocked_response
+
     def test_configure_for_x509_certification_all_success_case(self, mocker, ssl):
         """This method tests the state manager with mocking ATCom, and checks if
         they all called.
