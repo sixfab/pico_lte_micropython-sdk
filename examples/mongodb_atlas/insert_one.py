@@ -1,5 +1,5 @@
 """
-Example code for finding a document in MongoDB Atlas with using its Data API.
+Example code for inserting a document in MongoDB Atlas with using its Data API.
 
 Example Configuration
 ---------------------
@@ -26,12 +26,16 @@ payload = {
     "dataSource": "PicoLTE",
     "database": "sample_mflix",
     "collection": "comments",
-    "filter": {"_id": {"$oid": "5a9427648b0beebeb6957ec9"}},
-    "projection": {"name": 1, "movie_id": 1, "text": 1},
+    "document": {
+        "name": "John Bishop",
+        "email": "john_bishop@fakegmail.com",
+        "movie_id": {"$oid": "573a1390f29313caabcd446f"},
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla in.",
+    },
 }
 
 payload = json.dumps(payload)
 
 debug.info("Network Registration...")
-result = picoLTE.mongodb_atlas.find_one(payload)
+result = picoLTE.mongodb_atlas.insert_one(payload)
 debug.info("Result:", result)
