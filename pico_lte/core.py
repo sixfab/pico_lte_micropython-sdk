@@ -62,7 +62,7 @@ class PicoLTE:
         )
         self.scriptr = Scriptr(self.base, self.network, self.http)
         self.google_sheets = GoogleSheets(self.base, self.network, self.http)
-        self.mongodb_atlas = MongoDBAtlas(self.base, self.network, self.http)
+        self.mongodb_atlas = MongoDBAtlas(self.base, self.network, self.http, self.ssl)
 
         # Power up modem
         if self.base.power_status() != 0:

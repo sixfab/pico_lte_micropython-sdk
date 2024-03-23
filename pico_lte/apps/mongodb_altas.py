@@ -3,7 +3,6 @@ Module for including functions of MongoDB Atlas for for PicoLTE module.
 """
 
 import time
-import json
 
 from pico_lte.common import debug
 from pico_lte.utils.manager import StateManager, Step
@@ -16,7 +15,7 @@ class MongoDBAtlas:
     Class for including functions of MongoDB Atlas operations for PicoLTE module.
     """
 
-    def __init__(self, base, network, http):
+    def __init__(self, base, network, http, ssl):
         """
         Constructor of the class.
 
@@ -28,60 +27,22 @@ class MongoDBAtlas:
             PicoLTE Network class
         http : HTTP
             PicoLTE HTTP class
+        ssl : SSL
+            PicoLTE SSL class
         """
         self.base = base
         self.network = network
         self.http = http
-
-    def set_network(self):
-        """
-        Function includes network configurations for tcp/ip connection.
-
-        Returns
-        -------
-        dict
-            Result dictionary that contains "status and ""response" keys.
-        """
-
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
-            fail="failure",
-        )
-
-        step_get_pdp_ready = Step(
-            function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
-            success="success",
-            fail="failure",
-        )
-
-        function_name = "set_network"
-
-        sm = StateManager(first_step=step_network_reg, function_name=function_name)
-
-        sm.add_step(step_network_reg)
-        sm.add_step(step_get_pdp_ready)
-
-        while True:
-            result = sm.run()
-
-            if result["status"] == Status.SUCCESS:
-                return result
-            elif result["status"] == Status.ERROR:
-                return result
-            time.sleep(result["interval"])
+        self.ssl = ssl
 
     def base_http_function(
         self,
         function_name,
-        http_method,
-        url,
-        data,
+        base_url,
+        endpoint,
+        api_key,
+        payload,
         desired_response,
-        username=None,
-        password=None,
     ):
         """
         Base function for MongoDB Atlas HTTP requests.
@@ -105,6 +66,30 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
+        base_url = get_parameter(["mongodb_atlas", "base_url"])
+        api_key = get_parameter(["mongodb_atlas", "api_key"])
+
+        url = base_url + endpoint
+
+        if (url is not None) and (api_key is not None):
+            temp_url = url.replace("https://", "")
+            index = temp_url.find("/") if temp_url.find("/") != -1 else len(temp_url)
+            host = temp_url[:index]
+            query = temp_url[index:]
+        else:
+            debug.error("There are missing parameters for MongoDB Atlas.")
+
+        header = "\n".join(
+            [
+                f"POST {query} HTTP/1.1",
+                f"Host: {host}",
+                "Content-Type: application/json",
+                f"Content-Length: {len(payload)+1}",
+                f"apiKey: {api_key}",
+                "\n\n",
+            ]
+        )
+
         step_network_reg = Step(
             function=self.network.register_network,
             name="register_network",
@@ -115,63 +100,44 @@ class MongoDBAtlas:
         step_get_pdp_ready = Step(
             function=self.network.get_pdp_ready,
             name="get_pdp_ready",
+            success="http_ssl_configuration",
+            fail="failure",
+        )
+
+        step_http_ssl_configuration = Step(
+            function=self.http.set_ssl_context_id,
+            name="http_ssl_configuration",
+            success="set_sni",
+            fail="failure",
+            function_params={"cid": 1},
+        )
+
+        step_set_sni = Step(
+            function=self.ssl.set_sni,
+            name="set_sni",
             success="set_server_url",
             fail="failure",
+            function_params={"ssl_context_id": 1, "sni": 1},
         )
 
         step_set_server_url = Step(
             function=self.http.set_server_url,
             name="set_server_url",
-            success=(
-                "http_request" if username is None or password is None else "set_auth"
-            ),
+            success="post_request",
             fail="failure",
             function_params={"url": url},
         )
 
-        step_set_auth = Step(
-            function=self.http.set_auth,
-            name="set_auth",
-            success="http_request",
+        step_post_request = Step(
+            function=self.http.post,
+            name="post_request",
+            success="read_response",
             fail="failure",
-            function_params={"username": username, "password": password},
+            function_params={
+                "header_mode": 1,
+                "data": header + payload,
+            },
         )
-
-        if http_method == "GET":
-            step_http_request = Step(
-                function=self.http.get,
-                name="http_request",
-                success="read_response",
-                fail="failure",
-                function_params={
-                    "header_mode": 1,
-                    "data": data,
-                },
-            )
-        elif http_method == "POST":
-            step_http_request = Step(
-                function=self.http.post,
-                name="http_request",
-                success="read_response",
-                fail="failure",
-                function_params={
-                    "header_mode": 1,
-                    "data": data,
-                },
-            )
-        elif http_method == "PUT":
-            step_http_request = Step(
-                function=self.http.put,
-                name="http_request",
-                success="read_response",
-                fail="failure",
-                function_params={
-                    "header_mode": 1,
-                    "data": data,
-                },
-            )
-        else:
-            return {"status": Status.ERROR, "response": "Invalid HTTP method."}
 
         step_read_response = Step(
             function=self.http.read_response,
@@ -185,9 +151,10 @@ class MongoDBAtlas:
 
         sm.add_step(step_network_reg)
         sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_http_ssl_configuration)
+        sm.add_step(step_set_sni)
         sm.add_step(step_set_server_url)
-        sm.add_step(step_set_auth)
-        sm.add_step(step_http_request)
+        sm.add_step(step_post_request)
         sm.add_step(step_read_response)
 
         while True:
@@ -198,22 +165,16 @@ class MongoDBAtlas:
                 return result
             time.sleep(result["interval"])
 
-    def find_one(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def find_one(self, payload, base_url=None, api_key=None):
         """
         Function for finding a document in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -223,57 +184,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            or cloud_provider is None
-            or app_id is None
-            or api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/findOne"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Custom-Header-Name: Custom-Data",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.find_one", "POST", url, data, "document"
+            function_name="mongodb_atlas.find_one",
+            base_url=base_url,
+            endpoint="/action/findOne",
+            api_key=api_key,
+            payload=payload,
+            desired_response="document",
         )
 
-    def find_many(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def find_many(self, payload, base_url=None, api_key=None):
         """
         Function for finding multiple documents in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -283,57 +212,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            or cloud_provider is None
-            or app_id is None
-            or api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/findMany"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Custom-Header-Name: Custom-Data",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.find_many", "POST", url, data, "document"
+            function_name="mongodb_atlas.find_many",
+            base_url=base_url,
+            endpoint="/action/find",
+            api_key=api_key,
+            payload=payload,
+            desired_response="documents",
         )
 
-    def insert_one(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def insert_one(self, payload, base_url=None, api_key=None):
         """
         Function for inserting a document in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -343,56 +240,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            and cloud_provider is None
-            and app_id is None
-            and api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/insertOne"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.insert_one", "POST", url, data, "insertedId"
+            function_name="mongodb_atlas.insert_one",
+            base_url=base_url,
+            endpoint="/action/insertOne",
+            api_key=api_key,
+            payload=payload,
+            desired_response="insertedId",
         )
 
-    def insert_many(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def insert_many(self, payload, base_url=None, api_key=None):
         """
         Function for inserting multiple documents in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -402,56 +268,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            and cloud_provider is None
-            and app_id is None
-            and api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/insertMany"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.insert_many", "POST", url, data, "insertedIds"
+            function_name="mongodb_atlas.insert_many",
+            base_url=base_url,
+            endpoint="/action/insertMany",
+            api_key=api_key,
+            payload=payload,
+            desired_response="insertedIds",
         )
 
-    def update_one(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def update_one(self, payload, base_url=None, api_key=None):
         """
-        Function for update a document in MongoDB Atlas.
+        Function for updating a document in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -461,56 +296,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            and cloud_provider is None
-            and app_id is None
-            and api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/updateOne"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.update_one", "POST", url, data, "matchedCount"
+            function_name="mongodb_atlas.update_one",
+            base_url=base_url,
+            endpoint="/action/updateOne",
+            api_key=api_key,
+            payload=payload,
+            desired_response="matchedCount",
         )
 
-    def update_many(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def update_many(self, payload, base_url=None, api_key=None):
         """
         Function for updating multiple documents in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -520,56 +324,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            and cloud_provider is None
-            and app_id is None
-            and api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/updateMany"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.update_many", "POST", url, data, "matchedCount"
+            function_name="mongodb_atlas.update_many",
+            base_url=base_url,
+            endpoint="/action/updateMany",
+            api_key=api_key,
+            payload=payload,
+            desired_response="matchedCount",
         )
 
-    def delete_one(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def delete_one(self, payload, base_url=None, api_key=None):
         """
         Function for deleting a document in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -579,56 +352,25 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            and cloud_provider is None
-            and app_id is None
-            and api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/deleteOne"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.delete_one", "POST", url, data, "deletedCount"
+            function_name="mongodb_atlas.delete_one",
+            base_url=base_url,
+            endpoint="/action/deleteOne",
+            api_key=api_key,
+            payload=payload,
+            desired_response="deletedCount",
         )
 
-    def delete_many(
-        self, payload, region=None, cloud_provider=None, app_id=None, api_key=None
-    ):
+    def delete_many(self, payload, base_url=None, api_key=None):
         """
         Function for deleting multiple documents in MongoDB Atlas.
 
         Parameters
         ----------
-        payload: dict
-            Payload for the request.
-        region: str
-            Region of the MongoDB Atlas.
-        cloud_provider: str
-            Cloud provider of the MongoDB Atlas.
-        app_id: str
-            Application ID of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
         api_key: str
             API key of the MongoDB Atlas.
 
@@ -638,131 +380,11 @@ class MongoDBAtlas:
             Result dictionary that contains "status" and "response" keys.
         """
 
-        region = get_parameter(["mongodb_atlas", "region"])
-        cloud_provider = get_parameter(["mongodb_atlas", "cloud_provider"])
-        app_id = get_parameter(["mongodb_atlas", "app_id"])
-        api_key = get_parameter(["mongodb_atlas", "api_key"])
-
-        if not (
-            region is None
-            and cloud_provider is None
-            and app_id is None
-            and api_key is None
-        ):
-            host = f"{region}.{cloud_provider}.data.mongodb-api.com"
-            query = f"app/{app_id}/endpoint/data/v1/action/deleteMany"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                f"Content-Length: {len(payload)+1}",
-                f"apiKey: {api_key}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
         return self.base_http_function(
-            "mongodb_atlas.delete_many", "POST", url, data, "deletedCount"
-        )
-
-    def create_cluster(self, payload, groupId=None, username=None, password=None):
-        """
-        Function for creating a cluster in MongoDB Atlas.
-
-        Parameters
-        ----------
-        payload: dict
-            Payload for the request.
-        groupId: str
-            Group ID of the MongoDB Atlas Project.
-        username: str
-            Username of the MongoDB Atlas.
-        password: str
-            Password of the MongoDB Atlas.
-
-        Returns
-        -------
-        dict
-            Result dictionary that contains "status" and "response" keys.
-        """
-
-        groupId = get_parameter(["mongodb_atlas", "groupId"])
-        username = get_parameter(["mongodb_atlas", "username"])
-        password = get_parameter(["mongodb_atlas", "password"])
-
-        if not (groupId is None or username is None or password is None):
-            host = "cloud.mongodb.com"
-            query = f"api/atlas/v2/groups/{groupId}/clusters"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                "Accept: application/vnd.atlas.2023-01-01+json",
-                f"Content-Length: {len(payload)+1}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
-        return self.base_http_function(
-            "mongodb_atlas.create_cluster", "POST", url, data, "id", username, password
-        )
-
-    def create_project(self, payload, username=None, password=None):
-        """
-        Function for creating a project in MongoDB Atlas.
-
-        Parameters
-        ----------
-        payload: dict
-            Payload for the request.
-        username: str
-            Username of the MongoDB Atlas.
-        password: str
-            Password of the MongoDB Atlas.
-
-        Returns
-        -------
-        dict
-            Result dictionary that contains "status" and "response" keys.
-        """
-
-        username = get_parameter(["mongodb_atlas", "username"])
-        password = get_parameter(["mongodb_atlas", "password"])
-
-        if not (username is None or password is None):
-            host = "cloud.mongodb.com"
-            query = "api/atlas/v2/groups"
-            url = f"https://{host}/{query}"
-        else:
-            debug.error("There are missing parameters for MongoDB Atlas.")
-
-        header = "\n".join(
-            [
-                f"POST /{query} HTTP/1.1",
-                f"Host: {host}",
-                "Content-Type: application/json",
-                "Accept: application/vnd.atlas.2023-01-01+json",
-                f"Content-Length: {len(payload)+1}",
-                "\n\n",
-            ]
-        )
-
-        data = header + json.dumps(payload)
-
-        return self.base_http_function(
-            "mongodb_atlas.create_project", "POST", url, data, "id", username, password
+            function_name="mongodb_atlas.delete_many",
+            base_url=base_url,
+            endpoint="/action/deleteMany",
+            api_key=api_key,
+            payload=payload,
+            desired_response="deletedCount",
         )
