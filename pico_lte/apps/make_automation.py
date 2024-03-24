@@ -3,8 +3,8 @@ Module for including functions of Make.com automations.
 '''
 
 import time
-import json
 
+from pico_lte.common import config
 from pico_lte.utils.manager import StateManager, Step
 from pico_lte.utils.status import Status
 from pico_lte.utils.helpers import get_parameter
@@ -14,7 +14,9 @@ class MakeAutomation:
     Class for including MakeAutomation functions.
     """
 
-    def __init__(self, base, network, http):
+    cache = config["cache"]
+
+    def __init__(self, base, network, http, ssl):
         """Constructor of the class.
 
         Parameters
@@ -25,24 +27,32 @@ class MakeAutomation:
             PicoLTE Network class
         http : HTTP
             PicoLTE HTTP class
+        ssl : SSL
+            PicoLTE SSL class
         """
         self.base = base
         self.network = network
         self.http = http
+        self.ssl = ssl
 
-    def send_data(self, message=None):
-        """This function sends data to Make.com.
+    def send_data(self, payload, host=None):
+        """
+        Function for sending data to Make.com.
 
         Parameters
         ----------
         message : str
-            Data to send.
+            Json for sending data to the MakeAutomation
+        host: str
+            MakeAutomation webhook URL. 
+            
+        Returns
+        -------
+        dict
+            Result dictionary that contains "status" and "message" keys.
         """
-        url = get_parameter(["make_automation", "url"])
-        print(url)
-
-        payload_json = {"text": message}
-        payload = json.dumps(payload_json)
+        if host is None:
+            url = get_parameter(["make_automation", "url"])
 
         step_register_network = Step(
             name="register_network",
@@ -55,8 +65,16 @@ class MakeAutomation:
         step_prepare_pdp = Step(
             name="prepare_pdp",
             function=self.network.get_pdp_ready,
+            success="set_sni",
+            fail="failure",
+        )
+
+        step_set_sni = Step(
+            name="set_sni",
+            function=self.ssl.set_sni,
             success="set_server_url",
             fail="failure",
+            function_params={"ssl_context_id": 1, "sni": 1}
         )
 
         step_set_server_url = Step(
@@ -91,18 +109,16 @@ class MakeAutomation:
             function=self.http.read_response,
             success="success",
             fail="failure",
-            function_params={
-                "desired_response": ["200"],
-                "fault_response":["404"]
-            },
         )
 
+        # Add cache if it is not already existed
         function_name = "make_automation.send_data"
 
         state_manager = StateManager(first_step=step_register_network, function_name=function_name)
 
         state_manager.add_step(step_register_network)
         state_manager.add_step(step_prepare_pdp)
+        state_manager.add_step(step_set_sni)
         state_manager.add_step(step_set_server_url)
         state_manager.add_step(step_set_content_type)
         state_manager.add_step(step_post_request)
@@ -116,4 +132,3 @@ class MakeAutomation:
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
-
