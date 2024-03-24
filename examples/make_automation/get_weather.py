@@ -27,3 +27,4 @@ payload = json.dumps(payload_json)
 debug.info("The weather forecast for tomorrow is being sent to Telegram.")
 result = picoLTE.make_automation.send_data(payload)
 debug.info("Result: ", result)
+
