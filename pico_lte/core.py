@@ -25,7 +25,7 @@ from pico_lte.apps.thingspeak import ThingSpeak
 from pico_lte.apps.azure import Azure
 from pico_lte.apps.scriptr import Scriptr
 from pico_lte.apps.google_sheets import GoogleSheets
-from pico_lte.apps.mongodb_altas import MongoDBAtlas
+from pico_lte.apps.mongodb_atlas import MongoDBAtlas
 
 
 class PicoLTE:
