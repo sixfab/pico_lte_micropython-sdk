@@ -41,8 +41,8 @@ class MakeAutomation:
 
         Parameters
         ----------
-        message : str
-            Json for sending data to the MakeAutomation
+        payload : str
+            Json payload for sending data to the MakeAutomation.
         host: str
             MakeAutomation webhook URL. 
             

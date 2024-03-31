@@ -1,5 +1,5 @@
 """
-Example code to send weather forecast to Telegram using Make Automation.
+Example code to get weather forecast with using Make Automation.
 
 Example Configuration
 ---------------------
@@ -17,14 +17,11 @@ import json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-debug.set_level(0)
-
 picoLTE = PicoLTE()
 
 payload_json = {"City": "Adana"}
 payload = json.dumps(payload_json)
 
-debug.info("The weather forecast for tomorrow is being sent to Telegram.")
+debug.info("Getting the forecast for tomorrow.")
 result = picoLTE.make_automation.send_data(payload)
 debug.info("Result: ", result)
-

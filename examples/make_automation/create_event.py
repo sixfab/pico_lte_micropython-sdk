@@ -17,16 +17,13 @@ import json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
-debug.set_level(0)
-
 picoLTE = PicoLTE()
 
 payload_json = {"Name": "Meeting with someone.",
-                "Start_Date": "27.03.2024 09:15",
+                "Start_Date": "31.03.2024 09:15",
                 "Duration": "01:30"}
 payload = json.dumps(payload_json)
 
 debug.info("Setting event on Google Calendar.")
 result = picoLTE.make_automation.send_data(payload)
 debug.info("Result: ", result)
-
