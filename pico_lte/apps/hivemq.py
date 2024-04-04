@@ -17,7 +17,7 @@ class HiveMQ:
 
     cache = config["cache"]
 
-    def __init__(self, base, network, mqtt):
+    def __init__(self, base, auth, network, ssl, mqtt):
         """Constructor of the class.
 
         Parameters
@@ -30,11 +30,13 @@ class HiveMQ:
             Modem MQTT instance
         """
         self.base = base
+        self.auth = auth
         self.network = network
+        self.ssl = ssl
         self.mqtt = mqtt
 
     def publish_message(
-        self, payload, host=None, port=None, topic=None, username=None, password=None
+        self, payload, host=None, port=None, topic=None, client_id=None, username=None, password=None
     ):
         """
         Function for publishing a message to HiveMQ by using MQTT.
@@ -68,6 +70,9 @@ class HiveMQ:
 
         if username is None:
             username = get_parameter(["hivemq", "mqtts", "username"])
+            
+        if client_id is None:
+            client_id = get_parameter(["hivemq", "mqtts", "client_id"])
 
         if password is None:
             password = get_parameter(["hivemq", "mqtts", "password"])
@@ -88,19 +93,55 @@ class HiveMQ:
             function=self.mqtt.has_opened_connection,
             name="check_opened",
             success="connect_mqtt_broker",
-            fail="register_network",
+            fail="deactivate_pdp_context",
         )
-
-        step_network_reg = Step(
-            function=self.network.register_network,
-            name="register_network",
-            success="get_pdp_ready",
+        
+        step_deactivate_pdp_context = Step(
+            function=self.network.deactivate_pdp_context,
+            name="deactivate_pdp_context",
+            success="load_certificates",
             fail="failure",
         )
 
-        step_pdp_ready = Step(
+        step_load_certificates = Step(
+            function=self.auth.load_certificates,
+            name="load_certificates",
+            success="register_network",
+            fail="failure",
+        )
+        
+        step_network_reg = Step(
+            function=self.network.register_network,
+            name="register_network",
+            success="get_ready_pdp",
+            fail="failure",
+        )
+
+        step_get_pdp_ready = Step(
             function=self.network.get_pdp_ready,
-            name="get_pdp_ready",
+            name="get_ready_pdp",
+            success="ssl_configuration",
+            fail="failure",
+        )
+
+        step_ssl_configuration = Step(
+            function=self.ssl.configure_for_x509_certification,
+            name="ssl_configuration",
+            success="set_mqtt_version",
+            fail="failure",
+            cachable=True,
+        )
+
+        step_set_mqtt_version = Step(
+            function=self.mqtt.set_version_config,
+            name="set_mqtt_version",
+            success="set_mqtt_ssl_mode",
+            fail="failure",
+        )
+
+        step_set_mqtt_ssl_mode = Step(
+            function=self.mqtt.set_ssl_mode_config,
+            name="set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
@@ -111,7 +152,13 @@ class HiveMQ:
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
-            interval=1,
+        )
+
+        step_connect_mqtt_broker = Step(
+            function=self.mqtt.connect_broker,
+            name="connect_mqtt_broker",
+            success="publish_message",
+            fail="failure",
         )
 
         step_connect_mqtt_broker = Step(
@@ -120,6 +167,7 @@ class HiveMQ:
             success="publish_message",
             fail="failure",
             function_params={
+                "client_id_string": client_id,
                 "username": username,
                 "password": password,
             },
@@ -138,14 +186,17 @@ class HiveMQ:
         # Add cache if it is not already existed
         function_name = "hivemq.publish_message"
 
-        sm = StateManager(
-            first_step=step_check_mqtt_connected, function_name=function_name
-        )
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
+        sm.add_step(step_deactivate_pdp_context)
+        sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_ready)
+        sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_ssl_configuration)
+        sm.add_step(step_set_mqtt_version)
+        sm.add_step(step_set_mqtt_ssl_mode)
         sm.add_step(step_open_mqtt_connection)
         sm.add_step(step_connect_mqtt_broker)
         sm.add_step(step_publish_message)
@@ -160,7 +211,7 @@ class HiveMQ:
             time.sleep(result["interval"])
 
     def subscribe_topics(
-        self, host=None, port=None, topics=None, username=None, password=None
+        self, host=None, port=None, topics=None, client_id=None, username=None, password=None
     ):
         """
         Function for subscribing to topics of HiveMQ.
@@ -188,6 +239,9 @@ class HiveMQ:
 
         if port is None:
             port = get_parameter(["hivemq", "mqtts", "port"], 8883)
+            
+        if client_id is None:
+            client_id = get_parameter(["thingspeak", "mqtts", "client_id"])
 
         if username is None:
             username = get_parameter(["thingspeak", "mqtts", "username"])
@@ -204,6 +258,7 @@ class HiveMQ:
             name="check_connected",
             success="subscribe_topics",
             fail="check_opened",
+            retry=2,
         )
 
         # Check if client connected to HiveMQ IoT
@@ -212,6 +267,21 @@ class HiveMQ:
             name="check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
+            retry=2,
+        )
+
+        step_deactivate_pdp_context = Step(
+            function=self.network.deactivate_pdp_context,
+            name="deactivate_pdp_context",
+            success="load_certificates",
+            fail="failure",
+        )
+
+        step_load_certificates = Step(
+            function=self.auth.load_certificates,
+            name="load_certificates",
+            success="register_network",
+            fail="failure",
         )
 
         step_network_reg = Step(
@@ -221,9 +291,30 @@ class HiveMQ:
             fail="failure",
         )
 
-        step_pdp_ready = Step(
+        step_get_pdp_ready = Step(
             function=self.network.get_pdp_ready,
             name="get_pdp_ready",
+            success="ssl_configuration",
+            fail="failure",
+        )
+
+        step_ssl_configuration = Step(
+            function=self.ssl.configure_for_x509_certification,
+            name="ssl_configuration",
+            success="set_mqtt_version",
+            fail="failure",
+        )
+
+        step_set_mqtt_version = Step(
+            function=self.mqtt.set_version_config,
+            name="set_mqtt_version",
+            success="set_mqtt_ssl_mode",
+            fail="failure",
+        )
+
+        step_set_mqtt_ssl_mode = Step(
+            function=self.mqtt.set_ssl_mode_config,
+            name="set_mqtt_ssl_mode",
             success="open_mqtt_connection",
             fail="failure",
         )
@@ -234,7 +325,6 @@ class HiveMQ:
             success="connect_mqtt_broker",
             fail="failure",
             function_params={"host": host, "port": port},
-            interval=1,
         )
 
         step_connect_mqtt_broker = Step(
@@ -243,6 +333,7 @@ class HiveMQ:
             success="subscribe_topics",
             fail="failure",
             function_params={
+                "client_id_string": client_id,
                 "username": username,
                 "password": password,
             },
@@ -261,14 +352,17 @@ class HiveMQ:
         # Add cache if it is not already existed
         function_name = "hivemq.subscribe_message"
 
-        sm = StateManager(
-            first_step=step_check_mqtt_connected, function_name=function_name
-        )
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
+        sm.add_step(step_deactivate_pdp_context)
+        sm.add_step(step_load_certificates)
         sm.add_step(step_network_reg)
-        sm.add_step(step_pdp_ready)
+        sm.add_step(step_get_pdp_ready)
+        sm.add_step(step_ssl_configuration)
+        sm.add_step(step_set_mqtt_version)
+        sm.add_step(step_set_mqtt_ssl_mode)
         sm.add_step(step_open_mqtt_connection)
         sm.add_step(step_connect_mqtt_broker)
         sm.add_step(step_subscribe_topics)
@@ -287,3 +381,4 @@ class HiveMQ:
         Read messages from subscribed topics.
         """
         return self.mqtt.read_messages()
+

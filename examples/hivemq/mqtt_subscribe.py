@@ -9,16 +9,17 @@ config.json file must include the following parameters for this example:
 
 config.json
 {
-	"hivemq": {
-		"mqtts":{
-			"url":"[YOUR_URL]",
-			"port": [PORT_NUMBER],
+    "hivemq": {
+        "mqtts":{
+            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
+            "url":"[YOUR_URL]",
+            "port": [PORT_NUMBER],
             "username": "[HIVEMQ_USERNAME]",
             "password": "[HIVEMQ_PASSWORD]",
-			"sub_topics": [
-					["YOUR_MQTT_TOPIC", QOS]
-			]
-		}
+            "sub_topics": [
+                    ["YOUR_MQTT_TOPIC", QOS]
+            ]
+        }
     }
 }
 """
@@ -42,3 +43,4 @@ if result.get("status") == Status.SUCCESS:
         result = picoLTE.hivemq.read_messages()
         debug.info(result.get("messages"))
         time.sleep(5)
+
