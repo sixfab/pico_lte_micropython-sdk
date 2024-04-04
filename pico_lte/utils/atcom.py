@@ -11,8 +11,8 @@ from pico_lte.utils.status import Status
 class ATCom:
     """Class for handling AT communication with modem"""
 
-    def __init__(self, uart_number=0, tx_pin=Pin(0), rx_pin=Pin(1), baudrate=115200, timeout=10000):
-        self.modem_com = UART(uart_number, tx=tx_pin, rx=rx_pin, baudrate=baudrate, timeout=timeout)
+    def __init__(self, uart_number=0, tx_pin=Pin(0), rx_pin=Pin(1), baudrate=115200, timeout=10000, rxbuf=2048):
+        self.modem_com = UART(uart_number, tx=tx_pin, rx=rx_pin, baudrate=baudrate, timeout=timeout, rxbuf=rxbuf)
 
     def send_at_comm_once(self, command, line_end=True):
         """
