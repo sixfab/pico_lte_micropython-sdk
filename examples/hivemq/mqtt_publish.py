@@ -10,6 +10,7 @@ config.json
 {
     "hivemq": {
         "mqtts":{
+            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
             "url":"[YOUR_URL]",
             "port": [PORT_NUMBER],
             "username": "[HIVEMQ_USERNAME]",
@@ -30,3 +31,4 @@ payload = "Hello HiveMQ! This is a test message."
 debug.info("Publishing data to HiveMQ...")
 result = picoLTE.hivemq.publish_message(payload)
 debug.info("Result", result)
+

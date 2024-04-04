@@ -60,7 +60,7 @@ class PicoLTE:
         )
         self.scriptr = Scriptr(self.base, self.network, self.http)
         self.google_sheets = GoogleSheets(self.base, self.network, self.http)
-        self.hivemq = HiveMQ(self.base, self.network, self.mqtt)
+        self.hivemq = HiveMQ(self.base, self.auth, self.network, self.ssl, self.mqtt)
 
         # Power up modem
         if self.base.power_status() != 0:
