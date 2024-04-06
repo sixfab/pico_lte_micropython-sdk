@@ -51,12 +51,14 @@ class MongoDBAtlas:
         ----------
         function_name: str
             Name of the function.
-        http_method: str
-            HTTP method for the request.
-        url: str
-            URL for the request.
-        data: str
-            Data for the request.
+        base_url: str
+            Base URL of the MongoDB Atlas Data API.
+        endpoint: str
+            Endpoint of the MongoDB Atlas Data API.
+        api_key: str
+            API key of the MongoDB Atlas.
+        payload: str
+            JSON payload for sending to the MongoDB Atlas.
         desired_response: str
             Desired response for the request.
 
