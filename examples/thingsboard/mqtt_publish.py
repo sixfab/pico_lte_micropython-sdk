@@ -8,10 +8,12 @@ Create a config.json file in the root directory of the PicoLTE device.
 config.json file must include the following parameters for this example:
 
 {
-    "thingsboard": {
+    "thingsboard": {      
         "host":"[HOST_ADDRESS]",
         "port": [PORT_NUMBER],
         "pub_topic": "[YOUR_MQTT_TOPIC]",
+        "device":"[YOUR_MQTT_DEVICE]",
+        "client_id":"[CLIENT_ID]",
         "username": "[DEVICE_MQTT_USERNAME]",
         "password": "[DEVICE_MQTT_PASSWORD]",
         "qos": "[QoS]",
@@ -21,14 +23,30 @@ config.json file must include the following parameters for this example:
 
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
+import machine
+import utime
 
-picoLTE = PicoLTE()
+picoLte = PicoLTE()
+debug.info("Publishing temperature data to ThingsBoard...")
+TEMP_SENSOR_PIN = 4
 
-debug.info("Publishing a message.")
+
+def adc_to_voltage(adc_value):
+    max_adc_value = 65535
+    return adc_value * (3.3 / max_adc_value)
 
 
-payload = {"device": "temp_sensor", "value_type": "celcius", "area": "indoor", "status": "Temperature value"}
+def adc_to_temperature(adc_value):
+    voltage = adc_to_voltage(adc_value)
+    reference_voltage = 0.706
+    temperature_factor = 0.001721
+    return 27 - ((voltage - reference_voltage) / temperature_factor)
 
-debug.info("Publishing data to ThingsBoard...")
-result = picoLTE.thingsboard.publish_message(payload)
-debug.info("Result:", result)
+
+while True:
+    adc_value = machine.ADC(TEMP_SENSOR_PIN).read_u16()
+    temperature = adc_to_temperature(adc_value)
+    payload = {"temperature": temperature}
+    result = picoLte.thingsboard.publish_message(payload)
+    debug.info(f"Result: {result}, Temp: {temperature:.2f}°C")
+    utime.sleep(30)
