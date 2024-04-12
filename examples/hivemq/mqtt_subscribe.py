@@ -29,6 +29,8 @@ from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 from pico_lte.utils.status import Status
 
+debug.set_level(0)
+
 picoLTE = PicoLTE()
 
 debug.info("Subscribing to topics...")
@@ -43,4 +45,3 @@ if result.get("status") == Status.SUCCESS:
         result = picoLTE.hivemq.read_messages()
         debug.info(result.get("messages"))
         time.sleep(5)
-

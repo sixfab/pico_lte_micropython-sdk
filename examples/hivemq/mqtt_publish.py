@@ -24,6 +24,8 @@ config.json
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
+debug.set_level(0)
+
 picoLTE = PicoLTE()
 
 payload = "Hello HiveMQ! This is a test message."
@@ -31,4 +33,3 @@ payload = "Hello HiveMQ! This is a test message."
 debug.info("Publishing data to HiveMQ...")
 result = picoLTE.hivemq.publish_message(payload)
 debug.info("Result", result)
-

@@ -56,9 +56,7 @@ class Auth:
                 debug.error("Error occured while uploading certificates", error)
                 return {"status": Status.ERROR, "response": str(error)}
 
-            debug.info(
-                "Certificates uploaded secure storage. Deleting from file system..."
-            )
+            debug.info("Certificates uploaded secure storage. Deleting from file system...")
             try:
                 os.remove("../cert/cacert.pem")
                 os.remove("../cert/client.pem")
@@ -103,4 +101,66 @@ class Auth:
             return {
                 "status": Status.ERROR,
                 "response": "Error occured while getting certificates from modem!",
+            }
+
+    def load_ca_certificate(self):
+        """
+        Function for loading CA certificate from file
+
+        Returns
+        -------
+        dict
+            Result that includes "status" and "response" keys
+        """
+        cacert = read_file("../cert/cacert.pem")
+
+        # If cacert is true, then upload the certificate to the modem
+        if cacert:
+            try:
+                # delete old certificate if existed
+                self.file.delete_file_from_modem("/security/cacert.pem")
+                # Upload new certificate
+                self.file.upload_file_to_modem("/security/cacert.pem", cacert)
+                del cacert
+            except Exception as error:
+                debug.error("Error occured while uploading certificate", error)
+                return {"status": Status.ERROR, "response": str(error)}
+
+            debug.info("Certificate uploaded secure storage. Deleting from file system...")
+            try:
+                os.remove("../cert/cacert.pem")
+            except Exception as error:
+                debug.error("Error occured while deleting certificate", error)
+                return {"status": Status.ERROR, "response": str(error)}
+
+            debug.info("Certificate deleted from file system.")
+
+        # check certificate in modem
+        result = self.file.get_file_list("ufs:/security/*")
+        response = result.get("response", [])
+
+        cacert_in_modem = False
+
+        if result["status"] == Status.SUCCESS:
+            for line in response:
+                if "cacert.pem" in line:
+                    cacert_in_modem = True
+
+            if cacert_in_modem:
+                debug.info("Certificate found in PicoLTE.")
+                return {
+                    "status": Status.SUCCESS,
+                    "response": "Certificate found in PicoLTE.",
+                }
+            else:
+                debug.error("Certificate couldn't find in modem!")
+                return {
+                    "status": Status.ERROR,
+                    "response": "Certificate couldn't find in modem!",
+                }
+        else:
+            debug.error("Error occured while getting certificate from modem!")
+            return {
+                "status": Status.ERROR,
+                "response": "Error occured while getting certificate from modem!",
             }
