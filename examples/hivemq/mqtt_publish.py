@@ -9,22 +9,18 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "hivemq": {
-        "mqtts":{
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "url":"[YOUR_URL]",
-            "port": [PORT_NUMBER],
-            "username": "[HIVEMQ_USERNAME]",
-            "password": "[HIVEMQ_PASSWORD]",
-            "pub_topic": "[YOUR_PUBLISH_TOPIC]"
-         }
+        "client_id": "[DEVICE_MQTT_CLIENT_ID]",
+        "host":"[CLUSTER_URL]",
+        "port": [PORT_NUMBER],
+        "username": "[MQTT_USERNAME]",
+        "password": "[MQTT_PASSWORD]",
+        "pub_topic": "[MQTT_TOPIC]"
     }
 }
 """
 
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
-
-debug.set_level(0)
 
 picoLTE = PicoLTE()
 

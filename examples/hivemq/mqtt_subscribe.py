@@ -10,16 +10,16 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "hivemq": {
-        "mqtts":{
-            "client_id": "[DEVICE_MQTT_CLIENT_ID]",
-            "url":"[YOUR_URL]",
-            "port": [PORT_NUMBER],
-            "username": "[HIVEMQ_USERNAME]",
-            "password": "[HIVEMQ_PASSWORD]",
-            "sub_topics": [
-                    ["YOUR_MQTT_TOPIC", QOS]
-            ]
-        }
+        "client_id": "[DEVICE_MQTT_CLIENT_ID]",
+        "host":"[CLUSTER_URL]",
+        "port": [PORT_NUMBER],
+        "username": "[MQTT_USERNAME]",
+        "password": "[MQTT_PASSWORD]",
+        "sub_topics": [
+                ["MQTT_TOPIC", QOS],
+                ["MQTT_TOPIC", QOS],
+                ...
+        ]
     }
 }
 """
@@ -28,8 +28,6 @@ import time
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 from pico_lte.utils.status import Status
-
-debug.set_level(0)
 
 picoLTE = PicoLTE()
 
