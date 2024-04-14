@@ -10,7 +10,6 @@ config.json file must include the following parameters for this example:
 config.json
 {
     "hivemq": {
-        "client_id": "[DEVICE_MQTT_CLIENT_ID]",
         "host":"[CLUSTER_URL]",
         "port": [PORT_NUMBER],
         "username": "[MQTT_USERNAME]",
