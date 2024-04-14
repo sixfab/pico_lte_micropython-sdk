@@ -139,6 +139,9 @@ class MongoDBAtlas:
                 "header_mode": 1,
                 "data": header + payload,
             },
+            cachable=True,
+            retry=1,
+            interval=1,
         )
 
         step_read_response = Step(
@@ -147,6 +150,8 @@ class MongoDBAtlas:
             success="success",
             fail="failure",
             function_params={"desired_response": desired_response},
+            retry=1,
+            interval=1,
         )
 
         sm = StateManager(first_step=step_network_reg, function_name=function_name)
