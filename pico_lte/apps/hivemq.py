@@ -79,7 +79,7 @@ class HiveMQ:
             username = get_parameter(["hivemq", "username"])
 
         if client_id is None:
-            client_id = get_parameter(["hivemq", "client_id"], "PicoLTE")
+            client_id = get_parameter(["hivemq", "client_id"])
 
         if password is None:
             password = get_parameter(["hivemq", "password"])
@@ -265,7 +265,7 @@ class HiveMQ:
             port = get_parameter(["hivemq", "port"], 8883)
 
         if client_id is None:
-            client_id = get_parameter(["hivemq", "client_id"], "PicoLTE")
+            client_id = get_parameter(["hivemq", "client_id"])
 
         if username is None:
             username = get_parameter(["hivemq", "username"])

@@ -12,8 +12,7 @@ config.json
         "host":"[CLUSTER_URL]",
         "port": [PORT_NUMBER],
         "username": "[MQTT_USERNAME]",
-        "password": "[MQTT_PASSWORD]",
-        "pub_topic": "[MQTT_TOPIC]"
+        "password": "[MQTT_PASSWORD]"
     }
 }
 """
@@ -26,5 +25,5 @@ picoLTE = PicoLTE()
 payload = "Hello HiveMQ! This is a test message."
 
 debug.info("Publishing data to HiveMQ...")
-result = picoLTE.hivemq.publish_message(payload)
+result = picoLTE.hivemq.publish_message(payload, topic="topic")
 debug.info("Result", result)
