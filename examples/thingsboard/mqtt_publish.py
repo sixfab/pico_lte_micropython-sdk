@@ -20,7 +20,7 @@ config.json file must include the following parameters for this example:
     }
 }
 """
-'''
+
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 import machine
@@ -28,7 +28,7 @@ import utime
 import json
 
 picoLte = PicoLTE()
-debug.set_level(0)
+
 debug.info("Publishing temperature data to ThingsBoard...")
 TEMP_SENSOR_PIN = 4
 
@@ -53,18 +53,3 @@ while True:
     result = picoLte.thingsboard.publish_message(payload)
     debug.info(f"Result: {result}, Temp: {temperature:.2f}°C")
     utime.sleep(30)
-    
-'''
-
-from pico_lte.core import PicoLTE
-from pico_lte.common import debug
-
-picoLTE = PicoLTE()
-
-debug.info("Publishing a message.")
-
-payload = str({"temperature":30})
-
-debug.info("Publishing data to ThingsBoard...")
-result = picoLTE.thingsboard.publish_message(payload)
-debug.info("Result:", result)
