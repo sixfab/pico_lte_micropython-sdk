@@ -14,7 +14,7 @@ config.json
         "device":"[YOUR_MQTT_DEVICE]",
         "username": "[DEVICE_MQTT_USERNAME]",
         "password": "[DEVICE_MQTT_PASSWORD]",
-        "sub_topics": [
+        "topics": [
                 ["[YOUR_MQTT_TOPIC_1]", [QoS]],
                 ["[YOUR_MQTT_TOPIC_2]", [QoS]],
                 ...
@@ -33,6 +33,7 @@ from pico_lte.common import debug
 from pico_lte.utils.status import Status
 
 picoLTE = PicoLTE()
+debug.set_level(0)
 
 debug.info("Subscribing to topics...")
 result = picoLTE.thingsboard.subscribe_topics()

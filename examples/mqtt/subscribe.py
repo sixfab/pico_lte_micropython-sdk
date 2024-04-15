@@ -32,6 +32,8 @@ from pico_lte.utils.status import Status
 from pico_lte.core import PicoLTE
 from pico_lte.common import debug
 
+debug.set_level(0)
+
 picoLTE = PicoLTE()
 
 picoLTE.network.register_network()

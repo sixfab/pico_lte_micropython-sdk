@@ -76,35 +76,27 @@ class ThingsBoard:
         """
         if host is None:
             host = get_parameter(["thingsboard", "host"])
-        print(host)
 
         if port is None:
             port = get_parameter(["thingsboard", "port"])
-        print(port)
 
         if topic is None:
             topic = get_parameter(["thingsboard", "pub_topic"])
-        print(topic)
 
         if device is None:
             device = get_parameter(["thingsboard", "device"])
-        print(device)
-
+            
         if client_id is None:
             client_id = get_parameter(["thingsboard", "client_id"])
-        print(client_id)
 
         if username is None:
             username = get_parameter(["thingsboard", "username"])
-        print(username)
 
         if password is None:
             password = get_parameter(["thingsboard", "password"])
-        print(password)
 
         if qos is None:
             qos = get_parameter(["thingsboard", "qos"])
-        print(qos)
 
         # Create message from dictionary if needed.
         if isinstance(payload, dict):
