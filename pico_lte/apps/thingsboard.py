@@ -350,4 +350,4 @@ class ThingsBoard:
         for key, value in payload_dict.items():
             payload_string += f"{key}={value}&"
 
-        return str(payload_string[:-1])
+        return payload_string[:-1]
