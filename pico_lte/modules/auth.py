@@ -87,7 +87,7 @@ class Auth:
                     client_key_in_modem = True
 
             # if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
-            if cacert_in_modem:
+            if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
                 debug.info("Certificates found in PicoLTE.")
                 return {
                     "status": Status.SUCCESS,
