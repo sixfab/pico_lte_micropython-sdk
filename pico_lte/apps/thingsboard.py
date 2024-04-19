@@ -85,7 +85,7 @@ class ThingsBoard:
 
         if device is None:
             device = get_parameter(["thingsboard", "device"])
-            
+
         if client_id is None:
             client_id = get_parameter(["thingsboard", "client_id"])
 
