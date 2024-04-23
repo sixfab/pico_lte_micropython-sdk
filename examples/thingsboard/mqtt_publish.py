@@ -13,7 +13,7 @@ config.json file must include the following parameters for this example:
         "client_id":"[CLIENT_ID]",
         "username": "[DEVICE_MQTT_USERNAME]",
         "password": "[DEVICE_MQTT_PASSWORD]",
-        "qos": "[QoS]",
+        "qos": [QoS],
     }
 }
 """
