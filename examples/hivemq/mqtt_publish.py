@@ -1,5 +1,5 @@
 """
-Example code for publising data to HiveMQ by using MQTT.
+Example code for publishing data to HiveMQ by using MQTT.
 
 Example Configuration
 ---------------------
