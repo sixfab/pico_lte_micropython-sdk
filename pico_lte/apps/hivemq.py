@@ -136,7 +136,6 @@ class HiveMQ:
             name="ssl_configuration",
             success="set_sni",
             fail="failure",
-            cachable=True,
         )
 
         step_set_sni = Step(
@@ -174,13 +173,6 @@ class HiveMQ:
             name="connect_mqtt_broker",
             success="publish_message",
             fail="failure",
-        )
-
-        step_connect_mqtt_broker = Step(
-            function=self.mqtt.connect_broker,
-            name="connect_mqtt_broker",
-            success="publish_message",
-            fail="failure",
             function_params={
                 "client_id_string": client_id,
                 "username": username,
@@ -194,16 +186,15 @@ class HiveMQ:
             success="success",
             fail="failure",
             function_params={"payload": payload, "topic": topic, "qos": 1},
-            retry=3,
+            retry=2,
             interval=1,
+            cachable=True,
         )
 
         # Add cache if it is not already existed
         function_name = "hivemq.publish_message"
 
-        sm = StateManager(
-            first_step=step_check_mqtt_connected, function_name=function_name
-        )
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
@@ -327,7 +318,6 @@ class HiveMQ:
             name="ssl_configuration",
             success="set_sni",
             fail="failure",
-            cachable=True,
         )
 
         step_set_sni = Step(
@@ -378,16 +368,15 @@ class HiveMQ:
             success="success",
             fail="failure",
             function_params={"topics": topics},
-            retry=3,
+            retry=2,
             interval=1,
+            cachable=True,
         )
 
         # Add cache if it is not already existed
         function_name = "hivemq.subscribe_message"
 
-        sm = StateManager(
-            first_step=step_check_mqtt_connected, function_name=function_name
-        )
+        sm = StateManager(first_step=step_check_mqtt_connected, function_name=function_name)
 
         sm.add_step(step_check_mqtt_connected)
         sm.add_step(step_check_mqtt_opened)
