@@ -75,13 +75,13 @@ class ThingsBoard:
             Result that includes "status" and "response" keys
         """
         if host is None:
-            host = get_parameter(["thingsboard", "host"])
+            host = get_parameter(["thingsboard", "host"], "demo.thingsboard.io")
 
         if port is None:
-            port = get_parameter(["thingsboard", "port"])
+            port = get_parameter(["thingsboard", "port"], 1883)
 
         if topic is None:
-            topic = get_parameter(["thingsboard", "pub_topic"])
+            topic = get_parameter(["thingsboard", "pub_topic"], "v1/devices/me/telemetry")
 
         if device is None:
             device = get_parameter(["thingsboard", "device"])
