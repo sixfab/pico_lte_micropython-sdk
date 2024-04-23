@@ -56,9 +56,7 @@ class Auth:
                 debug.error("Error occured while uploading certificates", error)
                 return {"status": Status.ERROR, "response": str(error)}
 
-            debug.info(
-                "Certificates uploaded secure storage. Deleting from file system..."
-            )
+            debug.info("Certificates uploaded secure storage. Deleting from file system...")
             try:
                 os.remove("../cert/cacert.pem")
                 os.remove("../cert/client.pem")
@@ -86,7 +84,6 @@ class Auth:
                 if "user_key.pem" in line:
                     client_key_in_modem = True
 
-            # if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
             if cacert_in_modem and client_cert_in_modem and client_key_in_modem:
                 debug.info("Certificates found in PicoLTE.")
                 return {
