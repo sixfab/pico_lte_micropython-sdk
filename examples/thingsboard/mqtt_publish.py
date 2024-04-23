@@ -9,9 +9,6 @@ config.json file must include the following parameters for this example:
 
 {
     "thingsboard": {      
-        "host":"[HOST_ADDRESS]",
-        "port": [PORT_NUMBER],
-        "pub_topic": "[YOUR_MQTT_TOPIC]",
         "device":"[YOUR_MQTT_DEVICE]",
         "client_id":"[CLIENT_ID]",
         "username": "[DEVICE_MQTT_USERNAME]",
