@@ -25,9 +25,9 @@ from pico_lte.apps.thingspeak import ThingSpeak
 from pico_lte.apps.azure import Azure
 from pico_lte.apps.scriptr import Scriptr
 from pico_lte.apps.google_sheets import GoogleSheets
+from pico_lte.apps.hivemq import HiveMQ
 from pico_lte.apps.mongodb_atlas import MongoDBAtlas
 from pico_lte.apps.make_automation import MakeAutomation
-
 
 class PicoLTE:
     """
@@ -63,6 +63,7 @@ class PicoLTE:
         )
         self.scriptr = Scriptr(self.base, self.network, self.http)
         self.google_sheets = GoogleSheets(self.base, self.network, self.http)
+        self.hivemq = HiveMQ(self.base, self.auth, self.network, self.ssl, self.mqtt)
         self.mongodb_atlas = MongoDBAtlas(self.base, self.network, self.http, self.ssl)
         self.make_automation = MakeAutomation(self.base, self.network, self.http, self.ssl)
 
@@ -72,3 +73,4 @@ class PicoLTE:
         self.base.wait_until_status_on()
         self.base.wait_until_modem_ready_to_communicate()
         self.base.set_echo_off()
+
