@@ -2,6 +2,7 @@
 Module for ease to use of cellular PicoLTE. This module includes required functions
 for working with cellular modem without need of AT command knowledge.
 """
+
 from pico_lte.common import config
 
 from pico_lte.utils.helpers import read_json_file
@@ -25,6 +26,8 @@ from pico_lte.apps.azure import Azure
 from pico_lte.apps.scriptr import Scriptr
 from pico_lte.apps.google_sheets import GoogleSheets
 from pico_lte.apps.hivemq import HiveMQ
+from pico_lte.apps.mongodb_atlas import MongoDBAtlas
+from pico_lte.apps.make_automation import MakeAutomation
 
 class PicoLTE:
     """
@@ -61,6 +64,8 @@ class PicoLTE:
         self.scriptr = Scriptr(self.base, self.network, self.http)
         self.google_sheets = GoogleSheets(self.base, self.network, self.http)
         self.hivemq = HiveMQ(self.base, self.auth, self.network, self.ssl, self.mqtt)
+        self.mongodb_atlas = MongoDBAtlas(self.base, self.network, self.http, self.ssl)
+        self.make_automation = MakeAutomation(self.base, self.network, self.http, self.ssl)
 
         # Power up modem
         if self.base.power_status() != 0:
