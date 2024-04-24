@@ -273,7 +273,6 @@ class HiveMQ:
             name="check_connected",
             success="subscribe_topics",
             fail="check_opened",
-            retry=2,
         )
 
         # Check if client connected to HiveMQ IoT
@@ -282,7 +281,6 @@ class HiveMQ:
             name="check_opened",
             success="connect_mqtt_broker",
             fail="deactivate_pdp_context",
-            retry=2,
         )
 
         step_deactivate_pdp_context = Step(
