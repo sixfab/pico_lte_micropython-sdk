@@ -27,6 +27,8 @@ picoLTE = PicoLTE()
 picoLTE.network.register_network()
 picoLTE.http.set_context_id()
 picoLTE.network.get_pdp_ready()
+# Uncomment the line below if you use basic HTTP authentication with username and password given in config.json file.
+# picoLTE.http.set_auth()
 picoLTE.http.set_server_url()
 
 debug.info("Sending a POST request.")
