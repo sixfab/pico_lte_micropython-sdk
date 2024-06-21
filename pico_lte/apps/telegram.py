@@ -1,6 +1,7 @@
 """
 Module for including functions of Telegram bot for PicoLTE module.
 """
+
 import time
 
 from pico_lte.common import config
@@ -61,9 +62,7 @@ class Telegram:
         if chat_id is None:
             chat_id = get_parameter(["telegram", "chat_id"])
 
-        publish_url = (
-            f"https://{host}{bot_token}/" + f"sendMessage?chat_id={chat_id}&text={payload}"
-        )
+        publish_url = f"https://{host}{bot_token}/" + f"sendMessage?chat_id={chat_id}&text={payload}"
 
         step_network_reg = Step(
             function=self.network.register_network,
@@ -93,6 +92,7 @@ class Telegram:
             success="get_request",
             fail="failure",
             function_params={"url": publish_url},
+            cachable=True,
             interval=2,
         )
 
@@ -101,7 +101,6 @@ class Telegram:
             name="get_request",
             success="read_response",
             fail="failure",
-            cachable=True,
             interval=5,
         )
 
