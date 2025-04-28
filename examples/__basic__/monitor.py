@@ -78,7 +78,7 @@ def check_network_type():
     try:
         numbered_debug(f"Network Scan Mode: {at_communicator.send_at_comm('AT+QCFG=\"nwscanmode\"')}")
     except Exception as e:
-        numbered_debug(f"Network Scan Mode: Unable to retrieve scan mode.")")
+        numbered_debug(f"Network Scan Mode: Unable to retrieve scan mode.")
     
     try:
         numbered_debug(f"IoT Optimization Mode: {at_communicator.send_at_comm('AT+QCFG=\"iotopmode\"')}")
