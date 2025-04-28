@@ -56,7 +56,6 @@ def get_device_information():
 
 
 # --------------- SIM Related Functions ---------------
-# --------------- SIM Related Functions ---------------
 def check_sim_information():
     """Retrieve and log SIM card information."""
     debug.info("--- SIM Card Information ---")
