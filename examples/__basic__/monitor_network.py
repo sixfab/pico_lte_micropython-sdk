@@ -18,10 +18,10 @@ from pico_lte.modules.network import Network
 from pico_lte.utils.atcom import ATCom
 
 # Initialize PicoLTE core and modules
-pico_lte_device = PicoLTE()
-at_communicator = ATCom()
-base_module = Base(at_communicator)
-network_module = Network(at_communicator, base_module)
+pico_lte_device = PicoLTE() # Initialize the core device object
+at_communicator = ATCom() # Initialize the AT communicator for sending commands
+base_module = Base(at_communicator) # Initialize the base class for interaction
+network_module = Network(at_communicator, base_module) # Initialize the network class for network operations
 
 # Serial counter for numbering debug outputs
 SERIAL_COUNTER = 1
@@ -173,11 +173,6 @@ def check_qping():
         numbered_debug(f"QPING (Single Ping Test): {at_communicator.send_at_comm('AT+QPING=1,\"www.google.com\"')}")
     except Exception:
         numbered_debug(f"QPING Single: Could not retrieve — network unreachable or firewall issue.")
-    
-    try:
-        numbered_debug(f"QPING (Detailed 10x Ping Test): {at_communicator.send_at_comm('AT+QPING=1,\"www.google.com\",10,10')}\n")
-    except Exception:
-        numbered_debug(f"QPING Detailed: Could not retrieve — likely no internet access.\n")
 
 # --------------- Main Monitoring Function ---------------
 # Runs all the above checks in sequence, providing a full diagnostic snapshot.
