@@ -7,7 +7,6 @@ Each section includes clear comments explaining:
 - Why the check is important
 - What the output can tell you when diagnosing issues
 
-Author: Imran N. Emon
 Version: 2.0.0
 Date: 2025-05-05
 """
@@ -82,7 +81,7 @@ def check_sim_information():
         numbered_debug(f"SIM Ready Status: Unable to check — possible SIM or module fault.\n")
 
 # --------------- Network Configuration Check ---------------
-# This section retrieves network scan mode (automatic, Cat-M1, NB-IoT),
+# This section retrieves network scan mode (Cat-M1, eGPRS, NB-IoT),
 # IoT optimization mode, and current access technology.
 # These details are important to confirm the device is configured to use the intended network types.
 def check_network_type():
