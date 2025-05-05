@@ -345,3 +345,25 @@ class Network:
             elif result["status"] == Status.ERROR:
                 return result
             time.sleep(result["interval"])
+
+    def get_signal_strength(self):
+        """
+        Function for getting the cellular signal strength (RSSI) in dBm.
+
+        Returns
+        -------
+        dict
+            Result that includes "status", "response", and "rssi" keys.
+        """
+        command = "AT+CSQ"
+        result = self.atcom.send_at_comm(command)
+
+        if result["status"] == Status.SUCCESS:
+            try:
+                rssi_raw = result["response"][0].split(":")[1].split(",")[0].strip()
+                rssi_dbm = (int(rssi_raw) * 2) - 109
+                result["rssi"] = rssi_dbm
+            except (IndexError, ValueError):
+                result["status"] = Status.ERROR
+                result["error"] = "Failed to parse RSSI value."
+        return result
