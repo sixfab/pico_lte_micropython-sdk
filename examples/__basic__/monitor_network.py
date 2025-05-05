@@ -43,14 +43,15 @@ def get_device_information():
     safe_check("IMEI (Unique Module ID)", lambda: pico_lte.atcom.send_at_comm('AT+GSN'))
     safe_check("Firmware Version", lambda: pico_lte.atcom.send_at_comm('AT+QGMR'))
     safe_check("Manufacturer Name", lambda: pico_lte.atcom.send_at_comm('AT+CGMI'))
-    safe_check("Model Name", lambda: pico_lte.atcom.send_at_comm('AT+CGMM'))
+    safe_check(f"Model Name {lambda: pico_lte.atcom.send_at_comm('AT+CGMM')}\n\n")
+
 
 # --------------- SIM Card Status Check ---------------
 def check_sim_information():
     """Check SIM card presence, ICCID, and readiness."""
     debug.info("--- SIM Card Information ---")
     safe_check("SIM ICCID (Card Serial Number)", lambda: pico_lte.base.get_sim_iccid())
-    safe_check("SIM Ready Status", lambda: pico_lte.base.check_sim_ready())
+    safe_check(f"SIM Ready Status {lambda: pico_lte.base.check_sim_ready()}\n\n")
 
 # --------------- Network Configuration Check ---------------
 def check_network_type():
@@ -58,13 +59,13 @@ def check_network_type():
     debug.info("--- Network Type Information ---")
     safe_check("Network Scan Mode", lambda: pico_lte.atcom.send_at_comm('AT+QCFG=\"nwscanmode\"'))
     safe_check("IoT Optimization Mode", lambda: pico_lte.atcom.send_at_comm('AT+QCFG=\"iotopmode\"'))
-    safe_check("Current Network Technology", lambda: pico_lte.network.get_access_technology())
+    safe_check(f"Current Network Technology {lambda: pico_lte.network.get_access_technology()}\n\n")
 
 # --------------- Signal Quality Check ---------------
 def check_signal_quality():
     """Retrieve basic signal strength and quality information."""
     debug.info("--- Signal Quality ---")
-    safe_check("Signal Quality (CSQ - RSSI/BER)", lambda: pico_lte.atcom.send_at_comm('AT+CSQ'))
+    safe_check(f"Signal Quality (CSQ - RSSI/BER) {lambda: pico_lte.atcom.send_at_comm('AT+CSQ')}\n\n")
 
 # --------------- Network Status Check ---------------
 def check_network_status():
@@ -74,7 +75,7 @@ def check_network_status():
     safe_check("LTE Network Registration (CEREG)", lambda: pico_lte.atcom.send_at_comm('AT+CEREG?'))
     safe_check("Serving Cell Info", lambda: pico_lte.atcom.send_at_comm('AT+QNWINFO'))
     safe_check("Extended Signal Quality (QCSQ - RSRP/RSRQ/SINR)", lambda: pico_lte.atcom.send_at_comm('AT+QCSQ'))
-    safe_check("Signaling Connection Status (QCSCON)", lambda: pico_lte.atcom.send_at_comm('AT+QCSCON?'))
+    safe_check(f"Signaling Connection Status (QCSCON) {lambda: pico_lte.atcom.send_at_comm('AT+QCSCON?')}\n\n")
 
 # --------------- Packet Service and APN Check ---------------
 def check_packet_service_status():
@@ -82,20 +83,20 @@ def check_packet_service_status():
     debug.info("--- Packet Service and APN Info ---")
     safe_check("PDP Context (APN Settings)", lambda: pico_lte.atcom.send_at_comm('AT+CGDCONT?'))
     safe_check("IP Address Info", lambda: pico_lte.atcom.send_at_comm('AT+CGPADDR'))
-    safe_check("Packet Attach Status (CGATT)", lambda: pico_lte.atcom.send_at_comm('AT+CGATT?'))
+    safe_check(f"Packet Attach Status (CGATT) {lambda: pico_lte.atcom.send_at_comm('AT+CGATT?')}\n\n")
 
 # ------------------------- QPING Connectivity Check -------------------------
 def check_qping():
     """Perform a ping test to check internet connectivity."""
     debug.info("--- QPING Command ---")
-    safe_check("QPING (Single Ping Test)", lambda: pico_lte.atcom.send_at_comm('AT+QPING=1,\"www.google.com\"'))
+    safe_check(f"QPING (Single Ping Test) {lambda: pico_lte.atcom.send_at_comm('AT+QPING=1,\"www.google.com\"')}\n\n")
 
 # --------------- Main Monitoring Function ---------------
 def main():
     """Run all diagnostic checks sequentially."""
     global SERIAL_COUNTER
     SERIAL_COUNTER = 1
-    debug.info("========== PicoLTE Device and Network Status Check Start ==========")
+    debug.info("========== PicoLTE Device and Network Status Check Start ==========\n\n")
 
     get_device_information()
     check_sim_information()
