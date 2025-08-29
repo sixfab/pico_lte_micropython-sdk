@@ -43,14 +43,14 @@ else:
 
 
 # Custom header
-HEADER = "\n".join(
+HEADER = "\r\n".join(
     [
         f"GET {query} HTTP/1.1",
         f"Host: {host}",
         "Custom-Header-Name: Custom-Data",
         "Content-Type: application/json",
-        "Content-Length: 0\n",
-        "\n\n",
+        "Content-Length: 0",
+        "\r\n",
     ]
 )
 

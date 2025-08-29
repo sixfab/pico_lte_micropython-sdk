@@ -46,14 +46,14 @@ DATA_TO_POST = {"message": "PicoLTE HTTP POST Example with Custom Header"}
 payload = json.dumps(DATA_TO_POST)
 
 # Custom header
-HEADER = "\n".join(
+HEADER = "\r\n".join(
     [
         f"POST /{query} HTTP/1.1",
         f"Host: {host}",
         "Custom-Header-Name: Custom-Data",
         "Content-Type: application/json",
-        f"Content-Length: {len(payload)+1}",
-        "\n\n",
+        f"Content-Length: {len(payload) + 1}",
+        "\r\n",
     ]
 )
 
